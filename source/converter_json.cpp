@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONVERTER_JSON
+#define CONVERTER_JSON
 #include "..\\include\converter_json.h"
 
 #include <nlohmann/json.hpp>
@@ -6,10 +7,10 @@
 #include <exception>
 #include <iostream>
 
-ConverterJSON::ConverterJSON()
-{
-	initialize();
-}
+//ConverterJSON::ConverterJSON()
+//{
+//	initialize();
+//}
 
 std::vector<std::string> ConverterJSON::GetTextDocuments()
 {
@@ -60,20 +61,20 @@ void ConverterJSON::initialize()
 {
 	std::ifstream configFile("config.json");
 	if (!configFile.is_open())
-	{		
-		throw(std::exception("config.json is missing"));
+    {
+        throw(std::exception("config.json is missing"));
 	}
 	else
 	{
-		nlohmann::json config;
-		config << configFile;
+        nlohmann::json config;
+         configFile >> config;
 		configFile.close();
 
 		if (config.find("config") == config.end())
-			throw(std::exception("Config file is empty"));
+            throw(std::exception("Config file is empty"));
 		else if (config.find("files") == config.end() || config["files"].size() == 0)
 		{
-			throw(std::exception("File list is missing"));
+            throw(std::exception("File list is missing"));
 		}
 		else
 		{
@@ -86,13 +87,13 @@ void ConverterJSON::initialize()
 	
 	std::ifstream requestFile("requests.json");
 	if (!requestFile.is_open())
-	{
-		throw(std::exception("requests.json is missing"));
+    {
+        throw(std::exception("requests.json is missing"));
 	}
-	else
+    else
 	{
-		nlohmann::json requestsContainer;		
-		requestsContainer << requestFile;
+        nlohmann::json requestsContainer;
+        requestFile >> requestsContainer;
 		requestFile.close();		
 
 		requestsContainer.at("requests").get_to(requests);		
@@ -108,3 +109,4 @@ std::string ConverterJSON::getRequestNumber(int number)
 	else
 		return("request" + std::to_string(number));
 }
+#endif
