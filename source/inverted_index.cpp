@@ -1,13 +1,26 @@
 #ifndef INVERTED_INDEX
 #define INVERTED_INDEX
 
+
+//#define QT_THREADS
+//#define STD_THREADS
+
 #include "../include/inverted_index.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <thread>
 
-//#include <QtConcurrent/QtConcurrent>
+#ifdef STD_THREADS
+#include <thread>
+#define THREADS
+#endif // STD_THREADS
+
+
+#ifdef QT_THREADS
+#include <QtConcurrent/QtConcurrent>
+#include <QFuture>
+#define THREADS
+#endif // QT_THREADS
 
 void InvertedIndex::UpdateDocumentBase(std::vector<std::string> input_docs)
 {
@@ -56,15 +69,45 @@ std::vector<Entry> InvertedIndex::GetWordCount(const std::string& word)
 void InvertedIndex::CreateFrequencyDictionary()
 {
 	size_t doc_id = 0;
-	
+#ifdef QT_THREADS
+	QList<QFuture<void>> index_threads;	
 	for (auto& document : docs)
-	{
-		MakeIndexDocument(document, doc_id, *this);
+    {
+		index_threads.append(QtConcurrent::run(InvertedIndex::MakeIndexDocument, ((void*)this), document, doc_id));
+		//MakeIndexDocument(document, doc_id, *this);
 		doc_id++;
 	}
+	for (auto& thread : index_threads)
+	{
+		thread.waitForFinished();
+	}
+#endif // QT_THREADS
+
+#ifdef STD_THREADS
+	std::vector<std::thread> index_threads;
+	for (auto& document : docs)
+    {
+        index_threads.emplace_back(std::thread(MakeIndexDocument, document, doc_id, (*this)));
+		//MakeIndexDocument(document, doc_id, *this);
+		doc_id++;
+	}
+	for (auto& thread : index_threads)
+	{
+		thread.join();
+	}
+#endif // STD_THREADS
+
+#ifndef THREADS
+	for (auto& document : docs)
+	{
+		MakeIndexDocument(this, document, doc_id);
+		doc_id++;
+	}
+#endif // !THREADS
+
 }
 
-void MakeIndexDocument(std::string& document, size_t doc_id, InvertedIndex& caller)
+void InvertedIndex::MakeIndexDocument(void* object, std::string& document, size_t doc_id)
 {
 	std::stringstream buffer;
 	buffer << document;
@@ -98,15 +141,15 @@ void MakeIndexDocument(std::string& document, size_t doc_id, InvertedIndex& call
 				wordList.insert({ subWord, 1 });
 		}
 	}
-	caller.freq_dictionary_access.lock();	
+	((InvertedIndex*)object)->freq_dictionary_access.lock();
 	for (auto& word : wordList)
 	{
 		Entry wordFrequency;
 		wordFrequency.doc_id = doc_id;
 		wordFrequency.count = word.second;
-		caller.freq_dictionary[word.first].push_back(wordFrequency);
+		((InvertedIndex*)object)->freq_dictionary[word.first].push_back(wordFrequency);
 	}
-	caller.freq_dictionary_access.unlock();	
+	((InvertedIndex*)object)->freq_dictionary_access.unlock();
 }
 
 #endif

@@ -31,7 +31,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
-#find_package(Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt5 REQUIRED COMPONENTS Core)
 
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/config.json" DESTINATION "${CMAKE_BINARY_DIR}/")
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/answers.json" DESTINATION "${CMAKE_BINARY_DIR}/")
@@ -52,13 +52,13 @@ add_executable(Search-engine-tests
 target_link_libraries(Search-engine PUBLIC
             nlohmann_json::nlohmann_json
             GTest::gtest_main
-            #Qt5::Core
+            Qt5::Core
     )
 
 target_link_libraries(Search-engine-tests PUBLIC
             nlohmann_json::nlohmann_json
             GTest::gtest_main
-            #Qt5::Core
+            Qt5::Core
     )
 
 include(GoogleTest)

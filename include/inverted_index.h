@@ -14,10 +14,8 @@ struct Entry
     }
 };
 
-void MakeIndexDocument(std::string& document, size_t doc_id, class InvertedIndex& caller); //возвращает частотный словарь конкретного документа
-
 class InvertedIndex {
-    friend void MakeIndexDocument(std::string& document, size_t doc_id, InvertedIndex& caller);
+    friend void InvertedIndex::MakeIndexDocument(std::string& document, size_t doc_id);
 public:
     InvertedIndex() = default;
 /*
@@ -33,6 +31,7 @@ public:
 * @return возвращает подготовленный список с частотой слов
 */
     std::vector<Entry> GetWordCount(const std::string& word);
+    static void MakeIndexDocument(void* object, std::string& document, size_t doc_id); //возвращает частотный словарь конкретного документа
 private:
     void CreateFrequencyDictionary();
     std::vector<std::string> docs;                              // список содержимого документов
