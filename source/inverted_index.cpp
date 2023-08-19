@@ -185,6 +185,10 @@ void InvertedIndex::CreateFrequencyDictionary()
 		}
 		doc_id++;
 	}
+	for (auto& vector : word_vector)
+	{
+		delete vector;
+	}
 #endif // STD_THREADS
 
 #ifndef THREADS
