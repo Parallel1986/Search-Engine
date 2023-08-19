@@ -24,23 +24,6 @@
 
 void InvertedIndex::UpdateDocumentBase(std::vector<std::string> input_docs)
 {
-	//for (auto& document : input_docs)
-	//{
-	//	std::ifstream file(document);
-	//	if (file.is_open())
-	//	{
-	//		std::string content;
-	//		file >> content;
-	//		file.close();
-	//		docs.push_back(content);
-	//	}
-	//	else
-	//	{
-	//		std::cerr << "Can not find file: " << document << std::endl;
-	//		docs.push_back("");
-	//	}
-	//}
-
 	for (auto& document : input_docs)
 	{
 		docs.push_back(document);
