@@ -3,7 +3,7 @@
 
 
 //#define QT_THREADS
-//#define STD_THREADS
+#define STD_THREADS
 
 #include "../include/inverted_index.h"
 #include <fstream>
@@ -69,87 +69,177 @@ std::vector<Entry> InvertedIndex::GetWordCount(const std::string& word)
 void InvertedIndex::CreateFrequencyDictionary()
 {
 	size_t doc_id = 0;
-#ifdef QT_THREADS
-	QList<QFuture<void>> index_threads;	
-	for (auto& document : docs)
-    {
-		index_threads.append(QtConcurrent::run(InvertedIndex::MakeIndexDocument, ((void*)this), document, doc_id));
-		//MakeIndexDocument(document, doc_id, *this);
-		doc_id++;
-	}
-	for (auto& thread : index_threads)
-	{
-		thread.waitForFinished();
-	}
+#ifdef QT_THREADS	
+	//QList<QFuture<std::map<std::string, int>>> index_threads;
+	//for (auto& document : docs)
+ //   {
+	//	index_threads.append(QtConcurrent::run([&document]()
+	//		{
+	//			std::stringstream buffer;
+	//			buffer << document;
+	//			std::string word;
+	//			std::map<std::string, int> wordList;
+	//			while (std::getline(buffer, word))
+	//			{
+	//				std::size_t prev = 0, pos;
+	//				while ((pos = word.find_first_of(" ';", prev)) != std::string::npos)
+	//				{
+	//					if (pos > prev)
+	//					{
+	//						std::string subWord = word.substr(prev, pos - prev);
+	//						if (wordList.find(subWord) != wordList.end())
+	//						{
+	//							wordList.at(subWord) += 1;
+	//						}
+	//						else
+	//							wordList.insert({ subWord, 1 });
+	//					}
+	//					prev = pos + 1;
+	//				}
+	//				if (prev < word.length())
+	//				{
+	//					std::string subWord = word.substr(prev, std::string::npos);
+	//					if (wordList.find(subWord) != wordList.end())
+	//					{
+	//						wordList.at(subWord) += 1;
+	//					}
+	//					else
+	//						wordList.insert({ subWord, 1 });
+	//				}
+	//			}
+	//			return wordList;
+	//		}));		
+	//}
+	//for (auto& thread : index_threads)
+	//{
+	//	thread.waitForFinished();
+	//}
+	//for (auto& result : index_threads)
+	//{
+	//	/*for (auto& word : )
+	//	{
+	//		Entry wordFrequency;
+	//		wordFrequency.doc_id = doc_id;
+	//		wordFrequency.count = word.second;
+	//		((InvertedIndex*)object)->freq_dictionary[word.first].push_back(wordFrequency);
+	//	}*/
+	//}
 #endif // QT_THREADS
 
 #ifdef STD_THREADS
 	std::vector<std::thread> index_threads;
+	std::vector< std::map<std::string, int>*> word_vector;
 	for (auto& document : docs)
     {
-        index_threads.emplace_back(std::thread(MakeIndexDocument, document, doc_id, (*this)));
-		//MakeIndexDocument(document, doc_id, *this);
-		doc_id++;
+		auto new_map = new std::map<std::string, int>;
+		word_vector.emplace_back(new_map);
+        index_threads.emplace_back(std::thread([&document, new_map]()
+			{
+				std::stringstream buffer;
+				buffer << document;
+				std::string word;
+				std::map<std::string, int> wordList;
+				while (std::getline(buffer, word))
+				{
+					std::size_t prev = 0, pos;
+					while ((pos = word.find_first_of(" ';", prev)) != std::string::npos)
+					{
+						if (pos > prev)
+						{
+							std::string subWord = word.substr(prev, pos - prev);
+							if (wordList.find(subWord) != wordList.end())
+							{
+								wordList.at(subWord) += 1;
+							}
+							else
+								wordList.insert({ subWord, 1 });
+						}
+						prev = pos + 1;
+					}
+					if (prev < word.length())
+					{
+						std::string subWord = word.substr(prev, std::string::npos);
+						if (wordList.find(subWord) != wordList.end())
+						{
+							wordList.at(subWord) += 1;
+						}
+						else
+							wordList.insert({ subWord, 1 });
+					}
+				}
+				*new_map = wordList;
+			}));
 	}
 	for (auto& thread : index_threads)
 	{
 		thread.join();
+	}
+	for (auto& wordList : word_vector)
+	{
+		for (auto& word : *wordList)
+		{
+			Entry wordFrequency;
+			wordFrequency.doc_id = doc_id;
+			wordFrequency.count = word.second;
+			freq_dictionary[word.first].push_back(wordFrequency);
+		}
+		doc_id++;
 	}
 #endif // STD_THREADS
 
 #ifndef THREADS
 	for (auto& document : docs)
 	{
-		MakeIndexDocument(this, document, doc_id);
+		//MakeIndexDocument(this, document, doc_id);
 		doc_id++;
 	}
 #endif // !THREADS
 
 }
 
-void InvertedIndex::MakeIndexDocument(void* object, std::string& document, size_t doc_id)
-{
-	std::stringstream buffer;
-	buffer << document;
-	std::string word;
-	std::map<std::string, int> wordList;
-	while (std::getline(buffer, word))
-	{
-		std::size_t prev = 0, pos;
-		while ((pos = word.find_first_of(" ';", prev)) != std::string::npos)
-		{
-			if (pos > prev)
-			{
-				std::string subWord = word.substr(prev, pos - prev);
-				if (wordList.find(subWord) != wordList.end())
-				{
-					wordList.at(subWord) += 1;
-				}
-				else
-					wordList.insert({ subWord, 1 });
-			}
-			prev = pos + 1;
-		}
-		if (prev < word.length())
-		{
-			std::string subWord = word.substr(prev, std::string::npos);
-			if (wordList.find(subWord) != wordList.end())
-			{
-				wordList.at(subWord) += 1;
-			}
-			else
-				wordList.insert({ subWord, 1 });
-		}
-	}
-	((InvertedIndex*)object)->freq_dictionary_access.lock();
-	for (auto& word : wordList)
-	{
-		Entry wordFrequency;
-		wordFrequency.doc_id = doc_id;
-		wordFrequency.count = word.second;
-		((InvertedIndex*)object)->freq_dictionary[word.first].push_back(wordFrequency);
-	}
-	((InvertedIndex*)object)->freq_dictionary_access.unlock();
-}
+//void InvertedIndex::MakeIndexDocument(void* object, std::string& document, size_t doc_id)
+//{
+//	std::stringstream buffer;
+//	buffer << document;
+//	std::string word;
+//	std::map<std::string, int> wordList;
+//	while (std::getline(buffer, word))
+//	{
+//		std::size_t prev = 0, pos;
+//		while ((pos = word.find_first_of(" ';", prev)) != std::string::npos)
+//		{
+//			if (pos > prev)
+//			{
+//				std::string subWord = word.substr(prev, pos - prev);
+//				if (wordList.find(subWord) != wordList.end())
+//				{
+//					wordList.at(subWord) += 1;
+//				}
+//				else
+//					wordList.insert({ subWord, 1 });
+//			}
+//			prev = pos + 1;
+//		}
+//		if (prev < word.length())
+//		{
+//			std::string subWord = word.substr(prev, std::string::npos);
+//			if (wordList.find(subWord) != wordList.end())
+//			{
+//				wordList.at(subWord) += 1;
+//			}
+//			else
+//				wordList.insert({ subWord, 1 });
+//		}
+//	}
+//	((InvertedIndex*)object)->freq_dictionary_access.lock();
+//	for (auto& word : wordList)
+//	{
+//		Entry wordFrequency;
+//		wordFrequency.doc_id = doc_id;
+//		wordFrequency.count = word.second;
+//		((InvertedIndex*)object)->freq_dictionary[word.first].push_back(wordFrequency);
+//	}
+//	((InvertedIndex*)object)->freq_dictionary_access.unlock();
+//}
 
 #endif
