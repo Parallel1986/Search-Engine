@@ -1,10 +1,11 @@
 #include <gtest/gtest.h>
 #include "include/converter_json.h"
 #include "include/inverted_index.h"
+#include "include/file_index.h"
 using namespace std;
 
 #define INVERTED_INDEX_READY
-//#define SEARCH_SERVER_READY
+#define SEARCH_SERVER_READY
 
 #ifdef INVERTED_INDEX_READY
 void TestInvertedIndexFunctionality(

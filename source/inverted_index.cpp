@@ -28,6 +28,7 @@ void InvertedIndex::UpdateDocumentBase(std::vector<std::string> input_docs)
 	{
 		docs.push_back(document);
 	}
+	CreateFrequencyDictionary();
 }
 
 std::vector<Entry> InvertedIndex::GetWordCount(const std::string& word)
@@ -45,7 +46,7 @@ std::vector<Entry> InvertedIndex::GetWordCount(const std::string& word)
 	{
 		std::vector<Entry> list = (*freq_dictionary.find(word)).second;
 		return list;
-	}	
+	}
 }
 
 void InvertedIndex::CreateFrequencyDictionary()
