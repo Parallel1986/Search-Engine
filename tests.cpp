@@ -87,9 +87,9 @@ TEST(TestCaseSearchServer, TestSimple)
     const std::vector<vector<RelativeIndex>> expected = 
     {
         {
-            {2, 1},
-            {0, 0.7},
-            {1, 0.3}
+            {2, 1.0f},
+            {0, 0.7f},
+            {1, 0.3f}
         },
         {}
     };
