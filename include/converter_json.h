@@ -4,12 +4,12 @@
 #include <vector>
 #include <map>
 
-struct Answer
-{
-	std::string request;
-	bool reesult;
-	std::map<float, int> relevantTable;
-};
+//struct Answer
+//{
+//	std::string request;
+//	bool result;
+//	std::map<float, int> relevantTable;
+//};
 
 class ConverterJSON {
 public:
@@ -36,15 +36,21 @@ public:
 	*/
 	void putAnswers(std::vector<std::vector<std::pair<int, float>>>
 		answers);
-
+	/*
+	* Инициализвация конвертера файлом конфигурации config.json
+	*/
 	void initialize();
 private:
+	/*
+	* Получает строку с номером запроса
+	*/
 	std::string getRequestNumber(int number);
 
-	std::string engineName;						//Search engine name
-	std::string engineVersion;					//Search eengine version
-	int maxResponses = 5;						//Maximum number of responsesж
-	std::vector<std::string> requests;			//List of requests
-	std::vector<std::string> fileList;			//List of files for search
+	std::string engineName;						// Имя поискового двигателя //Search engine name
+	std::string engineVersion;					// Версия поискового двигателя //Search eengine version
+	int maxResponses = 5;						// Максимальное количество ответов на запрос //Maximum number of responsesж
+	std::vector<std::string> requests;			// Список поисковых запросов //List of requests
+	std::vector<std::string> fileList;			// Список содержимого файлов, в которых производится поиск //List of files for search
+	bool initialized = false;					// Указывает на инициализацию конвертера // Flag of converter initialization
 //	std::vector<std::map<float,int>> answers;	//List of answers
 };

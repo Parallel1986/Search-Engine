@@ -7,8 +7,8 @@
 #include <functional>
 
 void SearchServer::setMaxResponse(int max_response)
-{
-	this->max_response = max_response;
+{	//”станавливаем максимальное число ответов //Setting maximum number of responses
+	this->max_response = max_response; 
 }
 
 std::vector<std::vector<RelativeIndex>> SearchServer::search(const std::vector<std::string>& queries_input)
