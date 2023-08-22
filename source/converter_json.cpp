@@ -51,8 +51,52 @@ void ConverterJSON::putAnswers(std::vector<std::vector<std::pair<int, float>>> a
 			answersTemplate["answers"][getRequestNumber(i)]["relevance"] = outVector;
 		}		
 	}
-	
-	answerFile << answersTemplate;	//Записываем шаблон в файл //Writing the template to the file
+	std::stringstream unformat_stream;			//Строковый поток для неотформатированного вывода //String stream for unformated output
+	std::string unformat_line, format_line;		//Строки с неотформатированым и отформатированым результатами //String for unformated and formated result respeectively
+
+	unformat_stream << answersTemplate;		//Создаём неотформатированый результат //Creating unformated result
+	std::getline(unformat_stream, unformat_line); //Записываем неформатированый результат в строку //writing unformated result to the string
+	size_t tabs = 0;		//Счётчик табуляций //tab counter
+	for (size_t i = 0; i < unformat_line.length(); i++)
+	{
+		if (unformat_line[i] == '{'			//После открывающих скобок переходим на новую строку
+			|| unformat_line[i] == '['		//After opening brackets going to new line
+			|| unformat_line[i] == '(')
+		{
+			format_line += unformat_line[i];
+			tabs++;							//Смещаем счётчик табуляций на +1 //Shifting tab counter to +1
+			format_line += '\n';
+			for (size_t j = 0; j < tabs; j++)
+			{
+				format_line += '\t';		//Добавляем нужное количество табуляций //Adding required tabs number
+			}
+		}
+		else if (unformat_line[i] == '}'	//После закрывающих скобок переходим на новую строку
+			|| unformat_line[i] == ']'		//After closening brackets going to new line
+			|| unformat_line[i] == ')')
+		{
+			tabs--;							//Смещаем счётчик табуляции на -1 //Shifting tab counter to -1
+			format_line += '\n';
+			for (size_t j = 0; j < tabs; j++)
+			{
+				format_line += '\t';		//Добавляем нужное количество табуляций //Adding required tabs number
+			}
+			format_line += unformat_line[i];
+		}		
+		else if (unformat_line[i] == ',')	//После запятой переходим на новую строку
+		{									//After comma going to new line
+			format_line += unformat_line[i];
+			format_line += '\n';
+			for (size_t j = 0; j < tabs; j++)
+			{
+				format_line += '\t';
+			}
+		}
+		else
+			format_line += unformat_line[i];
+	}
+	answerFile << format_line;	//Записываем шаблон в файл //Writing the template to the file
+
 	answerFile.close();				//Закрываем файл // Closing the file
 }
 
@@ -91,12 +135,15 @@ void ConverterJSON::initialize()
 				else
 				{
 					std::string content;	//Строка с содержимым файла //String for file content
-					char buffer[20];		//Буффер для чтения //Buffer for reading of the efile
-					do
-					{	//Читаем пока не достигнем конца документа //Reading while reaching end of file
-						document.read(buffer,20);
-						content += buffer;	//Добавляем содержимое буфера в строку //Adding content of the buffer to string
-					} while (!document.eof());
+					//char buffer[20];		//Буффер для чтения //Buffer for reading of the efile
+					std::getline(document, content);
+					//document >> content;
+					//do
+					//{	//Читаем пока не достигнем конца документа //Reading while reaching end of file
+					//	document.read(buffer,20);
+					//	document.
+					//	content += buffer;	//Добавляем содержимое буфера в строку //Adding content of the buffer to string
+					//} while (!document.eof());
 					fileList.push_back(content);	//Добавляем содержимое документа в список содержимого
 														//Adding content of file to content list
 				}
