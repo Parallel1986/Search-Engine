@@ -90,14 +90,15 @@ void ConverterJSON::initialize()
 				}
 				else
 				{
-					std::string content;
-					char buffer[20];
+					std::string content;	//Строка с содержимым файла //String for file content
+					char buffer[20];		//Буффер для чтения //Buffer for reading of the efile
 					do
-					{
+					{	//Читаем пока не достигнем конца документа //Reading while reaching end of file
 						document.read(buffer,20);
-						content += buffer;
+						content += buffer;	//Добавляем содержимое буфера в строку //Adding content of the buffer to string
 					} while (!document.eof());
-					fileList.push_back(content);
+					fileList.push_back(content);	//Добавляем содержимое документа в список содержимого
+														//Adding content of file to content list
 				}
 			}
 		}
