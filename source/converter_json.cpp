@@ -6,6 +6,7 @@
 #include <fstream>
 #include <exception>
 #include <iostream>
+#include <sstream>
 
 std::vector<std::string> ConverterJSON::GetTextDocuments()
 {
@@ -75,8 +76,30 @@ void ConverterJSON::initialize()
 			engineName = config["config"]["name"];				//Записываем имя поискового двигателя //Filling search engine`s namee
 			engineVersion = config["config"]["version"];		//Записываем версию поискового двигателя //Filling search engine`s version
 			maxResponses = config["config"]["max_responses"];	//Записываем максимавльное число запросов //Filling number of maximum responses
-			config.at("files").get_to(fileList);		//Заполняем список содержимого файлов по которым будет производиться поиск
+			
+			std::vector<std::string> file_paths;
+			config.at("files").get_to(file_paths);		//Заполняем список содержимого файлов по которым будет производиться поиск
 																//Filling list of files` content for search
+			for (auto& file : file_paths)
+			{
+				std::ifstream document(file);
+				if (!document.is_open())
+				{	//Если файл не удалось открыть, то выбрасываем исключение
+					//Throwing the exception if can not open the file
+					throw (std::exception(("Could not open " + file).c_str()));
+				}
+				else
+				{
+					std::string content;
+					char buffer[20];
+					do
+					{
+						document.read(buffer,20);
+						content += buffer;
+					} while (!document.eof());
+					fileList.push_back(content);
+				}
+			}
 		}
 	}
 	

@@ -10,7 +10,6 @@ int main(int argC, char* argV[])
     ConverterJSON converter;
     converter.initialize();
 
-
     InvertedIndex index;
     SearchServer server(index);
 
