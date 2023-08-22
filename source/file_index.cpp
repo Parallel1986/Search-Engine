@@ -61,7 +61,7 @@ std::vector<std::vector<RelativeIndex>> SearchServer::search(const std::vector<s
 			}
 		}															//на выходе получаем список слов отсортированных по частоте вхождений		
 
-		if (not_matched)											//если отсутствует слово в во всех документах выводим пустой вектор
+		if (not_matched)											//если отсутствует слово во всех документах выводим пустой вектор
 		{
 			std::vector<RelativeIndex> empty_vector;
 			result.push_back(empty_vector);
@@ -90,7 +90,7 @@ std::vector<std::vector<RelativeIndex>> SearchServer::search(const std::vector<s
 						doc_absolute_relevance.at(entry.doc_id) += entry.count;		
 						if (max_count < doc_absolute_relevance.at(entry.doc_id))
 						{
-							max_count += doc_absolute_relevance.at(entry.doc_id);
+							max_count = doc_absolute_relevance.at(entry.doc_id);
 						}
 					}
 				}				
@@ -101,7 +101,7 @@ std::vector<std::vector<RelativeIndex>> SearchServer::search(const std::vector<s
 			std::multimap<float, size_t, std::greater<float>> relevance_map;
 			for (auto& document : doc_absolute_relevance)
 			{
-				relevance_map.insert({ (float)((float)document.second / (float)max_count), document.second });
+				relevance_map.insert({ (float)((float)document.second / (float)max_count), document.first });
 			}		//на выходе получаем отсортированный список релевантности документов
 
 			//заполняем вектор релевантностей
