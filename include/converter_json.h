@@ -37,7 +37,7 @@ public:
 	void putAnswers(std::vector<std::vector<std::pair<int, float>>>
 		answers);
 	/*
-	* Инициализвация конвертера файлом конфигурации config.json
+	* Инициализация конвертера файлом конфигурации config.json
 	*/
 	void initialize();
 private:
