@@ -6,6 +6,10 @@
 #include <sstream>
 #include <functional>
 
+void SearchServer::setMaxResponse(int max_response)
+{
+	this->max_response = max_response;
+}
 
 std::vector<std::vector<RelativeIndex>> SearchServer::search(const std::vector<std::string>& queries_input)
 {
@@ -41,15 +45,12 @@ std::vector<std::vector<RelativeIndex>> SearchServer::search(const std::vector<s
 
 		auto iterator = word_list.begin();	//начало списка слов
 		auto iterator_end = word_list.end();	//конец списка слов
-		bool not_matched = false;									//нет совпадений слова в индексе документов
 		std::map<size_t, size_t> doc_absolute_relevance;			//<doc_id, relevance> список документов для подсчёта релевантности 
 
-		while (iterator != iterator_end && !not_matched)			//проходим по списку и считаем количество совпадений для каждого слова
+		while (iterator != iterator_end)			//проходим по списку и считаем количество совпадений для каждого слова
 		{
 			std::vector<Entry> helper(_index.GetWordCount(*iterator));	//получаем список документов содержащих слово и его количество
-			if (helper.empty())										//если список пуст, то меняем флаг not_matched на true и выходим из цикла
-				not_matched = true;
-			else													//иначе считаем количество вхождений слова в документах
+			if (!helper.empty())										//если список пуст, то меняем флаг not_matched на true и выходим из цикла
 			{
 				size_t counter = 0;									//количество вхождений слова
 				for (auto& entry : helper)					//проходим по списку документов и считаем количество
@@ -57,11 +58,11 @@ std::vector<std::vector<RelativeIndex>> SearchServer::search(const std::vector<s
 					counter += entry.count;
 				}
 				sorted_words.insert({ counter, (*iterator) });	//добавляем в список слов отсортированный по количеству вхождений
-				iterator++;											//смещаем итератор на следующее слово
 			}
-		}															//на выходе получаем список слов отсортированных по частоте вхождений		
+			iterator++;											//смещаем итератор на следующее слово
+		}	//на выходе получаем список слов отсортированных по частоте вхождений		
 
-		if (not_matched)											//если отсутствует слово во всех документах выводим пустой вектор
+		if (sorted_words.empty())											//если отсутствует слово во всех документах выводим пустой вектор
 		{
 			std::vector<RelativeIndex> empty_vector;
 			result.push_back(empty_vector);
@@ -70,16 +71,32 @@ std::vector<std::vector<RelativeIndex>> SearchServer::search(const std::vector<s
 		{															//получаем список документов самого редкого слова для подсчёта релевантности	
 			//получаем список документов содержащих самое редкое слово и колчичество его вхождений
 			auto it = sorted_words.begin();
+			auto it_end = sorted_words.end();
+
 			std::vector<Entry> helper(_index.GetWordCount((*it).second));
-			for (auto& entry : helper)
+
+			while (doc_absolute_relevance.size() < max_response && it != it_end)
 			{
-				doc_absolute_relevance.insert({ entry.doc_id, entry.count });
+				for (auto& entry : helper)
+				{
+					if (doc_absolute_relevance.find(entry.doc_id) != doc_absolute_relevance.end())
+						doc_absolute_relevance.at(entry.doc_id) += entry.count;
+					else if (doc_absolute_relevance.size() < max_response)
+						doc_absolute_relevance.insert({ entry.doc_id, entry.count });
+				}
+				if (doc_absolute_relevance.size() < max_response)
+				{
+					it++;
+					if (it != it_end)
+						helper = _index.GetWordCount((*it).second);
+				}
 			}
 
 			//проходим по оставшимся словам и добавляем их количество вхождений к имеющемуся, попутно вычисляя максимальное количество вхождений
-			it++;
-			size_t max_count = 0;
-			auto it_end = sorted_words.end();
+			if (it != it_end)
+			{
+				it++;
+			}
 			while (it != it_end)
 			{
 				helper = _index.GetWordCount((*it).second);
@@ -87,15 +104,20 @@ std::vector<std::vector<RelativeIndex>> SearchServer::search(const std::vector<s
 				{
 					if (doc_absolute_relevance.find(entry.doc_id) != doc_absolute_relevance.end())
 					{
-						doc_absolute_relevance.at(entry.doc_id) += entry.count;		
-						if (max_count < doc_absolute_relevance.at(entry.doc_id))
-						{
-							max_count = doc_absolute_relevance.at(entry.doc_id);
-						}
+						doc_absolute_relevance.at(entry.doc_id) += entry.count;
 					}
-				}				
+				}
 				it++;
 			}		// на выходе получаем заполненый список документов с абсолютными релевантностями
+
+			size_t max_count = 0;
+			for (auto& doc : doc_absolute_relevance)
+			{
+				if (max_count < doc.second)
+				{
+					max_count = doc.second;
+				}
+			}
 
 			//проходим по списку и считаем относительную релевантность, добавляя в новый список релевантности
 			std::multimap<float, size_t, std::greater<float>> relevance_map;
@@ -116,7 +138,7 @@ std::vector<std::vector<RelativeIndex>> SearchServer::search(const std::vector<s
 			result.push_back(request_result);
 		}
 		/**************/
-	}	
+	}
 	return result;
 }
 #endif
