@@ -35,7 +35,7 @@ std::vector<std::string> ConverterJSON::GetRequests()
 void ConverterJSON::putAnswers(std::vector<std::vector<std::pair<int, float>>> answers)
 {
 	nlohmann::json answersTemplate;				//Создаём шаблон для заполнения ответа //Creating template for filling answer
-	std::ofstream answerFile("answer.json");	//Открываем файл для записи ответа //Opening file for recording
+	std::ofstream answerFile("answers.json");	//Открываем файл для записи ответа //Opening file for recording
 	if (answerFile.is_open())					
 		answerFile.clear();						//Очищаем содержимое файла //Clearing file
 	for (int i = 0; i < answers.size(); i++)	//Проходим по вектору ответов и заполнгяем шаблон //Going through answer vector and filling template
