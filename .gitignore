@@ -5,3 +5,6 @@
 /out/build/x64-Debug
 /.vs
 /testEnvironments.json
+/build-GUI-Desktop_Qt_5_15_2_MSVC2019_64bit-Debug
+/build-GUI-Desktop_Qt_5_15_2_MSVC2019_64bit-Debugconfig.json
+/CMakeLists.txt.user
