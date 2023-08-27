@@ -96,7 +96,6 @@ void ConverterJSON::putAnswers(std::vector<std::vector<std::pair<int, float>>> a
 			format_line += unformat_line[i];
 	}
 	answerFile << format_line;	//Записываем шаблон в файл //Writing the template to the file
-
 	answerFile.close();				//Закрываем файл // Closing the file
 }
 

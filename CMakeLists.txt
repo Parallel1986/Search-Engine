@@ -3,6 +3,25 @@ cmake_minimum_required(VERSION 3.23)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(SEARCH_ENGINE_GUI ON)
+
+set (${SEARCH_ENGINE_GUI_RESOURCES} "")
+
+if(SEARCH_ENGINE_GUI)
+    set(CMAKE_AUTOUIC ON)
+    set(CMAKE_AUTOMOC ON)
+    set(CMAKE_AUTORCC ON)
+        
+    set (${SEARCH_ENGINE_GUI_RESOURCES}
+            mainwindow.h
+            mainwindow.cpp
+            mainwindow.ui
+
+        )
+    find_package(Qt5 REQUIRED COMPONENTS Widgets)
+
+endif()
+
 project(Search-engine VERSION 0.1 LANGUAGES CXX)
 project(Search-engine-tests VERSION 0.1 LANGUAGES CXX)
 
@@ -42,6 +61,7 @@ add_executable(Search-engine
           engine.cpp
           ${PROJECT_SOURCES}
           ${PROJECT_INCLUDE_SOURCES}
+          ${SEARCH_ENGINE_GUI_RESOURCES}
 )
 
 add_executable(Search-engine-tests
@@ -50,17 +70,30 @@ add_executable(Search-engine-tests
           ${PROJECT_INCLUDE_SOURCES}
 )
 
-target_link_libraries(Search-engine PUBLIC
+
+
+if(SEARCH_ENGINE_GUI)
+    target_link_libraries(Search-engine PUBLIC
+        nlohmann_json::nlohmann_json
+        GTest::gtest_main
+        Qt5::Core
+        Qt5::Widgets
+    )
+else()
+    target_link_libraries(Search-engine PUBLIC
             nlohmann_json::nlohmann_json
             GTest::gtest_main
             Qt5::Core
-    )
+        )
+
+endif()
 
 target_link_libraries(Search-engine-tests PUBLIC
-            nlohmann_json::nlohmann_json
-            GTest::gtest_main
-            Qt5::Core
-    )
+        nlohmann_json::nlohmann_json
+        GTest::gtest_main
+        Qt5::Core
+)
+
 
 include(GoogleTest)
 gtest_discover_tests(Search-engine-tests)
