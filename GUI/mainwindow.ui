@@ -17,7 +17,14 @@
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="7" column="2">
+      <item row="2" column="0">
+       <widget class="QLabel" name="requests_path_line">
+        <property name="text">
+         <string>Path to Requests.json</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="3">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QPushButton" name="requests_add_button">
@@ -48,15 +55,26 @@
         </item>
        </layout>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="requests_path_line">
+      <item row="5" column="2" colspan="2">
+       <widget class="QPushButton" name="answers_path_button">
         <property name="text">
-         <string>Path to Requests.json</string>
+         <string>Open...</string>
         </property>
        </widget>
       </item>
-      <item row="9" column="0" colspan="3">
-       <widget class="QTextBrowser" name="answers_field_edit"/>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="config_path_button">
+        <property name="text">
+         <string>Open...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="config_path_line">
+        <property name="text">
+         <string>Path to Config.json</string>
+        </property>
+       </widget>
       </item>
       <item row="5" column="0">
        <widget class="QLineEdit" name="answers_path_edit"/>
@@ -68,20 +86,30 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLineEdit" name="config_path_edit"/>
+      <item row="3" column="0">
+       <widget class="QLineEdit" name="requests_path_edit"/>
+      </item>
+      <item row="9" column="0" colspan="4">
+       <widget class="QTextBrowser" name="answers_field_edit"/>
+      </item>
+      <item row="3" column="2" colspan="2">
+       <widget class="QPushButton" name="requests_path_button">
+        <property name="text">
+         <string>Open...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="config_change">
+        <property name="text">
+         <string>Configure...</string>
+        </property>
+       </widget>
       </item>
       <item row="6" column="0">
        <widget class="QLabel" name="requests_fieeld_line">
         <property name="text">
          <string>Requests</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QPushButton" name="config_path_button">
-        <property name="text">
-         <string>Open...</string>
         </property>
        </widget>
       </item>
@@ -92,44 +120,52 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="config_path_line">
-        <property name="text">
-         <string>Path to Config.json</string>
-        </property>
-       </widget>
+      <item row="1" column="0">
+       <widget class="QLineEdit" name="config_path_edit"/>
       </item>
-      <item row="3" column="0">
-       <widget class="QLineEdit" name="requests_path_edit"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="config_change">
-        <property name="text">
-         <string>Configure...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1" colspan="2">
-       <widget class="QPushButton" name="answers_path_button">
-        <property name="text">
-         <string>Open...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1" colspan="2">
-       <widget class="QPushButton" name="requests_path_button">
-        <property name="text">
-         <string>Open...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0" colspan="2">
+      <item row="7" column="0" colspan="3">
        <widget class="QPlainTextEdit" name="requests_field_edit">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="textInteractionFlags">
          <set>Qt::NoTextInteraction</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="no_config_mark">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap>icons/warning_small.png</pixmap>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="no_requests_mark">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap>icons/warning_small.png</pixmap>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="3">
+       <widget class="QPushButton" name="search_button">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Search</string>
         </property>
        </widget>
       </item>

@@ -1,9 +1,10 @@
 #ifndef INVERTED_INDEX
 #define INVERTED_INDEX
 
+#include <QSet>
 
-//#define QT_THREADS
-#define STD_THREADS
+#define QT_THREADS
+//#define STD_THREADS
 
 #include "../include/inverted_index.h"
 #include <fstream>
@@ -22,27 +23,27 @@
 #define THREADS
 #endif // QT_THREADS
 
-void InvertedIndex::UpdateDocumentBase(std::vector<std::string> input_docs)
+void InvertedIndex::UpdateDocumentBase(QList<QString> input_docs)
 {	//Проходим по входящим документам и вставляем их в список //Going through incoming documents and filling document list
 	for (auto& document : input_docs)
 	{
-		docs.push_back(document);
+        docs.append(document);
 	}
 	CreateFrequencyDictionary();	//Создаём частотный словарь //Creating frequency dictionary
 }
 
-std::vector<Entry> InvertedIndex::GetWordCount(const std::string& word)
+QList<Entry> InvertedIndex::GetWordCount(const QString& word)
 {
 	if (freq_dictionary.empty())	//Если частотный словарь пустой, то создаёт его//Creates frequency dictionari if it is empty
 		CreateFrequencyDictionary();
 	if (freq_dictionary.find(word) == freq_dictionary.end())
 	{	//Если слово отсутствует, то возвращает пустой список //Returns empty list if word is missing
-		std::vector<Entry> list;
+        QList<Entry> list;
 		return list;
 	}
 	else
 	{	//Инае возвращает список документов и количество вхождений //Othervise, returns list of document numbers and entries number
-		std::vector<Entry> list = (*freq_dictionary.find(word)).second;
+        QList<Entry> list = freq_dictionary.value(word);
 		return list;
 	}
 }
@@ -50,61 +51,51 @@ std::vector<Entry> InvertedIndex::GetWordCount(const std::string& word)
 void InvertedIndex::CreateFrequencyDictionary()
 {
 	size_t doc_id = 0;		//Для генерации номеров документов //For document`s number generation
-#ifdef QT_THREADS	//Параллельные потоки на основе Qt //Multithreading using Qt
-	QList<QFuture<std::map<std::string, int>>> index_threads;
+#ifdef QT_THREADS	//Многопоточность на основе Qt //Multithreading using Qt
+    QList<QFuture<QMap<QString, Entry>>> index_threads;
 	for (auto& document : docs)
-    {
-		index_threads.append(QtConcurrent::run([&document]()
-			{
-				std::stringstream buffer;
-				buffer << document;
-				std::string word;
-				std::map<std::string, int> wordList;
-				while (std::getline(buffer, word))
-				{
-					std::size_t prev = 0, pos;
-					while ((pos = word.find_first_of(" ';", prev)) != std::string::npos)
-					{
-						if (pos > prev)
-						{
-							std::string subWord = word.substr(prev, pos - prev);
-							if (wordList.find(subWord) != wordList.end())
-							{
-								wordList.at(subWord) += 1;
-							}
-							else
-								wordList.insert({ subWord, 1 });
-						}
-						prev = pos + 1;
-					}
-					if (prev < word.length())
-					{
-						std::string subWord = word.substr(prev, std::string::npos);
-						if (wordList.find(subWord) != wordList.end())
-						{
-							wordList.at(subWord) += 1;
-						}
-						else
-							wordList.insert({ subWord, 1 });
-					}
-				}
-				return wordList;
-			}));		
+    {        
+        index_threads.append(QtConcurrent::run([&document, doc_id]()
+			{                
+                QMap<QString,int> words_list;
+                QMap<QString, Entry> document_dictionary;
+                for (auto& word : document.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts))
+                {
+                    if (words_list.contains(word))
+                        words_list[word]+=1;
+                    else
+                        words_list[word] = 1;
+                }
+                for (auto word = words_list.begin();word != words_list.end();word++)
+                {
+                    Entry insert;
+                    insert.doc_id = doc_id;
+                    insert.count = word.value();
+                    document_dictionary.insert(word.key(),insert);
+                }
+                return document_dictionary;
+            }));
+            doc_id++;
 	}
 	for (auto& thread : index_threads)
 	{
-		thread.waitForFinished();
-	}
-	for (auto& result : index_threads)
-	{
-		/*for (auto& word : )
-		{
-			Entry wordFrequency;
-			wordFrequency.doc_id = doc_id;
-			wordFrequency.count = word.second;
-			((InvertedIndex*)object)->freq_dictionary[word.first].push_back(wordFrequency);
-		}*/
-	}  
+		thread.waitForFinished();		
+	}	
+    for (auto& thread : index_threads)
+    {
+        auto start = thread.result().begin();
+        auto finish = thread.result().end();
+        for (auto map_iter = start;
+         map_iter != finish;
+          map_iter++)
+        {
+            if (freq_dictionary.contains(map_iter.key()))
+                freq_dictionary[map_iter.key()].append(map_iter.value());
+            else
+                freq_dictionary.insert(map_iter.key(),QList{map_iter.value()});
+        }
+    }
+
 #endif // QT_THREADS
 
 #ifdef STD_THREADS	//Паралельные потоки на основе std::thread //Multithreading by using std::thread

@@ -26,6 +26,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void initializeSearchEngine();
 
 public slots:
     void openConfig();
@@ -36,9 +37,19 @@ public slots:
     void modifyConfig();
     void modifyRequeests();
     void modifyAnswers();
-    void setConfigPath(QString new_path);
+    void setConfigPath();
+    void setRequestsPath();
+    void setAnswersPath();
+    void checkConfigPath();
 private:
-    void initializeSearchEngine();
+    void configError();
+    void requestsError();
+//    void setConfigWarning();
+//    void unsetConfigWarning();
+//    void setRequestsWarning();
+//    void unsetRequestsWarning();
+    bool config_ready = false;
+    bool requests_ready = false;
     Ui::MainWindow *ui;
     ConfigWindow *conf_ui;
     ConverterJSON* converter;

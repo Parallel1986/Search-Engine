@@ -2,7 +2,7 @@
 #include "inverted_index.h"
 
 struct RelativeIndex {
-	size_t doc_id;
+    int doc_id;
 	float rank;
 	bool operator ==(const RelativeIndex& other) const {
 		return (doc_id == other.doc_id && rank == other.rank);
@@ -15,7 +15,7 @@ public:
 	InvertedIndex,
 	* чтобы SearchServer мог узнать частоту слов встречаемых в
 	запросе
-	*/
+    */
 	SearchServer(InvertedIndex& idx) : _index(idx) { };
 	/**
 	* Метод обработки поисковых запросов
@@ -24,8 +24,8 @@ public:
 	* @return возвращает отсортированный список релевантных ответов для
 	заданных запросов
 	*/
-	std::vector<std::vector<RelativeIndex>> search(const
-		std::vector<std::string>& queries_input);
+    QList<QList<RelativeIndex>> search(const
+        QList<QString>& queries_input);
 	void setMaxResponse(int max_response);
 private:
 	InvertedIndex _index;

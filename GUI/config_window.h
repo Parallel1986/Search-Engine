@@ -29,21 +29,23 @@ public slots:
     void clickedCancel();
     void clickedRemove();
     void clickedAdd();
-    void maxResponsesChanged();
-    void engineVerChanged();
-    void engineNameChanged();
+//    void maxResponsesChanged(int new_max);
+//    void engineVerChanged(QString new_ver);
+//    void engineNameChanged(QString new_name);
 signals:
     void configPathChanged(QString new_path);
     void openConfigRequest();
+    void ready();
+    void noConfigChanges();
 private:    
     void fillFields();
+    void fillSettings();
+    bool config_ready = false;
     Ui::Config_window *ui;
     ConverterJSON* converter;
-    QStringList file_list;
-//  QList<QString> search_files;
     QStringListModel *search_files_list;
-    QString engine_ver = "0.1";
-    QString engine_name = "Search Engine";
+    ConfigList settings;
+    QList<QString> bad_files {"Error files! Could not open!"};
     QString config_path = QDir::currentPath() + "/config.json";
     QString requests_path = QDir::currentPath() + "/requests.json";
     QString answers_path = QDir::currentPath() + "/answers.json";
