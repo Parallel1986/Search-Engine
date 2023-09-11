@@ -13,6 +13,9 @@
 #include "include/converter_json.h"
 #include "include/inverted_index.h"
 
+//Включение виджетов
+#include "include/requestadddialog.h"
+
 
 
 QT_BEGIN_NAMESPACE
@@ -26,23 +29,38 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void initializeSearchEngine();
 
 public slots:
+    void search();
     void openConfig();
     void openRequests();
     void openAnswers();
     void addRequests();
     void deleteRequests();
     void modifyConfig();
-    void modifyRequeests();
-    void modifyAnswers();
-    void setConfigPath(QString new_path);
+    void modifyRequests(QString);
+    void setConfigPath();
+    void setRequestsPath();
+    void setAnswersPath();
+    void checkConfigPath();
+    void saveResult();
 private:
-    void initializeSearchEngine();
-    Ui::MainWindow *ui;
-    ConfigWindow *conf_ui;
-    ConverterJSON* converter;
-    InvertedIndex* index;
-    SearchServer* server;
+    void configError();
+    void requestsError();
+    void loadRequests();
+    void readynessCheck();
+    bool config_ready = false;
+    bool requests_ready = false;
+    bool has_result = false;
+    Ui::MainWindow *ui = nullptr;
+    ConfigWindow *conf_ui = nullptr;
+    ConverterJSON* converter = nullptr;
+    InvertedIndex* index = nullptr;
+    SearchServer* server = nullptr;
+    RequestAddDialog* r_dialog = nullptr;
+    QList<QString> requests_list;
+    QStringListModel *request_list_model = nullptr;
+    QList<QList<RelativeIndex>> search_result;
 };
 #endif // MAINWINDOW_H

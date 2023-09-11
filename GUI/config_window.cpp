@@ -1,7 +1,10 @@
 #include "config_window.h"
-#include "./ui_config_window.h"
+#include "./ui/ui_config_window.cpp"
+#include "mainwindow.h"
 #include <QFileDialog>
 #include <QMessageBox>
+
+class MainWindow;
 
 ConfigWindow::ConfigWindow(QWidget *parent, ConverterJSON *converter)
     : QMainWindow(parent)
@@ -11,82 +14,81 @@ ConfigWindow::ConfigWindow(QWidget *parent, ConverterJSON *converter)
     this->converter = converter;
     this->hide();
     search_files_list = new QStringListModel();
-    QDir path(config_path);
-    if (path.isReadable())
-        converter->setConfigPath(config_path.toStdString());
-    else
-    {
-        engine_status |= ConverterStatus::CONFIG_MISSED;
-    }
+    converter->initialize();
+    fillSettings();
     fillFields();
 }
 
+//Заполнить поля
 void ConfigWindow::fillFields()
 {
+    ui->max_response_spin->setValue(settings.max_responses);
+    ui->engine_name_edit->setText(settings.enegine_name);
+    ui->engine_ver_edit->setText(settings.engine_ver);
+    search_files_list->setStringList(QStringList());    
+    search_list.clear();
+    (bad_files.size()>1)?search_list = settings.files + bad_files:search_list = settings.files;
+    search_files_list->setStringList(search_list);
+    ui->file_listView->setModel(search_files_list);
+    emit ready();
+}
 
-    if (converter->isInitialized())
+//Загрузить настройки
+void ConfigWindow::fillSettings()
+{
+    settings.enegine_name = converter->getEngineName();
+    settings.engine_ver = converter->getEngineVersion();
+    settings.max_responses = converter->GetResponsesLimit();
+    settings.files.clear();
+    bad_files.clear();
+    bad_files.append("    Error files! Could not open:");
+    for (auto& file : converter->getFilesPaths())
     {
-        ui->max_response_spin->setValue(converter->GetResponsesLimit());
-        ui->engine_name_edit->setText(QString(converter->getEngineName().c_str()));
-        ui->engine_ver_edit->setText(QString(converter->getEngineVersion().c_str()));
-        if (!converter->getFilesPaths().empty())
-        {
-//          ui->file_list->clear();
-            file_list.clear();
-search_files_list->setStringList(QStringList());
-            for (auto& file : converter->getFilesPaths())
-            {
-//             search_files.append(file.c_str());
-               file_list << file.c_str();
-//             ui->file_list->appendPlainText(search_files.back());
-            }
-            search_files_list->setStringList(file_list);
-            ui->file_listView->setModel(search_files_list);
-        }
+        QDir check(file);
+        if (check.isReadable())
+            settings.files.append(file);
         else
-        {
-            search_files_list->setStringList(QStringList());
-            ui->file_listView->setModel(search_files_list);
-        }
+            bad_files.append(file);
     }
-    else
-    {
-        ui->max_response_spin->setValue(5);
-        ui->engine_name_edit->setText(engine_name);
-        ui->engine_ver_edit->setText(engine_ver);
-        search_files_list->setStringList(QStringList());
-        ui->file_listView->setModel(search_files_list);
-    }
+
 }
 
-ConfigWindow::~ConfigWindow()
-{
-    delete ui;
-}
+//Деструктор
+ConfigWindow::~ConfigWindow() {delete ui;}
 
-char ConfigWindow::getEngineStatus()
-{
-    return engine_status;
-}
-
+//Нажата кнопка "Ок"
 void ConfigWindow::clickedOk()
 {
-    ConfigList settings;
-    settings.enegine_name = ui->engine_name_edit->text().toStdString();
-    settings.engine_ver = ui->engine_ver_edit->text().toStdString();
+    settings.enegine_name = ui->engine_name_edit->text();
+    settings.engine_ver = ui->engine_ver_edit->text();
     settings.max_responses = ui->max_response_spin->value();
-    for (auto& file : file_list)
+    settings.files.clear();
+    for (auto& line : search_files_list->stringList())
     {
-        settings.files.push_back(file.toStdString());
+        if (line != "    Error files! Could not open:")
+            settings.files.append(line);
+        else
+            break;
     }
-    converter->putConfig(settings, QDir::currentPath().toStdString());
+    converter->putConfig(settings, config_path);
+    converter->initialize();
     emit configPathChanged(config_path);
-    this->close();
+    if (settings.files.empty())
+    {
+        ((MainWindow*)parent())->configError();
+    }
+    else
+        this->close();
 }
+
+//Нажата кнопка "Cancel"
 void ConfigWindow::clickedCancel()
 {
+    emit noConfigChanges();
     this->close();
 }
+
+//Нажата кнопка "Remove"
 void ConfigWindow::clickedRemove()
 {
     QItemSelectionModel* selection = ui->file_listView->selectionModel();   //Выделенный элемент
@@ -97,16 +99,18 @@ void ConfigWindow::clickedRemove()
         search_files_list->removeRows(row,1,QModelIndex());     //Удаляем строку row
         ui->file_listView->setModel(search_files_list);         //Переназначаем список строк
     }
-    file_list = search_files_list->stringList();
+    settings.files = search_files_list->stringList();
 }
+
+//Нажата кнопка "Add"
 void ConfigWindow::clickedAdd()
 {
     QFileDialog* dlg = new QFileDialog();
     dlg->setNameFilter(tr("TXT file (*.txt)"));
     if (dlg->exec())
     {
-        auto new_file = dlg->selectedFiles();
-        file_list.append(new_file[0]);
+        auto new_file = dlg->selectedFiles();        
+        settings.files.append(new_file[0]);
         auto row = search_files_list->rowCount();
         search_files_list->insertRows(row,1,QModelIndex());
         search_files_list->setData(search_files_list->index(row),new_file[0],Qt::EditRole);
@@ -114,34 +118,3 @@ void ConfigWindow::clickedAdd()
     dlg->close();
     delete dlg;
 }
-void ConfigWindow::maxResponsesChanged()
-{}
-void ConfigWindow::engineVerChanged()
-{}
-void ConfigWindow::engineNameChanged()
-{}
-
-//void temp()
-//{
-//    QMessageBox* error_message = new QMessageBox();
-//    error_message->setText("Missing config.json");
-//    error_message->setInformativeText("Couldn`t find config.json, do you wish to configure new one?");
-//    error_message->setStandardButtons(QMessageBox::Close|QMessageBox::Open|QMessageBox::Yes);
-//    error_message->setDefaultButton(QMessageBox::Yes);
-//    int result = error_message->exec();
-//    switch (result) {
-//    case QMessageBox::Close:
-//        this->close();
-//        this->parentWidget()->close();
-//        break;
-//    case QMessageBox::Open:
-//        emit openConfigRequest();
-//        this->close();
-//        break;
-//    case QMessageBox::Yes:
-//        this->show();
-//        break;
-//    default:
-//        break;
-//    }
-//}

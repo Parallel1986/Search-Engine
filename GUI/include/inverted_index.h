@@ -3,10 +3,15 @@
 #include <map>
 #include <string>
 #include <mutex>
+#include <QList>
+#include <QMap>
+#include <QObject>
 
 struct Entry
 {
-    size_t doc_id, count;
+    int doc_id, count;
+    Entry(){}
+    Entry(int in_doc_id, int in_count) : doc_id(in_doc_id), count(in_count){}
 
     // Данный оператор необходим для проведения тестовых сценариев
     bool operator ==(const Entry& other) const {
@@ -15,7 +20,9 @@ struct Entry
     }
 };
 
-class InvertedIndex {
+class InvertedIndex
+{
+
 public:
     InvertedIndex() = default;
 /*
@@ -23,16 +30,18 @@ public:
 поиск
 * @param texts_input содержимое документов
 */
-    void UpdateDocumentBase(std::vector<std::string> input_docs);
+    void UpdateDocumentBase(QList<QString> input_docs);
+
 /*
 * Метод определяет количество вхождений слова word в загруженной базе
 документов
 * @param word слово, частоту вхождений которого необходимо определить
 * @return возвращает подготовленный список с частотой слов
 */
-    std::vector<Entry> GetWordCount(const std::string& word);
+    QList<Entry> GetWordCount(const QString& word);
+
 private:
     void CreateFrequencyDictionary();
-    std::vector<std::string> docs;                              // список содержимого документов
-    std::map<std::string, std::vector<Entry>> freq_dictionary;  // частотный словарь
+    QList<QString> docs;                            // список содержимого документов
+    QMap<QString, QList<Entry>> freq_dictionary;    // частотный словарь
 };
