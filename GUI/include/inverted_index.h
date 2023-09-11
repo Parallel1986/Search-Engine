@@ -10,6 +10,8 @@
 struct Entry
 {
     int doc_id, count;
+    Entry(){}
+    Entry(int in_doc_id, int in_count) : doc_id(in_doc_id), count(in_count){}
 
     // Данный оператор необходим для проведения тестовых сценариев
     bool operator ==(const Entry& other) const {
@@ -29,6 +31,7 @@ public:
 * @param texts_input содержимое документов
 */
     void UpdateDocumentBase(QList<QString> input_docs);
+
 /*
 * Метод определяет количество вхождений слова word в загруженной базе
 документов

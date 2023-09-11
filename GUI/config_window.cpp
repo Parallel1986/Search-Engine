@@ -1,7 +1,10 @@
 #include "config_window.h"
-#include "./ui_config_window.h"
+#include "./ui/ui_config_window.cpp"
+#include "mainwindow.h"
 #include <QFileDialog>
 #include <QMessageBox>
+
+class MainWindow;
 
 ConfigWindow::ConfigWindow(QWidget *parent, ConverterJSON *converter)
     : QMainWindow(parent)
@@ -16,49 +19,76 @@ ConfigWindow::ConfigWindow(QWidget *parent, ConverterJSON *converter)
     fillFields();
 }
 
+//Заполнить поля
 void ConfigWindow::fillFields()
 {
     ui->max_response_spin->setValue(settings.max_responses);
     ui->engine_name_edit->setText(settings.enegine_name);
     ui->engine_ver_edit->setText(settings.engine_ver);
-    search_files_list->setStringList(settings.files);
+    search_files_list->setStringList(QStringList());    
+    search_list.clear();
+    (bad_files.size()>1)?search_list = settings.files + bad_files:search_list = settings.files;
+    search_files_list->setStringList(search_list);
     ui->file_listView->setModel(search_files_list);
     emit ready();
 }
 
+//Загрузить настройки
 void ConfigWindow::fillSettings()
 {
     settings.enegine_name = converter->getEngineName();
     settings.engine_ver = converter->getEngineVersion();
     settings.max_responses = converter->GetResponsesLimit();
-    settings.files = converter->getFilesPaths();
+    settings.files.clear();
+    bad_files.clear();
+    bad_files.append("    Error files! Could not open:");
+    for (auto& file : converter->getFilesPaths())
+    {
+        QDir check(file);
+        if (check.isReadable())
+            settings.files.append(file);
+        else
+            bad_files.append(file);
+    }
+
 }
 
-ConfigWindow::~ConfigWindow()
-{delete ui;}
+//Деструктор
+ConfigWindow::~ConfigWindow() {delete ui;}
 
+//Нажата кнопка "Ок"
 void ConfigWindow::clickedOk()
 {
-//    fillSettings();
     settings.enegine_name = ui->engine_name_edit->text();
     settings.engine_ver = ui->engine_ver_edit->text();
     settings.max_responses = ui->max_response_spin->value();
     settings.files.clear();
     for (auto& line : search_files_list->stringList())
     {
-        if (line != "Error files! Could not open!")
+        if (line != "    Error files! Could not open:")
             settings.files.append(line);
+        else
+            break;
     }
-
-    converter->putConfig(settings, QDir::currentPath());
+    converter->putConfig(settings, config_path);
+    converter->initialize();
     emit configPathChanged(config_path);
-    this->close();
+    if (settings.files.empty())
+    {
+        ((MainWindow*)parent())->configError();
+    }
+    else
+        this->close();
 }
+
+//Нажата кнопка "Cancel"
 void ConfigWindow::clickedCancel()
 {
     emit noConfigChanges();
     this->close();
 }
+
+//Нажата кнопка "Remove"
 void ConfigWindow::clickedRemove()
 {
     QItemSelectionModel* selection = ui->file_listView->selectionModel();   //Выделенный элемент
@@ -71,6 +101,8 @@ void ConfigWindow::clickedRemove()
     }
     settings.files = search_files_list->stringList();
 }
+
+//Нажата кнопка "Add"
 void ConfigWindow::clickedAdd()
 {
     QFileDialog* dlg = new QFileDialog();
@@ -86,14 +118,3 @@ void ConfigWindow::clickedAdd()
     dlg->close();
     delete dlg;
 }
-
-//void ConfigWindow::maxResponsesChanged(int new_max)
-//{settings.max_responses = new_max;}
-
-//void ConfigWindow::engineVerChanged(QString new_ver)
-//{settings.engine_ver = new_ver;}
-
-//void ConfigWindow::engineNameChanged(QString new_name)
-//{settings.enegine_name = new_name;}
-
-

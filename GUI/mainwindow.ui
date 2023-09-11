@@ -15,87 +15,39 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0">
+    <item row="1" column="0">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="2" column="0">
-       <widget class="QLabel" name="requests_path_line">
-        <property name="text">
-         <string>Path to Requests.json</string>
+      <item row="10" column="3">
+       <widget class="QPushButton" name="search_button">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
-       </widget>
-      </item>
-      <item row="7" column="3">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QPushButton" name="requests_add_button">
-          <property name="text">
-           <string>Add...</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="requests_delete_button">
-          <property name="text">
-           <string>Delete...</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-      <item row="5" column="2" colspan="2">
-       <widget class="QPushButton" name="answers_path_button">
         <property name="text">
-         <string>Open...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QPushButton" name="config_path_button">
-        <property name="text">
-         <string>Open...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="config_path_line">
-        <property name="text">
-         <string>Path to Config.json</string>
+         <string>Search</string>
         </property>
        </widget>
       </item>
       <item row="5" column="0">
        <widget class="QLineEdit" name="answers_path_edit"/>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="answers_path_line">
-        <property name="text">
-         <string>Path to Answers.json</string>
+      <item row="6" column="0" colspan="4">
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLineEdit" name="requests_path_edit"/>
+      <item row="8" column="0" colspan="3">
+       <widget class="QListView" name="requests_line_list">
+        <property name="editTriggers">
+         <set>QAbstractItemView::SelectedClicked</set>
+        </property>
+       </widget>
       </item>
-      <item row="9" column="0" colspan="4">
-       <widget class="QTextBrowser" name="answers_field_edit"/>
-      </item>
-      <item row="3" column="2" colspan="2">
-       <widget class="QPushButton" name="requests_path_button">
+      <item row="12" column="3">
+       <widget class="QPushButton" name="save_button">
         <property name="text">
-         <string>Open...</string>
+         <string>Save</string>
         </property>
        </widget>
       </item>
@@ -106,30 +58,72 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="requests_fieeld_line">
+      <item row="3" column="0">
+       <widget class="QLineEdit" name="requests_path_edit"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="config_path_line">
         <property name="text">
-         <string>Requests</string>
+         <string>Path to Config.json</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="answers_field_line">
-        <property name="text">
-         <string>Results</string>
+      <item row="9" column="0" colspan="4">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
        <widget class="QLineEdit" name="config_path_edit"/>
       </item>
-      <item row="7" column="0" colspan="3">
-       <widget class="QPlainTextEdit" name="requests_field_edit">
-        <property name="enabled">
-         <bool>false</bool>
+      <item row="7" column="0">
+       <widget class="QLabel" name="requests_fieeld_line">
+        <property name="text">
+         <string>Requests</string>
         </property>
-        <property name="textInteractionFlags">
-         <set>Qt::NoTextInteraction</set>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="config_path_button">
+        <property name="text">
+         <string>Open...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2" colspan="2">
+       <widget class="QPushButton" name="requests_path_button">
+        <property name="text">
+         <string>Open...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="answers_path_line">
+        <property name="text">
+         <string>Path to Answers.json</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="requests_path_line">
+        <property name="text">
+         <string>Path to Requests.json</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2" colspan="2">
+       <widget class="QPushButton" name="answers_path_button">
+        <property name="text">
+         <string>Open...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="answers_field_line">
+        <property name="text">
+         <string>Results</string>
         </property>
        </widget>
       </item>
@@ -160,13 +154,74 @@
        </widget>
       </item>
       <item row="8" column="3">
-       <widget class="QPushButton" name="search_button">
-        <property name="enabled">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QPushButton" name="requests_add_button">
+          <property name="text">
+           <string>Add...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="requests_delete_button">
+          <property name="text">
+           <string>Delete...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="11" column="0" colspan="4">
+       <widget class="QTreeWidget" name="results_tree_widget">
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="showDropIndicator" stdset="0">
          <bool>false</bool>
         </property>
-        <property name="text">
-         <string>Search</string>
+        <property name="alternatingRowColors">
+         <bool>false</bool>
         </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::NoSelection</enum>
+        </property>
+        <property name="rootIsDecorated">
+         <bool>true</bool>
+        </property>
+        <property name="columnCount">
+         <number>3</number>
+        </property>
+        <attribute name="headerVisible">
+         <bool>false</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string notr="true">1</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string notr="true">2</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string notr="true">3</string>
+         </property>
+        </column>
        </widget>
       </item>
      </layout>
@@ -354,7 +409,7 @@
    <sender>requests_path_edit</sender>
    <signal>textChanged(QString)</signal>
    <receiver>MainWindow</receiver>
-   <slot>modifyRequeests()</slot>
+   <slot>modifyRequests()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>507</x>
@@ -398,6 +453,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>search_button</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>search()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>909</x>
+     <y>381</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>789</x>
+     <y>385</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>save_button</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveResult()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>877</x>
+     <y>528</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>741</x>
+     <y>529</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openConfig()</slot>
@@ -406,7 +493,9 @@
   <slot>addRequests()</slot>
   <slot>deleteRequests()</slot>
   <slot>modifyConfig()</slot>
-  <slot>modifyRequeests()</slot>
+  <slot>modifyRequests()</slot>
   <slot>modifyAnswers()</slot>
+  <slot>search()</slot>
+  <slot>saveResult()</slot>
  </slots>
 </ui>

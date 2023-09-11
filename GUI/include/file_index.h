@@ -17,7 +17,8 @@ public:
 	запросе
     */
 	SearchServer(InvertedIndex& idx) : _index(idx) { };
-	/**
+
+    /**
 	* Метод обработки поисковых запросов
 	* @param queries_input поисковые запросы взятые из файла
 	requests.json
@@ -28,7 +29,7 @@ public:
         QList<QString>& queries_input);
 	void setMaxResponse(int max_response);
 private:
-	InvertedIndex _index;
+    InvertedIndex _index;
 	int max_response = 5;
 };
 

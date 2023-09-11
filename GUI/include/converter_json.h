@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <nlohmann/json.hpp>
+#include "..\\include\\file_index.h"
 #include <QObject>
 #include <QList>
 #include <QDir>
@@ -58,14 +58,18 @@ public:
 	/**
 	* Положить в файл answers.json результаты поисковых запросов
 	*/
-    void putAnswers(QList<QList<std::pair<int, float>>>
+    void putAnswers(QList<QList<RelativeIndex>>
 		answers);
 
     /**
 	* Инициализация конвертера файлом конфигурации config.json
     */
-    void putConfig(ConfigList settings,QString path);
+    void putConfig(const ConfigList,QString);
 
+    /**
+     * @brief putRequests Save requests to requests.json
+     */
+    void putRequests(const QList<QString>);
 
     QString getEngineName();
     QString getEngineVersion();
@@ -74,28 +78,28 @@ public:
     bool isInitialized();
     bool isConfigInitialized();
     bool isRequestsInitialized();
+    QString getRequestsPath();
 
 public slots:
-    void setConfigPath(QString new_path);
-    void setRequestsPath(QString new_path);
-    void setAnswersPath(QString new_path);
+    void setConfigPath(QString);
+    void setRequestsPath(QString);
+    void setAnswersPath(QString);
     void initialize();
-    void setMaxRequests(int new_max);
+    void setMaxRequests(int);
 signals:
     void configUpdated();
     void requestsUpdated();
     void answersUpdated();
-//    void configMissed();
-//    void configFieldMissed();
-//    void configFilesMissed();
-//    void requestsMissed();
-//    void requestsFieldMissed();
-    void fileOpenFailure(QString filename);
+    void fileOpenFailure(QString);
 private:
+    void loadConfigs();
+    void loadConfigs(QJsonDocument&);
+    void loadSearchFiles();
+    void loadSearchFiles(QJsonDocument&);
     void initializeConfig();                        //Загружает данные из config.json //Loading data from config.json
     void initializeRequests();                      //Загружает данные из requests.json //Loading data from requests.json
     void initializeCheck();                         //Проверяет инициализацию //Checking initialization
-    QString makeRequestNumber(std::size_t number); //Генерирует строку запроса для записи в answers.json //Generates string of a request for writing to answers.json
+    QString makeRequestNumber(std::size_t); //Генерирует строку запроса для записи в answers.json //Generates string of a request for writing to answers.json
     QString config_file_path = QDir::currentPath() + "/config.json";       //Путь до файла конфигурации //Configuration file`s path
     QString requests_file_path = QDir::currentPath() + "/requests.json";   //Путь до файла запросов //Requests file`s path
     QString answers_file_path = QDir::currentPath() + "/answers.json";     //Путь до файла ответов //Answers file`s path
@@ -105,6 +109,5 @@ private:
     QList<QString> requests;                        //Список поисковых запросов //List of requests
     QList<QString> fileList;                        //Список содержимого файлов, в которых производится поиск //List of files for search
     QList<QString> file_paths;                      //Список путей файлов по которым производится поиск //List of files` paths for search
-//  bool initialized = false;               		//Указывает на инициализацию конвертера //Flag of converter initialization
     char engine_status = 0;                         //Состояние поискового движка //Search engine statee
 };
