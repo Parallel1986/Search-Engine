@@ -1,7 +1,6 @@
 #ifndef FILE_INDEX
 #define FILE_INDEX
 #include "../include/file_index.h"
-#include "../include/converter_json.h"
 #include <set>
 #include <sstream>
 #include <functional>
@@ -45,7 +44,7 @@ std::vector<std::vector<RelativeIndex>> SearchServer::search(const std::vector<s
 
 		auto iterator = word_list.begin();	//начало списка слов
 		auto iterator_end = word_list.end();	//конец списка слов
-		std::map<size_t, size_t> doc_absolute_relevance;			//<doc_id, relevance> список документов для подсчёта релевантности 
+        std::map<size_t/*doc_id*/, size_t/*relevance*/> doc_absolute_relevance;			//<doc_id, relevance> список документов для подсчёта релевантности
 
 		while (iterator != iterator_end)			//проходим по списку и считаем количество совпадений для каждого слова
 		{
