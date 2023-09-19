@@ -2,9 +2,13 @@
 
 EngineCore::EngineCore()
 {
+//Creating engine's objects
     converter = &ConverterJSON::GetInstance();
     index = new InvertedIndex();
     server = new SearchServer(*index);
+
+//Connecting signals
+
 }
 
 EngineCore::~EngineCore()
@@ -116,12 +120,13 @@ void EngineCore::Initialize()
     InitializeRequests();
 }
 
+//Make search
 void EngineCore::Search()
 {
-    index->UpdateDocumentBase(converter->GetTextDocuments());                   //Обновляем список документов в индексе
-    server = new SearchServer(*index);                                          //Создаём поисковый сервер
-    server->setMaxResponse(converter->GetResponsesLimit());                     //Устанавливаем максимальное количество результатов
-    search_result = (server->search(converter->GetRequests()));                 //Проводим поиск и записываем результат
+    index->UpdateDocumentBase(converter->GetTextDocuments());
+    server->setMaxResponse(converter->GetResponsesLimit());
+    search_result = (server->search(converter->GetRequests()));
+    converter->PutAnswers(search_result);
 }
 
 //Excluded

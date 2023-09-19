@@ -47,6 +47,10 @@ public:
      */
     bool IsRequestsInitialized();
 
+    void AddRequest(QString);
+    void AddSearchFile(QString);
+    void GenerateConfigFile(QStringList, int);
+
 signals:
     void ConfigPathChanged(QString);
     void OpenConfigRequest();

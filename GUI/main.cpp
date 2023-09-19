@@ -4,6 +4,7 @@
 #include<iostream>
 
 #include <QApplication>
+#include <QStringList>
 
 
 enum Comands
@@ -17,34 +18,31 @@ enum Comands
 };
 
 #define COMAND_LINE
-#define COMAND_LINE_TEST
+//#define COMAND_LINE_TEST
 
 #ifdef COMAND_LINE_TEST
 #undef COMAND_LINE
 #endif
 
 #ifdef COMAND_LINE
-
-//Обработка аргументов командной строки
-int processCommandLine(Preference& pref,int argc, char** argv)
+//Proccessing command line
+int processCommandLine(EngineCore& engine,int argc, char** argv)
 {
-    int com_ptr = 1;
-    unsigned char set = 0;
-    std::string arg_v;
-    while (com_ptr < argc)
+    QStringList arguments;
+    for (int arg_ptr = 1;arg_ptr <= argc; ++arg_ptr)
     {
-        arg_v = argv[com_ptr];
-        if (arg_v == "-cp")         //Указать путь к config.json
+        arguments.append(argv[arg_ptr]);
+    }
+    auto arg_end = arguments.end();
+    for (auto arg = arguments.begin(); arg!= arguments.end();++arg)
+    {
+        if (*arg == "-cp")         //Set path to a configurations' file
         {
-            ++com_ptr;
-            if (com_ptr < argc
-                && *argv[com_ptr] != '-'
-                && !(set&Comands::CONFIG_PATH))
+            ++arg;
+            if (arg != arg_end
+                && arg->at(0) != '-')
             {
-                arg_v = argv[com_ptr];
-                pref.config_path = arg_v;
-                pref.changes |= CHANGES::PATH_TO_CONFIG;
-                ++com_ptr;
+                engine.SetConfigPath(*arg);
             }
             else
             {
@@ -52,17 +50,13 @@ int processCommandLine(Preference& pref,int argc, char** argv)
                 return 1;
             }
         }
-        else if (arg_v == "-rp")	//Указать путь к requests.json
+        else if (*arg == "-rp")	//Указать путь к requests.json
         {
-            ++com_ptr;
-            if (com_ptr < argc
-            && *argv[com_ptr] != '-'
-            && !(set&Comands::REQUESTS_PATH))
+            ++arg;
+            if (arg != arg_end
+            && arg->at(0) != '-')
             {
-                arg_v = argv[com_ptr];
-                pref.requests_path = arg_v;
-                pref.changes |= CHANGES::PATH_TO_REQUESTS;
-                ++com_ptr;
+                engine.SetRequestsPath(*arg);
             }
             else
             {
@@ -70,17 +64,13 @@ int processCommandLine(Preference& pref,int argc, char** argv)
                 return 2;
             }
         }
-        else if (arg_v == "-ap")	//Указать путь к answers.json
+        else if (*arg == "-ap")	//Указать путь к answers.json
         {
-            ++com_ptr;
-            if (com_ptr < argc
-            && *argv[com_ptr] != '-'
-            && !(set&Comands::ANSWERS_PATH))
+            ++arg;
+            if (arg != arg_end
+            && arg->at(0) != '-')
             {
-                arg_v = argv[com_ptr];
-                pref.answers_path = arg_v;
-                pref.changes |= CHANGES::PATH_TO_ANSWERS;
-                ++com_ptr;
+               engine.SetAnswersPath(*arg);
             }
             else
             {
@@ -88,17 +78,15 @@ int processCommandLine(Preference& pref,int argc, char** argv)
                 return 3;
             }
         }
-        else if (arg_v == "-ra")	//Добавить поисковый запрос в начало списка запросов
+        else if (*arg == "-ra")	//Добавить поисковый запрос в начало списка запросов
         {
-            ++com_ptr;
-            if (com_ptr < argc && *argv[com_ptr] != '-')
+            ++arg;
+            if (arg != arg_end && arg->at(0) != '-')
             {
-                while (com_ptr < argc && *argv[com_ptr] != '-')
+                while (arg != arg_end && arg->at(0) != '-')
                 {
-                    arg_v = argv[com_ptr];
-                    pref.requests_adds.push_back(arg_v);
-                    pref.changes |= CHANGES::REQUESTS_ADDED;
-                    ++com_ptr;
+                    engine.AddRequest(*arg);
+                    ++arg;
                 }
             }
             else
@@ -107,17 +95,13 @@ int processCommandLine(Preference& pref,int argc, char** argv)
                 return 4;
             }
         }
-        else if (arg_v == "-mr")	//Задать макввсимальное количество ответов
+        else if (*arg == "-mr")	//Задать максимальное количество ответов
         {
-            ++com_ptr;
-            if (com_ptr < argc
-            && *argv[com_ptr] != '-'
-            && !(set&Comands::MAX_RESPONSE))
+            ++arg;
+            if (arg != arg_end
+            && arg->at(0) != '-')
             {
-                arg_v = argv[com_ptr];
-                pref.max_response = stoi(arg_v);
-                pref.changes |= CHANGES::RESPONSES;
-                ++com_ptr;
+                engine.SetMaxRequests(arg->toInt());
             }
             else
             {
@@ -125,35 +109,33 @@ int processCommandLine(Preference& pref,int argc, char** argv)
                 return 5;
             }
         }
-        else if (arg_v == "-cg")	//Сгенерировать config.json в формате 'path_to_config.json' 'max_response_count' 'path_to_file_for_search\\filename'
+        else if (*arg == "-cg")	//Сгенерировать config.json в формате 'path_to_config.json' 'max_response_count' 'path_to_file_for_search\\filename'
         {
-            ++com_ptr;
-            if (com_ptr < argc && *argv[com_ptr] != '-')
+            ++arg;
+            if (arg != arg_end && arg->at(0) != '-')
             {
-                arg_v = argv[com_ptr];
-                pref.config_path = arg_v;
-                pref.changes |= CHANGES::PATH_TO_CONFIG;
-                ++com_ptr;
-                if (com_ptr < argc && *argv[com_ptr] != '-')
+                QStringList pref;
+                int max_response;
+                pref.append(*arg);
+                pref.append("AutoGen");
+                pref.append("AutoGen V.0");
+                ++arg;
+                if (arg != arg_end && arg->at(0) != '-')
                 {
-                    arg_v = argv[com_ptr];
-                    pref.max_response = stoi(arg_v);
-                    pref.changes |= CHANGES::RESPONSES;
-                    ++com_ptr;
+                    max_response = arg->toInt();
+                    ++arg;
                 }
                 else
                 {
                     std::cerr << "Missing maximum response count! Application will be terminated\n";
                     return 6;
                 }
-                if (com_ptr < argc && *argv[com_ptr] != '-')
+                if (arg != arg_end && arg->at(0) != '-')
                 {
-                    while (com_ptr < argc && *argv[com_ptr] != '-')
+                    while (arg != arg_end && arg->at(0) != '-')
                     {
-                        arg_v = argv[com_ptr];
-                        pref.file_list_adds.push_back(arg_v);
-                        pref.changes |= CHANGES::FILES_TO_SEARCH_ADDED;
-                        ++com_ptr;
+                        pref.append(*arg);
+                        ++arg;
                     }
                 }
                 else
@@ -161,7 +143,7 @@ int processCommandLine(Preference& pref,int argc, char** argv)
                     std::cerr << "Missing path to file for search! Application will be terminated\n";
                     return 6;
                 }
-                pref.changes |= CHANGES::NEW_CONFIG;
+                engine.GenerateConfigFile(pref,max_response);
             }
             else
             {
@@ -169,17 +151,15 @@ int processCommandLine(Preference& pref,int argc, char** argv)
                 return 6;
             }
         }
-        else if (arg_v == "-fa")	//Добавить файлы для индексирования в наало списка
+        else if (*arg == "-fa")	//Добавить файлы для индексирования в наало списка
         {
-            ++com_ptr;
-            if (com_ptr < argc && *argv[com_ptr] != '-')
+            ++arg;
+            if (arg != arg_end && arg->at(0) != '-')
             {
-                while (com_ptr < argc && *argv[com_ptr] != '-')
+                while (arg != arg_end && arg->at(0) != '-')
                 {
-                    arg_v = argv[com_ptr];
-                    pref.file_list_adds.push_back(arg_v);
-                    pref.changes |= CHANGES::FILES_TO_SEARCH_ADDED;
-                    ++com_ptr;
+                    engine.AddSearchFile(*arg);
+                    ++arg;
                 }
             }
             else
@@ -199,20 +179,23 @@ int processCommandLine(Preference& pref,int argc, char** argv)
 
 int main(int argC, char *argV[])
 {
+    EngineCore engine;
+
+    engine.Initialize();
+    engine.Search();
+
 #ifdef GUI
     QApplication a(argC, argV);
     MainWindow w;
 #endif // GUI
 
 #ifdef COMAND_LINE
-    Preference pref;
 
     if (argC > 1)
     {
-        int res = processCommandLine(pref, argC,argV);
+        int res = processCommandLine(engine, argC,argV);
         if (res != 0)
             return 1;
-        converter.SetPreferences(pref);
     }
 
 #endif
@@ -223,15 +206,18 @@ int main(int argC, char *argV[])
         std::cout << argV[i] << std::endl;
     }
 #endif
+
+#ifndef GUI
+
+#endif
+
+#ifdef GUI
+
     QApplication a(argC, argV);
     MainWindow w;
 
     w.show();
     w.initializeSearchEngine();
     return a.exec();
-
-#ifdef GUI
-    w.show();
-    return a.exec();
-#endif // GUI
+#endif
 }
