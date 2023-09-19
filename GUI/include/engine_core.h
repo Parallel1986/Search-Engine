@@ -66,11 +66,6 @@ public slots:
 private:
     void ConfigError();
     void RequestsError();
-    void LoadRequests();
-    void LoadConfigs();                         //Loads configuration from the config.json file
-    void LoadConfigs(QJsonDocument&);           //Loads configuration from a file from received JSON document
-    void LoadSearchFiles();                     //Loads pathes of files for index from the config.json file
-    void LoadSearchFiles(QJsonDocument&);       //Loads pathes of files for index from receivwed JSON document
     void InitializeConfig();                    //Loads configuration from the config.json file
     void InitializeRequests();                  //Loading data from the requests.json file
     void InitializeCheck();                     //Checking initialization
@@ -83,9 +78,16 @@ private:
     QString engine_version;                     //Search eengine version
     int max_responses = 5;                      //Maximum number of responses
     QList<QString> requests;                    //List of requests
-    QList<QString> fileList;                    //List of files for search
+    QList<QString> file_list;                   //List of files for search
     QList<QString> file_paths;                  //List of files` paths for search
     char engine_status = 0;                     //Search engine state
 };
 
 #endif // ENGINE_CORE_H
+
+//Excluded
+//    void LoadRequests();                        //Loads requests from the requests' file
+//    void LoadConfigs();                         //Loads configuration from the config.json file
+//    void LoadConfigs(QJsonDocument&);           //Loads configuration from a file from received JSON document
+//    void LoadSearchFiles();                     //Loads pathes of files for index from the config.json file
+//    void LoadSearchFiles(QJsonDocument&);       //Loads pathes of files for index from receivwed JSON document
