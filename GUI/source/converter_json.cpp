@@ -11,113 +11,158 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QFile>
+#include <QtConcurrent/QtConcurrent>
 
-ConverterJSON::~ConverterJSON(){}
+//Get instance of the converter
+ConverterJSON& ConverterJSON::GetInstance()
+{
+    if (!instance)
+        instance = new ConverterJSON();
+    return *instance;
+}
 
-//Указать новый файл конфигурации
-void ConverterJSON::setConfigPath(QString new_path)
+//Destructor
+ConverterJSON::~ConverterJSON()
+{
+    if (configuration)
+    {
+        delete configuration;
+        configuration = nullptr;
+    }
+    if (requests)
+    {
+        delete requests;
+        requests = nullptr;
+    }
+    if (instance)
+    {
+        delete instance;
+        instance = nullptr;
+    }
+}
+
+//Change path to a configurations' file
+void ConverterJSON::ChangeConfigPath(QString new_path)
 {
     if (config_file_path != new_path)
     {
       config_file_path = new_path;
-      initializeConfig();
-      emit configUpdated();
+      emit ConfigUpdated(ConfigCorrectionCheck());
     }
 }
 
-//Указать новый файл запросов
-void ConverterJSON::setRequestsPath(QString new_path)
+//Change path to a requests' file
+void ConverterJSON::ChangeRequestsPath(QString new_path)
 {
     if (requests_file_path != new_path)
     {
       requests_file_path = new_path;
-      initializeRequests();
-      emit requestsUpdated();
+      emit RequestsUpdated(RequestsCorrectionCheck());
     }
 }
 
-//Указать новый файл ответов
-void ConverterJSON::setAnswersPath(QString new_path)
+//Change path to a answers' file
+void ConverterJSON::ChangeAnswersPath(QString new_path)
 {
     if (answers_file_path != new_path)
     {
         answers_file_path = new_path;
-        emit answersUpdated();
+        emit AnswersUpdated();
     }
 }
 
-//Проверка на инициализацию
-bool ConverterJSON::isInitialized()
-{
-    return isConfigInitialized() && isRequestsInitialized();
-}
-
-//Проверка инициализации файла config.json
-bool ConverterJSON::isConfigInitialized()
-{
-    return (!(engine_status&ConverterStatus::CONFIG_FIELD_MISSED)
-        &&!(engine_status&ConverterStatus::CONFIG_MISSED)
-        &&!(engine_status&ConverterStatus::SEARCH_FILES_MISSED));
-}
-
-//Проверка инициализации файла requests.json
-bool ConverterJSON::isRequestsInitialized()
-{
-    return (!(engine_status&ConverterStatus::REQUESTS_MISSED)
-        &&!(engine_status&ConverterStatus::REQUESTS_EMPTY));
-}
-
-//Указать максимальное колиество ответов
-void ConverterJSON::setMaxRequests(int new_max)
-{
-    if (max_responses != new_max)
-        {max_responses = new_max;}
-}
-
-//Получить тексты документов
+//Get documents' content
 QList<QString> ConverterJSON::GetTextDocuments()
 {
-    if (!isConfigInitialized())		//Проверка на инициализированность
-        {initializeConfig();}
-    return fileList;                //Возвращаем список содержимого файлов
+    if (config_loaded
+        || (!config_loaded && LoadConfigs()))
+    {
+        QList<QFuture<QString>> open_file_threads;
+        QList<QString> documents_text;
+        for (auto& file : GetFilesPaths())
+        {
+            open_file_threads.append(QtConcurrent::run([file, this]()
+            {
+                QFile document_file(file);
+                if (document_file.open(QIODevice::ReadOnly | QIODevice::Text))
+                {
+                    QString content = document_file.readAll();
+                    return content;
+                }
+                else
+                {
+                    emit FileOpenFailure(file);
+                    return QString();
+                }
+            }));
+        }
+        for (auto& thread : open_file_threads)
+        {
+            thread.waitForFinished();
+        }
+        for (auto& thread : open_file_threads)
+        {
+            documents_text.append(thread.result());
+        }
+        return documents_text;
+    }
+    return QList<QString>();
 }
 
-//Получить количество ответов
+//Get responses' limit
 int ConverterJSON::GetResponsesLimit()
 {
-    if (!isConfigInitialized())		//Проверка на инициализированность
-        {initializeConfig();}
-    return max_responses;           //Возвращаем максимальное количество запросов
+    if (config_loaded
+        || (!config_loaded && LoadConfigs()))
+    {
+        auto json_config_field = configuration->object()["config"];
+        return json_config_field.toObject()["max_responses"].toInt();
+    }
 }
 
-//Полуить список запросов
+//Get list of requests
 QList<QString> ConverterJSON::GetRequests()
 {
-    initializeRequests();
-    return requests;		//Возвращаем содержимое запросов
+    if (requests_loaded
+    ||(!requests_loaded && LoadRequests()))
+    {
+        QList<QString> req;
+        auto json_requests_field = requests->object()["requests"].toArray();
+        if (json_requests_field.isEmpty())              //Проверяем на наличие записей
+        {
+            for (auto it = json_requests_field.begin();
+            it != json_requests_field.end();
+            it++)
+            {
+                req.append(it->toString());
+            }
+        }
+        return req;
+    }
+    return QList<QString>();
 }
 
-//Сохранить ответ в answers.json
-void ConverterJSON::putAnswers(QList<QList<RelativeIndex>> answers)
+//Save answers to a answers' file
+void ConverterJSON::PutAnswers(QList<QList<RelativeIndex>> answers)
 {
-    QJsonDocument answers_template;				//Создаём шаблон для заполнения ответа
-    QFile answer_file(answers_file_path);       //Открываем файл для записи ответа
+    QJsonDocument answers_template;
+    QFile answer_file(answers_file_path);
 
-    if (answer_file.open(QIODevice::WriteOnly|QIODevice::Text))     //Проверка на открытые
+    if (answer_file.open(QIODevice::WriteOnly|QIODevice::Text))
     {
         QJsonArray answer_array;
         int counter = 0;
-        // Проходим по вектору ответов и заполнгяем шаблон
+
         for (auto it = answers.begin(); it != answers.end(); it++, counter++)
         {
-            if (it->size() == 0) // Если ответ пустой, значит ничего не нашлось
+            if (it->size() == 0)
             {
                 QJsonObject answer, result;
                 result.insert("result", false);
-                answer.insert(makeRequestNumber(counter),result);
+                answer.insert(MakeRequestNumber(counter),result);
                 answer_array.append(answer);
             }
-            else // Заполняем поля ответа
+            else
             {
                 QJsonObject answer, res;
                 QJsonArray res_array;
@@ -127,314 +172,134 @@ void ConverterJSON::putAnswers(QList<QList<RelativeIndex>> answers)
                     res.insert("rank",pair.rank);
                     res_array.append(res);
                 }
-                answer.insert(makeRequestNumber(counter),res_array);
+                answer.insert(MakeRequestNumber(counter),res_array);
                 answer_array.append(answer);
             }
         }
         QJsonObject output;
         output.insert("answers",answer_array);
         answers_template.setObject(output);
-        QByteArray out_stream;                  //Для записи в файл
+        QByteArray out_stream;
         out_stream = answers_template.toJson(QJsonDocument::Indented);
-        answer_file.write(out_stream);          //Записываем шаблон в файл
-        answer_file.close();                    //Закрываем файл
+        answer_file.write(out_stream);
+        answer_file.close();
     }
 }
 
-//Сохранить конфигурацию в файл config.json
-void ConverterJSON::putConfig(const ConfigList settings, QString conf_file)
+//Save cofniguration to a configurations' file
+void ConverterJSON::PutConfig(const ConfigList settings, QString conf_file)
 {
-    QJsonDocument config_template;      //Создаём шаблон JSON документа
     QFile config_file(conf_file);
-    if (config_file.open(QIODevice::WriteOnly|QIODevice::Text)) //Проверка на открытие
+    if (config_file.open(QIODevice::WriteOnly|QIODevice::Text))
     {
-        QJsonObject configs,output;     //Создаём объекты для вставки
-        QJsonArray json_files;          //Создаём массив для вставки
-        //Заполняем поля
+        if (!configuration)
+            configuration = new QJsonDocument();
+        QJsonObject configs,output;
+        QJsonArray json_files;
+
         configs.insert("name",settings.enegine_name);
         configs.insert("version",settings.engine_ver);
         configs.insert("max_responses", settings.max_responses);
-        //Заполняем массив файлов
+
         for(auto& file : settings.files)
         {
             json_files.append(file);
         }
-        //Вставляем в итоговый объект конфигурации и список файлов
+
         output.insert("config",configs);
         output.insert("files", json_files);
-        config_template.setObject(output);  //Назначаем объект в шаблоне
-        QByteArray out_stream;              //Для записи в файл
-        out_stream = config_template.toJson(QJsonDocument::Indented);
-        config_file.write(out_stream);      //Записываем в файл JSON документ
-        config_file.close();                //Закрываем файл
-        emit configUpdated();               //Отправляем сигнал об обновлении файла config.json
+
+        configuration->setObject(output);
+        QByteArray out_stream;
+        out_stream = configuration->toJson(QJsonDocument::Indented);
+        config_file.write(out_stream);
+        config_file.close();
+
+        config_loaded = true;
+        config_file_path = conf_file;
+        emit ConfigUpdated(ConverterStatus::NO_ERRORS);
     }
 }
 
-//Сохранить запросы в requests.json
-void ConverterJSON::putRequests(const QList<QString> requests)
+//Save requests to a requests' file
+void ConverterJSON::PutRequests(const QList<QString> in_requests)
 {
     QFile requests_file(requests_file_path);
-    if (requests_file.open(QIODevice::WriteOnly | QIODevice::Text)) //Проверка на открытие
+    if (requests_file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        QJsonDocument requests_template;    //Создаём шаблон JSON документа
-        QJsonObject output;                 //Создаём выходной объект
-        QJsonArray requests_list;           //Создаём массив запросов
-        //Заполняем массив запросов
-        for (auto& request:requests)
+        if (requests)
+            requests = new QJsonDocument();
+        QJsonObject output;
+        QJsonArray requests_list;
+
+        for (auto& request:in_requests)
         {
             requests_list.append(request);
         }        
-        output.insert("requests",requests_list);    //Вставляем массив в объект
-        requests_template.setObject(output);        //Назанчаем объект для JSON документа
-        QByteArray out_stream(requests_template.toJson(QJsonDocument::Indented));
-        requests_file.write(out_stream);    //Записываем в файл
-        requests_file.close();              //Закрываем файл
-        emit requestsUpdated();             //Отправляем сигнал об изменении файла requests.json
+        output.insert("requests",requests_list);
+        this->requests->setObject(output);
+        QByteArray out_stream(requests->toJson(QJsonDocument::Indented));
+        requests_file.write(out_stream);
+        requests_file.close();
+        emit RequestsUpdated(ConverterStatus::NO_ERRORS);
+        requests_loaded = true;
     }
 }
 
-//Инициализировать конвертер из файла config.json
-void ConverterJSON::initializeConfig()
+//Get search engine's name
+QString ConverterJSON::GetEngineName()
 {
-    //Загружаем данные из config.json    
-    {        
-        QFile config_file(config_file_path);        
-        if (!config_file.open(QIODevice::ReadOnly | QIODevice::Text))   //Проверка на открытие
-        {
-            engine_status |= ConverterStatus::CONFIG_MISSED;        //Выставляем статус
-        }
-        else
-        {
-            QByteArray in_stream;   //Для чтения из файла
-            engine_status &= ~ConverterStatus::CONFIG_MISSED;       //Выставляем статус
-            in_stream = config_file.readAll();                      //Читаем файл
-            config_file.close();                                    //Закрываем файл
-            QJsonDocument configuration (QJsonDocument::fromJson(in_stream));   //Создаём JSON документ
-            if (configuration.isNull())                             //Проверка на валидность
-            {
-                engine_status |= ConverterStatus::CONFIG_FIELD_MISSED   //Выставляем статус
-                                |ConverterStatus::SEARCH_FILES_MISSED;
-            }
-            else if (!configuration.isObject()                      //Проверяем наличие поля "config"
-                    ||!configuration.object().contains("config"))
-            {
-                engine_status |= ConverterStatus::CONFIG_FIELD_MISSED;  //Выставляем статус
-            }
-            else
-            {  //Заполняем поля конфигурации
-                engine_status &= ~ConverterStatus::CONFIG_FIELD_MISSED; //Выставляем статус
-                loadConfigs(configuration);                             //Загружаем конфигурации
-            }
-
-            if (!configuration.object().contains("files")           //Проверяем наличие поля "files"
-                ||!configuration.object()["files"].isArray())
-            {
-                engine_status |= ConverterStatus::SEARCH_FILES_MISSED;  //Выставляем статус
-            }
-            else
-            {
-                engine_status &= ~ConverterStatus::SEARCH_FILES_MISSED; //Выставляем статус
-                loadSearchFiles(configuration);                         //Загружаем список файлов для поиска
-            }
-            //Заполняем список содержимого файлов по которым будет производиться поиск
-            for (auto& file : file_paths)
-            {
-                QFile file_to_search(file);
-                if (!file_to_search.open(QIODevice::ReadOnly | QIODevice::Text)) //Проверка на открытие
-                {
-                    emit fileOpenFailure(file);     //Отправляем сигнал об отсуутствии
-                    file_to_search.close();         //Закрываем файл
-                }
-                else
-                {
-                    QTextStream file_stream(&file_to_search);
-
-                    QString content = file_stream.readAll();   //Строка с содержимым файла
-                    file_to_search.close();                    //Закрываем файл
-                    fileList.append(content.toLower());        //Добавляем содержимое документа в список содержимого
-                }
-            }
-        }
-    }
-}
-
-//Инициализировать конвертер из файла requests.json
-void ConverterJSON::initializeRequests()
-{
-    //Загружаем данные из requests.json
-    QFile requests_file(requests_file_path);    //Открываем файл с поисковыми запросами
-    if (!requests_file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (config_loaded
+        || (!config_loaded && LoadConfigs()))
     {
-        requests_file.close(); // Закрываем файл запросов
-        engine_status |= ConverterStatus::REQUESTS_MISSED;  //Выставляем статус
+        auto json_config_field = configuration->object()["config"];
+        return json_config_field.toObject()["name"].toString();
     }
     else
+        return "Unknown";
+}
+
+//Get search engine's version
+QString ConverterJSON::GetEngineVersion()
+{
+    if (config_loaded
+        || (!config_loaded && LoadConfigs()))
     {
-        engine_status &=~ConverterStatus::REQUESTS_MISSED;  //Выставляем статус
-        QByteArray in_stream;                               //Для чтения из файла
-        in_stream = requests_file.readAll();                //Читаем файл
-        requests_file.close();                              //Закрываем файл запросов
-        QJsonDocument json_requests(QJsonDocument::fromJson(in_stream));  //Создаём объект для чтения из файла запроса //Creating an object for reading request file
-        // Заполняем объект содержимым файла запросов
-        if (json_requests.isNull())                         //Проверка на валидность
-            engine_status |= ConverterStatus::REQUESTS_EMPTY;
-        else if (!json_requests.isObject()                  //Проверяем поле "requests"
-                 || !json_requests.object().contains("requests"))
-            engine_status |= ConverterStatus::REQUESTS_EMPTY;   //Выставляем статус
-        else
-        {
-            auto json_requests_field = json_requests.object()["requests"].toArray();
-            if (json_requests_field.isEmpty())              //Проверяем на наличие записей
-            {
-                engine_status |= ConverterStatus::REQUESTS_EMPTY;   //Выставляем статус
-            }
-            else
-            {                
-                engine_status &=~ConverterStatus::REQUESTS_EMPTY;   //Выставляем статус
-                requests.clear();                                   //Очищаем список запросов
-                // Заполняем список запросов
-                for (auto it = json_requests_field.begin();
-                it != json_requests_field.end();
-                it++)
-                {
-                    requests.append(it->toString());
-                }
-            }
-        }
-    }
-}
-
-//Получить статус конвертера
-char ConverterJSON::getEngineStatus()
-{return engine_status;}
-
-//Инициализировать конвертер
-void ConverterJSON::initialize()
-{
-    initializeConfig();
-    initializeRequests();
-}
-
-//Получить имя поискового двигателя
-QString ConverterJSON::getEngineName()
-{
-    if (!isConfigInitialized())		//Проверка на инициализированность //Initialization checking
-        {initializeConfig();}
-    if (engine_status&ConverterStatus::ENGINE_NAME_MISSED
-        ||engine_name =="")         //Проверка на наличие названия
-        {return "Unknown";}
-    return engine_name;
-}
-
-//Получить версию поискового двигателя
-QString ConverterJSON::getEngineVersion()
-{
-    if (!isConfigInitialized())		//Проверка на инициализированность //Initialization checking
-        {initializeConfig();}
-    if (engine_status&ConverterStatus::ENGINE_VERSION_MISSED
-        ||engine_version == "")     //Проверка на наличие названия
-        {return "Unknown";}
-    return engine_version;
-}
-
-//Получить пути к файлам для поиска
-QList<QString> ConverterJSON::getFilesPaths()
-{
-    loadSearchFiles();  //Загружаем список файлов
-    return file_paths;
-}
-
-//Загрузить поля config из config.json
-void ConverterJSON::loadConfigs()
-{
-    if (!(engine_status&ConverterStatus::CONFIG_MISSED)             //Проверка статуса
-        &&!(engine_status&ConverterStatus::CONFIG_FIELD_MISSED))
-    {
-        QFile config(config_file_path);
-        if (config.open(QIODevice::ReadOnly | QIODevice::Text))     //Проверка открытия
-        {
-            //Читаем файл конфигурации
-            QJsonDocument configuration(QJsonDocument::fromJson(QByteArray(config.readAll())));
-            config.close();                 //Закрываем файл
-            loadConfigs(configuration);     //Загружаем настройки
-        }
-    }
-}
-
-//Загрузить поля из JSON документа
-void ConverterJSON::loadConfigs(QJsonDocument& configuration)
-{
-    auto json_config_field = configuration.object()["config"];      //Получаем объект из JSON документа
-    if (json_config_field.toObject().contains("name"))
-    {
-        engine_name = json_config_field.toObject()["name"].toString();  //Записываем имя поискового двигателя
-        engine_status &= ~ConverterStatus::ENGINE_NAME_MISSED;      //Выставляем статус
+        auto json_config_field = configuration->object()["config"];
+        return json_config_field.toObject()["version"].toString();
     }
     else
-        engine_status |= ConverterStatus::ENGINE_NAME_MISSED;       //Выставляем статус
-
-    if (json_config_field.toObject().contains("version"))           //Проверяем наличие поля "version"
-    {
-        engine_version = json_config_field.toObject()["version"].toString();    //Записываем версию поискового двигателя
-        engine_status &= ~ConverterStatus::ENGINE_VERSION_MISSED;   //Выставляем статус
-    }
-    else
-        engine_status |= ConverterStatus::ENGINE_VERSION_MISSED;    //Выставляем статус
-
-    if (json_config_field.toObject().contains("max_responses"))
-    {
-        max_responses = json_config_field.toObject()["max_responses"].toInt();  //Записываем максимавльное число запросов //Filling number of maximum responses
-        engine_status &= ~ConverterStatus::MAX_RESPONSES_MISSED;    //Выставляем статус
-    }
-    else
-        engine_status |= ConverterStatus::MAX_RESPONSES_MISSED;     //Выставляем статус
+        return "Unknown";
 }
 
-//Загрузить поля files из config.json
-void ConverterJSON::loadSearchFiles()
+//Get pathes to files for search
+QList<QString> ConverterJSON::GetFilesPaths()
 {
-    if (!(engine_status&ConverterStatus::CONFIG_MISSED)             //Проверяем статус
-        &&!(engine_status&ConverterStatus::SEARCH_FILES_MISSED))
+    if (config_loaded
+        || (!config_loaded && LoadConfigs()))
     {
-        QFile config(config_file_path);
-        if (config.open(QIODevice::ReadOnly | QIODevice::Text))     //Проверка на открытие
-        {
-            //Загружаем JSON документ из файла
-            QJsonDocument configuration(QJsonDocument::fromJson(QByteArray(config.readAll())));
-            config.close();                     //Закрываем файл
-            loadSearchFiles(configuration);     //Загружаем список фвайлов
-        }
-    }
-}
-
-//Загрузить поля files из JSON документа
-void ConverterJSON::loadSearchFiles(QJsonDocument& configuration)
-{
-    auto json_fiels_field = configuration.object()["files"].toArray();
-    file_paths.clear();                 //Очищаем список путей
-    if (!json_fiels_field.isEmpty())    //Проверка на наличие записей
-    {
-        //Заполняем список
+        auto json_fiels_field = configuration->object()["files"].toArray();
+        QList<QString> file_paths;
         for (auto it = json_fiels_field.begin();it != json_fiels_field.end();it++)
             file_paths.append(it->toString());
+        return file_paths;
     }
     else
-        engine_status |= ConverterStatus::SEARCH_FILES_MISSED;  //Выставляем статус
+        return QList<QString>();
 }
 
-//Установить путь к файлу запросов
-QString ConverterJSON::getRequestsPath()
+//Get path to requests file
+QString ConverterJSON::GetRequestsPath()
 {
     return requests_file_path;
 }
 
-//Создать строковый номер запроса
-QString ConverterJSON::makeRequestNumber(std::size_t number)
+//Make request number as a string
+QString ConverterJSON::MakeRequestNumber(std::size_t number)
 {
     QString num;
-    num.setNum(number);                     //Переводим число в строку
-    //Добавляем нли при необходимости
+    num.setNum(number);
+
     if (number < 10)
         return QString("request00" + num);
     else if (number < 100)
@@ -442,4 +307,337 @@ QString ConverterJSON::makeRequestNumber(std::size_t number)
     else
         return QString("request" + num);
 }
+
+//Check the configurations' file for errors
+char ConverterJSON::ConfigCorrectionCheck()
+{
+    char result = ConverterStatusReset::RESET_ALL;
+    QFile config(config_file_path);
+    if (config.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QJsonDocument configuration(QJsonDocument::fromJson(QByteArray(config.readAll())));
+        config.close();
+
+        auto json_files_field = configuration.object()["files"].toArray();
+        auto json_config_field = configuration.object()["config"];
+
+        if (!json_config_field.toObject().contains("name"))
+            result |= ConverterStatus::ENGINE_NAME_MISSED;
+
+        if (!json_config_field.toObject().contains("version"))
+            result |= ConverterStatus::ENGINE_VERSION_MISSED;
+
+        if (!json_config_field.toObject().contains("max_responses"))
+            result |= ConverterStatus::MAX_RESPONSES_MISSED;
+
+        if (json_files_field.isEmpty())
+            result |= ConverterStatus::SEARCH_FILES_MISSED;
+    }
+    else
+        result |= ConverterStatus::CONFIG_MISSED;
+
+    return result;
+}
+
+//Check the requests' file for errors
+char ConverterJSON::RequestsCorrectionCheck()
+{
+    char result = ConverterStatusReset::RESET_ALL;
+    QFile requests_file(requests_file_path);
+    if (requests_file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QByteArray in_stream;
+        in_stream = requests_file.readAll();
+        requests_file.close();
+
+        QJsonDocument json_requests(QJsonDocument::fromJson(in_stream));
+
+        if (json_requests.isNull())
+            result |= ConverterStatus::REQUESTS_EMPTY;
+        else if (!json_requests.isObject()
+                 || !json_requests.object().contains("requests"))
+            result |= ConverterStatus::REQUESTS_EMPTY;
+    }
+    else
+        result |= ConverterStatus::REQUESTS_MISSED;
+
+    return result;
+}
+
+//Loading configurations' file
+bool ConverterJSON::LoadConfigs()
+{
+    if (!config_loaded
+        && (ConverterStatus::NO_CONFIG_ERRORS & ConfigCorrectionCheck()))
+    {
+        QFile config_file(config_file_path);
+        if (config_file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            *configuration = QJsonDocument::fromJson(QByteArray(config_file.readAll()));
+            config_file.close();
+            config_loaded = true;
+        }
+        else
+        {
+            emit FileOpenFailure(config_file_path);
+            config_loaded = false;
+            return false;
+        }
+    }
+    return true;
+}
+
+//Loading requests' file
+bool ConverterJSON::LoadRequests()
+{
+    if (!requests_loaded
+        && (ConverterStatus::NO_REQUESTS_ERRORS & RequestsCorrectionCheck()))
+    {
+        QFile requests_file(requests_file_path);
+        if (requests_file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            *requests = QJsonDocument::fromJson(QByteArray(requests_file.readAll()));
+            requests_file.close();
+            requests_loaded = true;
+        }
+        else
+        {
+            emit FileOpenFailure(requests_file_path);
+            requests_loaded = false;
+            return false;
+        }
+    }
+    return true;
+}
+
+//Removed to engine_core.cpp
+////Проверка на инициализацию
+//bool ConverterJSON::IsInitialized()
+//{
+//    return IsConfigInitialized() && IsRequestsInitialized();
+//}
+
+////Проверка инициализации файла config.json
+//bool ConverterJSON::IsConfigInitialized()
+//{
+//    return (!(engine_status&ConverterStatus::CONFIG_FIELD_MISSED)
+//        &&!(engine_status&ConverterStatus::CONFIG_MISSED)
+//        &&!(engine_status&ConverterStatus::SEARCH_FILES_MISSED));
+//}
+
+////Проверка инициализации файла requests.json
+//bool ConverterJSON::IsRequestsInitialized()
+//{
+//    return (!(engine_status&ConverterStatus::REQUESTS_MISSED)
+//        &&!(engine_status&ConverterStatus::REQUESTS_EMPTY));
+//}
+
+////Указать максимальное колиество ответов
+//void ConverterJSON::SetMaxRequests(int new_max)
+//{
+//    if (max_responses != new_max)
+//        {max_responses = new_max;}
+//}
+
+////Загрузить поля config из config.json
+//void ConverterJSON::LoadConfigs()
+//{
+//    if (!(engine_status&ConverterStatus::CONFIG_MISSED)             //Проверка статуса
+//        &&!(engine_status&ConverterStatus::CONFIG_FIELD_MISSED))
+//    {
+//        QFile config(config_file_path);
+//        if (config.open(QIODevice::ReadOnly | QIODevice::Text))     //Проверка открытия
+//        {
+//            //Читаем файл конфигурации
+//            QJsonDocument configuration(QJsonDocument::fromJson(QByteArray(config.readAll())));
+//            config.close();                 //Закрываем файл
+//            LoadConfigs(configuration);     //Загружаем настройки
+//        }
+//    }
+//}
+
+////Загрузить поля из JSON документа
+//void ConverterJSON::LoadConfigs(QJsonDocument& configuration)
+//{
+//    auto json_config_field = configuration.object()["config"];      //Получаем объект из JSON документа
+//    if (json_config_field.toObject().contains("name"))
+//    {
+//        engine_name = json_config_field.toObject()["name"].toString();  //Записываем имя поискового двигателя
+//        engine_status &= ~ConverterStatus::ENGINE_NAME_MISSED;      //Выставляем статус
+//    }
+//    else
+//        engine_status |= ConverterStatus::ENGINE_NAME_MISSED;       //Выставляем статус
+
+//    if (json_config_field.toObject().contains("version"))           //Проверяем наличие поля "version"
+//    {
+//        engine_version = json_config_field.toObject()["version"].toString();    //Записываем версию поискового двигателя
+//        engine_status &= ~ConverterStatus::ENGINE_VERSION_MISSED;   //Выставляем статус
+//    }
+//    else
+//        engine_status |= ConverterStatus::ENGINE_VERSION_MISSED;    //Выставляем статус
+
+//    if (json_config_field.toObject().contains("max_responses"))
+//    {
+//        max_responses = json_config_field.toObject()["max_responses"].toInt();  //Записываем максимавльное число запросов //Filling number of maximum responses
+//        engine_status &= ~ConverterStatus::MAX_RESPONSES_MISSED;    //Выставляем статус
+//    }
+//    else
+//        engine_status |= ConverterStatus::MAX_RESPONSES_MISSED;     //Выставляем статус
+//}
+
+////Загрузить поля files из config.json
+//void ConverterJSON::LoadSearchFiles()
+//{
+//    if (!(engine_status&ConverterStatus::CONFIG_MISSED)             //Проверяем статус
+//        &&!(engine_status&ConverterStatus::SEARCH_FILES_MISSED))
+//    {
+//        QFile config(config_file_path);
+//        if (config.open(QIODevice::ReadOnly | QIODevice::Text))     //Проверка на открытие
+//        {
+//            //Загружаем JSON документ из файла
+//            QJsonDocument configuration(QJsonDocument::fromJson(QByteArray(config.readAll())));
+//            config.close();                     //Закрываем файл
+//            LoadSearchFiles(configuration);     //Загружаем список фвайлов
+//        }
+//    }
+//}
+
+////Загрузить поля files из JSON документа
+//void ConverterJSON::LoadSearchFiles(QJsonDocument& configuration)
+//{
+//    auto json_fiels_field = configuration.object()["files"].toArray();
+//    file_paths.clear();                 //Очищаем список путей
+//    if (!json_fiels_field.isEmpty())    //Проверка на наличие записей
+//    {
+//        //Заполняем список
+//        for (auto it = json_fiels_field.begin();it != json_fiels_field.end();it++)
+//            file_paths.append(it->toString());
+//    }
+//    else
+//        engine_status |= ConverterStatus::SEARCH_FILES_MISSED;  //Выставляем статус
+//}
+
+////Инициализировать конвертер из файла config.json
+//void ConverterJSON::InitializeConfig()
+//{
+//    //Загружаем данные из config.json
+//    {
+//        QFile config_file(config_file_path);
+//        if (!config_file.open(QIODevice::ReadOnly | QIODevice::Text))   //Проверка на открытие
+//        {
+//            engine_status |= ConverterStatus::CONFIG_MISSED;        //Выставляем статус
+//        }
+//        else
+//        {
+//            QByteArray in_stream;   //Для чтения из файла
+//            engine_status &= ~ConverterStatus::CONFIG_MISSED;       //Выставляем статус
+//            in_stream = config_file.readAll();                      //Читаем файл
+//            config_file.close();                                    //Закрываем файл
+//            QJsonDocument configuration (QJsonDocument::fromJson(in_stream));   //Создаём JSON документ
+//            if (configuration.isNull())                             //Проверка на валидность
+//            {
+//                engine_status |= ConverterStatus::CONFIG_FIELD_MISSED   //Выставляем статус
+//                                |ConverterStatus::SEARCH_FILES_MISSED;
+//            }
+//            else if (!configuration.isObject()                      //Проверяем наличие поля "config"
+//                    ||!configuration.object().contains("config"))
+//            {
+//                engine_status |= ConverterStatus::CONFIG_FIELD_MISSED;  //Выставляем статус
+//            }
+//            else
+//            {  //Заполняем поля конфигурации
+//                engine_status &= ~ConverterStatus::CONFIG_FIELD_MISSED; //Выставляем статус
+//                LoadConfigs(configuration);                             //Загружаем конфигурации
+//            }
+
+//            if (!configuration.object().contains("files")           //Проверяем наличие поля "files"
+//                ||!configuration.object()["files"].isArray())
+//            {
+//                engine_status |= ConverterStatus::SEARCH_FILES_MISSED;  //Выставляем статус
+//            }
+//            else
+//            {
+//                engine_status &= ~ConverterStatus::SEARCH_FILES_MISSED; //Выставляем статус
+//                LoadSearchFiles(configuration);                         //Загружаем список файлов для поиска
+//            }
+//            //Заполняем список содержимого файлов по которым будет производиться поиск
+//            for (auto& file : file_paths)
+//            {
+//                QFile file_to_search(file);
+//                if (!file_to_search.open(QIODevice::ReadOnly | QIODevice::Text)) //Проверка на открытие
+//                {
+//                    emit FileOpenFailure(file);     //Отправляем сигнал об отсуутствии
+//                    file_to_search.close();         //Закрываем файл
+//                }
+//                else
+//                {
+//                    QTextStream file_stream(&file_to_search);
+
+//                    QString content = file_stream.readAll();   //Строка с содержимым файла
+//                    file_to_search.close();                    //Закрываем файл
+//                    fileList.append(content.toLower());        //Добавляем содержимое документа в список содержимого
+//                }
+//            }
+//        }
+//    }
+//}
+
+////Инициализировать конвертер из файла requests.json
+//void ConverterJSON::InitializeRequests()
+//{
+//    //Загружаем данные из requests.json
+//    QFile requests_file(requests_file_path);    //Открываем файл с поисковыми запросами
+//    if (!requests_file.open(QIODevice::ReadOnly | QIODevice::Text))
+//    {
+//        requests_file.close(); // Закрываем файл запросов
+//        engine_status |= ConverterStatus::REQUESTS_MISSED;  //Выставляем статус
+//    }
+//    else
+//    {
+//        engine_status &=~ConverterStatus::REQUESTS_MISSED;  //Выставляем статус
+//        QByteArray in_stream;                               //Для чтения из файла
+//        in_stream = requests_file.readAll();                //Читаем файл
+//        requests_file.close();                              //Закрываем файл запросов
+//        QJsonDocument json_requests(QJsonDocument::fromJson(in_stream));  //Создаём объект для чтения из файла запроса //Creating an object for reading request file
+//        // Заполняем объект содержимым файла запросов
+//        if (json_requests.isNull())                         //Проверка на валидность
+//            engine_status |= ConverterStatus::REQUESTS_EMPTY;
+//        else if (!json_requests.isObject()                  //Проверяем поле "requests"
+//                 || !json_requests.object().contains("requests"))
+//            engine_status |= ConverterStatus::REQUESTS_EMPTY;   //Выставляем статус
+//        else
+//        {
+//            auto json_requests_field = json_requests.object()["requests"].toArray();
+//            if (json_requests_field.isEmpty())              //Проверяем на наличие записей
+//            {
+//                engine_status |= ConverterStatus::REQUESTS_EMPTY;   //Выставляем статус
+//            }
+//            else
+//            {
+//                engine_status &=~ConverterStatus::REQUESTS_EMPTY;   //Выставляем статус
+//                requests.clear();                                   //Очищаем список запросов
+//                // Заполняем список запросов
+//                for (auto it = json_requests_field.begin();
+//                it != json_requests_field.end();
+//                it++)
+//                {
+//                    requests.append(it->toString());
+//                }
+//            }
+//        }
+//    }
+//}
+
+////Получить статус конвертера
+//char ConverterJSON::GetEngineStatus()
+//{
+//    return engine_status;
+//}
+
+////Инициализировать конвертер
+//void ConverterJSON::Initialize()
+//{
+//    InitializeConfig();
+//    InitializeRequests();
+//}
 #endif

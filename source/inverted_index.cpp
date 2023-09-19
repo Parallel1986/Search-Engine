@@ -23,25 +23,25 @@
 #endif // QT_THREADS
 
 void InvertedIndex::UpdateDocumentBase(std::vector<std::string> input_docs)
-{	//Проходим по входящим документам и вставляем их в список //Going through incoming documents and filling document list
+{	//РџСЂРѕС…РѕРґРёРј РїРѕ РІС…РѕРґСЏС‰РёРј РґРѕРєСѓРјРµРЅС‚Р°Рј Рё РІСЃС‚Р°РІР»СЏРµРј РёС… РІ СЃРїРёСЃРѕРє //Going through incoming documents and filling document list
 	for (auto& document : input_docs)
 	{
 		docs.push_back(document);
 	}
-	CreateFrequencyDictionary();	//Создаём частотный словарь //Creating frequency dictionary
+	CreateFrequencyDictionary();	//РЎРѕР·РґР°С‘Рј С‡Р°СЃС‚РѕС‚РЅС‹Р№ СЃР»РѕРІР°СЂСЊ //Creating frequency dictionary
 }
 
 std::vector<Entry> InvertedIndex::GetWordCount(const std::string& word)
 {
-	if (freq_dictionary.empty())	//Если частотный словарь пустой, то создаёт его//Creates frequency dictionari if it is empty
+	if (freq_dictionary.empty())	//Р•СЃР»Рё С‡Р°СЃС‚РѕС‚РЅС‹Р№ СЃР»РѕРІР°СЂСЊ РїСѓСЃС‚РѕР№, С‚Рѕ СЃРѕР·РґР°С‘С‚ РµРіРѕ//Creates frequency dictionari if it is empty
 		CreateFrequencyDictionary();
 	if (freq_dictionary.find(word) == freq_dictionary.end())
-	{	//Если слово отсутствует, то возвращает пустой список //Returns empty list if word is missing
+	{	//Р•СЃР»Рё СЃР»РѕРІРѕ РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚, С‚Рѕ РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚РѕР№ СЃРїРёСЃРѕРє //Returns empty list if word is missing
 		std::vector<Entry> list;
 		return list;
 	}
 	else
-	{	//Инае возвращает список документов и количество вхождений //Othervise, returns list of document numbers and entries number
+	{	//РРЅР°Рµ РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РґРѕРєСѓРјРµРЅС‚РѕРІ Рё РєРѕР»РёС‡РµСЃС‚РІРѕ РІС…РѕР¶РґРµРЅРёР№ //Othervise, returns list of document numbers and entries number
 		std::vector<Entry> list = (*freq_dictionary.find(word)).second;
 		return list;
 	}
@@ -49,8 +49,8 @@ std::vector<Entry> InvertedIndex::GetWordCount(const std::string& word)
 
 void InvertedIndex::CreateFrequencyDictionary()
 {
-	size_t doc_id = 0;		//Для генерации номеров документов //For document`s number generation
-#ifdef QT_THREADS	//Параллельные потоки на основе Qt //Multithreading using Qt
+	size_t doc_id = 0;		//Р”Р»СЏ РіРµРЅРµСЂР°С†РёРё РЅРѕРјРµСЂРѕРІ РґРѕРєСѓРјРµРЅС‚РѕРІ //For document`s number generation
+#ifdef QT_THREADS	//РџР°СЂР°Р»Р»РµР»СЊРЅС‹Рµ РїРѕС‚РѕРєРё РЅР° РѕСЃРЅРѕРІРµ Qt //Multithreading using Qt
 	QList<QFuture<std::map<std::string, int>>> index_threads;
 	for (auto& document : docs)
     {
@@ -107,46 +107,46 @@ void InvertedIndex::CreateFrequencyDictionary()
 	}  
 #endif // QT_THREADS
 
-#ifdef STD_THREADS	//Паралельные потоки на основе std::thread //Multithreading by using std::thread
-	std::vector<std::thread> index_threads;		//Список потоков //List of threads
-	std::vector< std::map<std::string, int>*> word_vector;	//Список слов //List of words
+#ifdef STD_THREADS	//РџР°СЂР°Р»РµР»СЊРЅС‹Рµ РїРѕС‚РѕРєРё РЅР° РѕСЃРЅРѕРІРµ std::thread //Multithreading by using std::thread
+	std::vector<std::thread> index_threads;		//РЎРїРёСЃРѕРє РїРѕС‚РѕРєРѕРІ //List of threads
+	std::vector< std::map<std::string, int>*> word_vector;	//РЎРїРёСЃРѕРє СЃР»РѕРІ //List of words
 	for (auto& document : docs)
-    {	//Проходим по документам и создаём частотный словарь для каждого из них
+    {	//РџСЂРѕС…РѕРґРёРј РїРѕ РґРѕРєСѓРјРµРЅС‚Р°Рј Рё СЃРѕР·РґР°С‘Рј С‡Р°СЃС‚РѕС‚РЅС‹Р№ СЃР»РѕРІР°СЂСЊ РґР»СЏ РєР°Р¶РґРѕРіРѕ РёР· РЅРёС…
 		//Going through documents` list and creating frequency dictionary for each one
-		auto new_map = new std::map<std::string, int>;	//Частотный словарь //Frequency dictionary
-		word_vector.emplace_back(new_map);	//Вставляем словарь в общий спписок //Inserting dictionary to general list
-        index_threads.emplace_back(std::thread([&document, new_map]()	//Запускаем потоки //Launching threads
+		auto new_map = new std::map<std::string, int>;	//Р§Р°СЃС‚РѕС‚РЅС‹Р№ СЃР»РѕРІР°СЂСЊ //Frequency dictionary
+		word_vector.emplace_back(new_map);	//Р’СЃС‚Р°РІР»СЏРµРј СЃР»РѕРІР°СЂСЊ РІ РѕР±С‰РёР№ СЃРїРїРёСЃРѕРє //Inserting dictionary to general list
+        index_threads.emplace_back(std::thread([&document, new_map]()	//Р—Р°РїСѓСЃРєР°РµРј РїРѕС‚РѕРєРё //Launching threads
 			{
-				std::stringstream buffer;	//Строковый буфер для считывания строки //String buffer for string reading
-				buffer << document;			//Заполняем буфер содержимым документа //Filling the buffer by document content
-				std::string word;			//Отдельное слово //Single word
-				//std::map<std::string, int> wordList;	//Словарь слов с количеством вхождений //Dictionary of words and word`s entries
+				std::stringstream buffer;	//РЎС‚СЂРѕРєРѕРІС‹Р№ Р±СѓС„РµСЂ РґР»СЏ СЃС‡РёС‚С‹РІР°РЅРёСЏ СЃС‚СЂРѕРєРё //String buffer for string reading
+				buffer << document;			//Р—Р°РїРѕР»РЅСЏРµРј Р±СѓС„РµСЂ СЃРѕРґРµСЂР¶РёРјС‹Рј РґРѕРєСѓРјРµРЅС‚Р° //Filling the buffer by document content
+				std::string word;			//РћС‚РґРµР»СЊРЅРѕРµ СЃР»РѕРІРѕ //Single word
+				//std::map<std::string, int> wordList;	//РЎР»РѕРІР°СЂСЊ СЃР»РѕРІ СЃ РєРѕР»РёС‡РµСЃС‚РІРѕРј РІС…РѕР¶РґРµРЅРёР№ //Dictionary of words and word`s entries
 				while (std::getline(buffer, word))
-				{	//Выделяем из строк отдельные слова, используя разделители //Extracting words by using dividers
-					std::size_t prev = 0, pos;		//Начальные положения указателей в строке //Initial pointers` positions
+				{	//Р’С‹РґРµР»СЏРµРј РёР· СЃС‚СЂРѕРє РѕС‚РґРµР»СЊРЅС‹Рµ СЃР»РѕРІР°, РёСЃРїРѕР»СЊР·СѓСЏ СЂР°Р·РґРµР»РёС‚РµР»Рё //Extracting words by using dividers
+					std::size_t prev = 0, pos;		//РќР°С‡Р°Р»СЊРЅС‹Рµ РїРѕР»РѕР¶РµРЅРёСЏ СѓРєР°Р·Р°С‚РµР»РµР№ РІ СЃС‚СЂРѕРєРµ //Initial pointers` positions
 					while ((pos = word.find_first_of(" ';", prev)) != std::string::npos)
-					{	//Ищем первое вхождение разделителя и проверяем выход за границы //Searching first entry of divider and checking reaching out of borders
+					{	//РС‰РµРј РїРµСЂРІРѕРµ РІС…РѕР¶РґРµРЅРёРµ СЂР°Р·РґРµР»РёС‚РµР»СЏ Рё РїСЂРѕРІРµСЂСЏРµРј РІС‹С…РѕРґ Р·Р° РіСЂР°РЅРёС†С‹ //Searching first entry of divider and checking reaching out of borders
 						if (pos > prev)
-						{	//Если разделитель дальше предыдуущей позиции, то выделяем слово
+						{	//Р•СЃР»Рё СЂР°Р·РґРµР»РёС‚РµР»СЊ РґР°Р»СЊС€Рµ РїСЂРµРґС‹РґСѓСѓС‰РµР№ РїРѕР·РёС†РёРё, С‚Рѕ РІС‹РґРµР»СЏРµРј СЃР»РѕРІРѕ
 							//If divider far than initial position then extracting word
 							std::string subWord = word.substr(prev, pos - prev);
 							if (new_map->find(subWord) != new_map->end())
-								new_map->at(subWord) += 1;	//Если слово ууже в словаре, то добавляем к количеству единицу
+								new_map->at(subWord) += 1;	//Р•СЃР»Рё СЃР»РѕРІРѕ СѓСѓР¶Рµ РІ СЃР»РѕРІР°СЂРµ, С‚Рѕ РґРѕР±Р°РІР»СЏРµРј Рє РєРѕР»РёС‡РµСЃС‚РІСѓ РµРґРёРЅРёС†Сѓ
 																	//If word already in the list adding 1 to its count
-							else	//Иначе добавляем слово в словарь и указываем количество как 1
+							else	//РРЅР°С‡Рµ РґРѕР±Р°РІР»СЏРµРј СЃР»РѕРІРѕ РІ СЃР»РѕРІР°СЂСЊ Рё СѓРєР°Р·С‹РІР°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РєР°Рє 1
 									//Otherewise inserting word to the dictionary and setting cout as 1
 								new_map->insert({ subWord, 1 });
 						}
-						prev = pos + 1; //смещаем указатель за раздклитель
+						prev = pos + 1; //СЃРјРµС‰Р°РµРј СѓРєР°Р·Р°С‚РµР»СЊ Р·Р° СЂР°Р·РґРєР»РёС‚РµР»СЊ
 					}
 					if (prev < word.length())
-					{	//Если указатель уходит за границы то выделяем последнее слово
+					{	//Р•СЃР»Рё СѓРєР°Р·Р°С‚РµР»СЊ СѓС…РѕРґРёС‚ Р·Р° РіСЂР°РЅРёС†С‹ С‚Рѕ РІС‹РґРµР»СЏРµРј РїРѕСЃР»РµРґРЅРµРµ СЃР»РѕРІРѕ
 						//If pointer going after line`s end substracting last word
 						std::string subWord = word.substr(prev, std::string::npos);
 						if (new_map->find(subWord) != new_map->end())
-							new_map->at(subWord) += 1;		//Если слово ууже в словаре, то добавляем к количеству единицу
+							new_map->at(subWord) += 1;		//Р•СЃР»Рё СЃР»РѕРІРѕ СѓСѓР¶Рµ РІ СЃР»РѕРІР°СЂРµ, С‚Рѕ РґРѕР±Р°РІР»СЏРµРј Рє РєРѕР»РёС‡РµСЃС‚РІСѓ РµРґРёРЅРёС†Сѓ
 																	//If word already in the list adding 1 to its count
-						else	//Иначе добавляем слово в словарь и указываем количество как 1
+						else	//РРЅР°С‡Рµ РґРѕР±Р°РІР»СЏРµРј СЃР»РѕРІРѕ РІ СЃР»РѕРІР°СЂСЊ Рё СѓРєР°Р·С‹РІР°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РєР°Рє 1
 								//Otherewise inserting word to the dictionary and setting cout as 1
 							new_map->insert({ subWord, 1 });
 					}
@@ -154,11 +154,11 @@ void InvertedIndex::CreateFrequencyDictionary()
 			}));
 	}
 	for (auto& thread : index_threads)
-	{	//Присоединяем потоки //Joining threads
+	{	//РџСЂРёСЃРѕРµРґРёРЅСЏРµРј РїРѕС‚РѕРєРё //Joining threads
 		thread.join();
 	}
 	for (auto& wordList : word_vector)
-	{	//Заполняем частотный словарь для каждого слова
+	{	//Р—Р°РїРѕР»РЅСЏРµРј С‡Р°СЃС‚РѕС‚РЅС‹Р№ СЃР»РѕРІР°СЂСЊ РґР»СЏ РєР°Р¶РґРѕРіРѕ СЃР»РѕРІР°
 		//Filling frequeency dictionary for each word
 		for (auto& word : *wordList)
 		{
@@ -170,15 +170,15 @@ void InvertedIndex::CreateFrequencyDictionary()
 		doc_id++;
 	}
 	for (auto& vector : word_vector)
-	{	//Освобождаем память //Releasing the memory
+	{	//РћСЃРІРѕР±РѕР¶РґР°РµРј РїР°РјСЏС‚СЊ //Releasing the memory
 		delete vector;
 	}
 #endif // STD_THREADS
 
-#ifndef THREADS		//Если многопоточность выключена //If multithreading is turned off
+#ifndef THREADS		//Р•СЃР»Рё РјРЅРѕРіРѕРїРѕС‚РѕС‡РЅРѕСЃС‚СЊ РІС‹РєР»СЋС‡РµРЅР° //If multithreading is turned off
 	for (auto& document : docs)
 	{
-		//MakeIndexDocument(this, document, doc_id); //Функция удалена //The function is deleted
+		//MakeIndexDocument(this, document, doc_id); //Р¤СѓРЅРєС†РёСЏ СѓРґР°Р»РµРЅР° //The function is deleted
 		doc_id++;
 	}
 #endif // !THREADS

@@ -242,12 +242,14 @@ void MainWindow::loadRequests()
 
 //Установить поле пути к файлу ответов
 void MainWindow::setAnswersPath()
-{ui->answers_path_edit->setText(conf_ui->answers_path);}                //Выводим путь к файлу ответов в главном окне
+{
+    ui->answers_path_edit->setText(conf_ui->answers_path);                //Выводим путь к файлу ответов в главном окне
+}
 
 //Проверяем готовность
 void MainWindow::readynessCheck()
 {
-        ui->search_button->setEnabled(requests_ready&&config_ready);    //Включаем кнопку Search при готовности настроек и запросов
+    ui->search_button->setEnabled(requests_ready&&config_ready);    //Включаем кнопку Search при готовности настроек и запросов
 }
 
 //Вызов ошибки файла конфигурации
@@ -318,10 +320,12 @@ void MainWindow::configError()
 //Выполнить поиск
 void MainWindow::search()
 {
-    index->UpdateDocumentBase(converter->GetTextDocuments());                   //Обновляем список документов в индексе
-    server = new SearchServer(*index);                                          //Создаём поисковый сервер
-    server->setMaxResponse(converter->GetResponsesLimit());                     //Устанавливаем максимальное количество результатов
-    search_result = (server->search(converter->GetRequests()));                 //Проводим поиск и записываем результат
+//Removed to engine_core.cpp
+//    index->UpdateDocumentBase(converter->GetTextDocuments());                   //Обновляем список документов в индексе
+//    server = new SearchServer(*index);                                          //Создаём поисковый сервер
+//    server->setMaxResponse(converter->GetResponsesLimit());                     //Устанавливаем максимальное количество результатов
+//    search_result = (server->search(converter->GetRequests()));                 //Проводим поиск и записываем результат
+
     int rec_id = 0;                                                             //Создаём счётчик номеров запросов
     ui->results_tree_widget->clear();                                           //Очищаем список ответов
     QTreeWidgetItem* main_item= new QTreeWidgetItem(ui->results_tree_widget);   //Создаём виджет для запросов

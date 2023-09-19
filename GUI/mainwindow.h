@@ -16,7 +16,7 @@
 //Включение виджетов
 #include "include/requestadddialog.h"
 
-
+class EngineCore;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -30,6 +30,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void initializeSearchEngine();
+
+signals:
+
 
 public slots:
     void search();
@@ -55,12 +58,15 @@ private:
     bool has_result = false;
     Ui::MainWindow *ui = nullptr;
     ConfigWindow *conf_ui = nullptr;
-    ConverterJSON* converter = nullptr;
-    InvertedIndex* index = nullptr;
-    SearchServer* server = nullptr;
     RequestAddDialog* r_dialog = nullptr;
-    QList<QString> requests_list;
     QStringListModel *request_list_model = nullptr;
-    QList<QList<RelativeIndex>> search_result;
+    EngineCore* core = nullptr;
+
+//Removed to engine_core.h
+//    QList<QList<RelativeIndex>> search_result;
+//    QList<QString> requests_list;
+//    ConverterJSON* converter = nullptr;
+//    InvertedIndex* index = nullptr;
+//    SearchServer* server = nullptr;
 };
 #endif // MAINWINDOW_H

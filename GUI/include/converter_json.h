@@ -1,4 +1,13 @@
-#pragma once
+//***************************************************************************//
+//  This file contains converter for JSON files and allow to read settings   //
+//  and files for index and requests for serach from config.json and         //
+//  requests.json. Also, it is made to save search results to answers.json.  //
+//  Class based on Singleton pattern, so you can create only one instance of //
+//  it. To create instance or get access to it use static method             //
+//  GetInstance()                                                            //
+//***************************************************************************//
+#ifndef CONVERTER_JSON_HEADER
+#define CONVERTER_JSON_HEADER
 
 #include <string>
 #include <vector>
@@ -8,106 +17,182 @@
 #include <QList>
 #include <QDir>
 
+//List of engine's settings
 struct ConfigList
 {    
-    QString enegine_name,
-            engine_ver;
-    int max_responses;
-    QList<QString> files;
+    QString enegine_name,           //Engine's name
+            engine_ver;             //Engine's version
+    int max_responses;              //Limit of responses for request
+    QList<QString> files;           //List of file's content
 };
 
+//Status of the converter - 0 is no errors
 enum ConverterStatus
 {
-    CONFIG_MISSED = 1,
-    CONFIG_FIELD_MISSED =2,
-    SEARCH_FILES_MISSED = 4,
-    ENGINE_NAME_MISSED = 8,
-    ENGINE_VERSION_MISSED = 16,
-    MAX_RESPONSES_MISSED = 32,
-    REQUESTS_MISSED = 64,
-    REQUESTS_EMPTY = 128
+    CONFIG_MISSED           = 1,    //Missing configurations' file
+    CONFIG_FIELD_MISSED     = 2,    //Missing field "config" in configurations' file
+    SEARCH_FILES_MISSED     = 4,    //Missing field "files" in configurations' file
+    ENGINE_NAME_MISSED      = 8,    //Missing engine's name in configurations' file
+    ENGINE_VERSION_MISSED   = 16,   //Missing engine's version in configurations' file
+    MAX_RESPONSES_MISSED    = 32,   //Missing maximum response's count in configurations' file
+    REQUESTS_MISSED         = 64,   //Missing requests' file
+    REQUESTS_EMPTY          = 128,  //Missing requests in requests' file
+    NO_CONFIG_ERRORS        = 63,   //No errors of the configurations' file
+    NO_REQUESTS_ERRORS      = 192,  //No errors of the requests' file
+    NO_ERRORS               = 0     //No errors
 };
+
+//Used to reset part of engine status
+enum ConverterStatusReset
+{
+    RESET_CONFIG_STATUS     = 192,  //To reset all configurations' statuses
+    RESET_REQUESTS_STATUS   = 63,   //To reset all requests' statuses
+    RESET_SEARCH_FILES      = 251,  //To reset status of files for serach
+    RESET_ALL               = 0     //To reset all statuses
+};
+
 
 class ConverterJSON : public QObject
 {
     Q_OBJECT
 public:
-	ConverterJSON() = default;
+    static ConverterJSON& GetInstance();
     ~ConverterJSON();
 
     /**
-	* Метод получения содержимого файлов
-	* @return Возвращает список с содержимым файлов перечисленных
-	* в config.json
+    * @brief Gets a file's content
+    * @return Returns a list with file's content
+    * that is listed in config.json file
     */
     QList<QString> GetTextDocuments();
 
 	/**
-	* Метод считывает поле max_responses для определения предельного
-	* количества ответов на один запрос
-	* @return
+    * @brief Method reads the field "max_responses" to get a limit
+    * of the answers' number for each request
+    * @return Returns a number of the response limit
 	*/
 	int GetResponsesLimit();
 
 	/**
-	* Метод получения запросов из файла requests.json
-	* @return возвращает список запросов из файла requests.json
+    * @brief Method of gets requests from the requests.json file
+    * @return Returns a list of requests from the requests.json file
 	*/
     QList<QString> GetRequests();
 
 	/**
-	* Положить в файл answers.json результаты поисковых запросов
+    * @brief Puts to the answers.json file the result of search requests
 	*/
-    void putAnswers(QList<QList<RelativeIndex>>
+    void PutAnswers(QList<QList<RelativeIndex>>
 		answers);
 
     /**
-	* Инициализация конвертера файлом конфигурации config.json
+    * @brief Puts settings to the config.json file
     */
-    void putConfig(const ConfigList,QString);
+    void PutConfig(const ConfigList,QString);
 
     /**
-     * @brief putRequests Save requests to requests.json
+     * @brief Saves requests to the requests.json
      */
-    void putRequests(const QList<QString>);
+    void PutRequests(const QList<QString>);
 
-    QString getEngineName();
-    QString getEngineVersion();
-    QList<QString> getFilesPaths();
-    char getEngineStatus();
-    bool isInitialized();
-    bool isConfigInitialized();
-    bool isRequestsInitialized();
-    QString getRequestsPath();
+    /**
+     * @brief Gets the name of the search engine
+     * @return Returns name of the search engine from the config.json
+     */
+    QString GetEngineName();
 
+    /**
+     * @brief Gets the version of the search engine
+     * @return Returns version of the search engine from the config.json
+     */
+    QString GetEngineVersion();
+
+    /**
+     * @brief Gets the list of files' content
+     * @return Returns list of files' content from files
+     * are included in the config.json
+     */
+    QList<QString> GetFilesPaths();
+
+    /**
+     * @brief Gets path to requests.json file
+     * @return Returns the path of the requests.json file
+     */
+    QString GetRequestsPath();
+
+//Removed to engine_core.h
+//    /**
+//     * @brief Gets the status of search engine
+//     * @return Returns a byte with engine's status that are described
+//     * in the enum ConverterStatus
+//     */
+//    char GetEngineStatus();
+
+//    /**
+//     * @return Returns true if the engine is initialised
+//     * by the config.json and requests.json
+//     */
+//    bool IsInitialized();
+
+//    /**
+//     * @return Returns true if the engine is initialised
+//     * by the config.json
+//     */
+//    bool IsConfigInitialized();
+
+//    /**
+//     * @return Returns true if the engine is initialised
+//     * by the requests.json
+//     */
+//    bool IsRequestsInitialized();
+
+    char ConfigCorrectionCheck();             //Checking the config.json file for errors, returns a status
+    char RequestsCorrectionCheck();           //Checking the requests.json file for errors, returns a status
 public slots:
-    void setConfigPath(QString);
-    void setRequestsPath(QString);
-    void setAnswersPath(QString);
-    void initialize();
-    void setMaxRequests(int);
+//Removed to engine_core.h
+    void ChangeConfigPath(QString);           //Changes path to config.json
+    void ChangeRequestsPath(QString);         //Changes path to requests.json
+    void ChangeAnswersPath(QString);          //Changes path to answers.json
+//    void Initialize();                      //Initialise the engine
+//    void SetMaxRequests(int);               //Sets response limit when it is changed
+
 signals:
-    void configUpdated();
-    void requestsUpdated();
-    void answersUpdated();
-    void fileOpenFailure(QString);
+    void ConfigLoaded(char);                  //Is emited when configuration is loaded from config.json
+    void RequestsLoaded(char);                //Is emited when requests are loaded from requests.json
+/**/void AnswersSaved();                      //Is emited when answers is successfully saved
+/**/void AnswersSaveError();                  //Is emited when answers is not saved
+    void ConfigUpdated(char);                 //Is emited when configurations is succrsfully changed
+    void RequestsUpdated(char);               //Is emited when requests is succrsfully changed
+    void AnswersUpdated();                    //Is emited when answers is succrsfully changed
+    void FileOpenFailure(QString);            //Is emited when can not open a file
+
 private:
-    void loadConfigs();
-    void loadConfigs(QJsonDocument&);
-    void loadSearchFiles();
-    void loadSearchFiles(QJsonDocument&);
-    void initializeConfig();                        //Загружает данные из config.json //Loading data from config.json
-    void initializeRequests();                      //Загружает данные из requests.json //Loading data from requests.json
-    void initializeCheck();                         //Проверяет инициализацию //Checking initialization
-    QString makeRequestNumber(std::size_t); //Генерирует строку запроса для записи в answers.json //Generates string of a request for writing to answers.json
-    QString config_file_path = QDir::currentPath() + "/config.json";       //Путь до файла конфигурации //Configuration file`s path
-    QString requests_file_path = QDir::currentPath() + "/requests.json";   //Путь до файла запросов //Requests file`s path
-    QString answers_file_path = QDir::currentPath() + "/answers.json";     //Путь до файла ответов //Answers file`s path
-    QString engine_name;                            //Имя поискового двигателя //Search engine name
-    QString engine_version;                         //Версия поискового двигателя //Search eengine version
-    int max_responses = 5;                          //Максимальное количество ответов на запрос //Maximum number of responsesж
-    QList<QString> requests;                        //Список поисковых запросов //List of requests
-    QList<QString> fileList;                        //Список содержимого файлов, в которых производится поиск //List of files for search
-    QList<QString> file_paths;                      //Список путей файлов по которым производится поиск //List of files` paths for search
-    char engine_status = 0;                         //Состояние поискового движка //Search engine statee
+    ConverterJSON() = default;                //Removing constructor for the Singletone pattern
+    QString MakeRequestNumber(std::size_t);   //Generates string of a request for writing to answers.json
+    bool LoadConfigs();                       //Loads configuration from the configurations' file
+    bool LoadRequests();                      //Loads requests from  requests' file
+    static ConverterJSON* instance;           //Incstance of the converter
+    QString config_file_path = "/config.json";       //Configuration file`s path
+    QString requests_file_path = "/requests.json";   //Requests file`s path
+    QString answers_file_path = "/answers.json";     //Answers file`s path
+    bool config_loaded = false;               //True if configurations loaded already
+    bool requests_loaded = false;             //True if requests loaded already
+    QJsonDocument* configuration = nullptr;   //Configurations as JSON document that are loaded from the file
+    QJsonDocument* requests = nullptr;        //Requests as JSON document that are loaded from the file
+
+//Removed to engine_core.h
+
+//    void LoadSearchFiles();                 //Loads pathes of files for index from the config.json file
+//    void LoadSearchFiles(QJsonDocument&);   //Loads pathes of files for index from receivwed JSON document
+//    void InitializeConfig();                //Loads configuration from the config.json file
+//    void InitializeRequests();              //Loading data from the requests.json file
+//    void InitializeCheck();                 //Checking initialization
+//    QString engine_name;                    //Search engine name
+//    QString engine_version;                 //Search eengine version
+//    int max_responses = 5;                  //Maximum number of responses
+//    QList<QString> requests;                //List of requests
+//    QList<QString> fileList;                //List of files for search
+//    QList<QString> file_paths;              //List of files` paths for search
+//    char engine_status = 0;                 //Search engine state
 };
+#endif

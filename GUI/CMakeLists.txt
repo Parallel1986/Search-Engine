@@ -46,6 +46,8 @@ set(PROJECT_SOURCES
         include/converter_json.h
         include/inverted_index.h
         include/file_index.h
+		include/engine_core.h
+		source/engine_core.cpp
 )
 
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/../config.json" DESTINATION "${CMAKE_BINARY_DIR}/")

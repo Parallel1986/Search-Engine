@@ -25,50 +25,50 @@ struct Preference
 
 class ConverterJSON {
 public:
-    //Получить ссылку на экземпляр
+    //РџРѕР»СѓС‡РёС‚СЊ СЃСЃС‹Р»РєСѓ РЅР° СЌРєР·РµРјРїР»СЏСЂ
     static ConverterJSON& GetInstance();
     ~ConverterJSON();
     /**
-	* Метод получения содержимого файлов
-	* @return Возвращает список с содержимым файлов перечисленных
-	* в config.json
+	* РњРµС‚РѕРґ РїРѕР»СѓС‡РµРЅРёСЏ СЃРѕРґРµСЂР¶РёРјРѕРіРѕ С„Р°Р№Р»РѕРІ
+	* @return Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє СЃ СЃРѕРґРµСЂР¶РёРјС‹Рј С„Р°Р№Р»РѕРІ РїРµСЂРµС‡РёСЃР»РµРЅРЅС‹С…
+	* РІ config.json
 	*/
     std::vector<std::string> GetTextDocuments();
 
     /**
-	* Метод считывает поле max_responses для определения предельного
-	* количества ответов на один запрос
+	* РњРµС‚РѕРґ СЃС‡РёС‚С‹РІР°РµС‚ РїРѕР»Рµ max_responses РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ РїСЂРµРґРµР»СЊРЅРѕРіРѕ
+	* РєРѕР»РёС‡РµСЃС‚РІР° РѕС‚РІРµС‚РѕРІ РЅР° РѕРґРёРЅ Р·Р°РїСЂРѕСЃ
 	* @return
 	*/	
     int GetResponsesLimit();
 
     /**
-	* Метод получения запросов из файла requests.json
-	* @return возвращает список запросов из файла requests.json
+	* РњРµС‚РѕРґ РїРѕР»СѓС‡РµРЅРёСЏ Р·Р°РїСЂРѕСЃРѕРІ РёР· С„Р°Р№Р»Р° requests.json
+	* @return РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє Р·Р°РїСЂРѕСЃРѕРІ РёР· С„Р°Р№Р»Р° requests.json
 	*/
     std::vector<std::string> GetRequests();
 
-    //Положить в файл answers.json результаты поисковых запросов
+    //РџРѕР»РѕР¶РёС‚СЊ РІ С„Р°Р№Р» answers.json СЂРµР·СѓР»СЊС‚Р°С‚С‹ РїРѕРёСЃРєРѕРІС‹С… Р·Р°РїСЂРѕСЃРѕРІ
     void PutAnswers(std::vector<std::vector<std::pair<int, float>>>& answers);
 
-    //Инициализация конвертера файлом конфигурации config.json
+    //РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєРѕРЅРІРµСЂС‚РµСЂР° С„Р°Р№Р»РѕРј РєРѕРЅС„РёРіСѓСЂР°С†РёРё config.json
     void Initialize();
 
-    //Изменить настройки
+    //РР·РјРµРЅРёС‚СЊ РЅР°СЃС‚СЂРѕР№РєРё
     void SetPreferences(Preference& pref);
 private:
     static ConverterJSON* instance;
     void GenerateConfig(Preference& pref);
-    ConverterJSON() = default;                  //Убираем конструктор, тобы нельзя было инстанциировать класс
-    std::string GetRequestNumber(int number);   //Получает строку с номером запроса
-    void operator=(ConverterJSON&);             //Убираем оператор присваивания
-    std::string engine_name;                    //Имя поискового двигателя
-    std::string engine_version;                 //Версия поискового двигателя
-    int max_responses = 5;                      //Максимальное количество ответов на запрос
-    std::vector<std::string> requests;          //Список поисковых запросов
-    std::vector<std::string> file_list;         //Список содержимого файлов, в которых производится поиск
-    bool initialized = false;                   //Указывает на инициализацию конвертера
-    std::string config_path = "config.json";    //Путь до config.json
-    std::string requests_path= "requests.json"; //Путь до requests.json
-    std::string answers_path= "answers.json";   //Путь до answers.json
+    ConverterJSON() = default;                  //РЈР±РёСЂР°РµРј РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, С‚РѕР±С‹ РЅРµР»СЊР·СЏ Р±С‹Р»Рѕ РёРЅСЃС‚Р°РЅС†РёРёСЂРѕРІР°С‚СЊ РєР»Р°СЃСЃ
+    std::string GetRequestNumber(int number);   //РџРѕР»СѓС‡Р°РµС‚ СЃС‚СЂРѕРєСѓ СЃ РЅРѕРјРµСЂРѕРј Р·Р°РїСЂРѕСЃР°
+    void operator=(ConverterJSON&);             //РЈР±РёСЂР°РµРј РѕРїРµСЂР°С‚РѕСЂ РїСЂРёСЃРІР°РёРІР°РЅРёСЏ
+    std::string engine_name;                    //РРјСЏ РїРѕРёСЃРєРѕРІРѕРіРѕ РґРІРёРіР°С‚РµР»СЏ
+    std::string engine_version;                 //Р’РµСЂСЃРёСЏ РїРѕРёСЃРєРѕРІРѕРіРѕ РґРІРёРіР°С‚РµР»СЏ
+    int max_responses = 5;                      //РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РѕС‚РІРµС‚РѕРІ РЅР° Р·Р°РїСЂРѕСЃ
+    std::vector<std::string> requests;          //РЎРїРёСЃРѕРє РїРѕРёСЃРєРѕРІС‹С… Р·Р°РїСЂРѕСЃРѕРІ
+    std::vector<std::string> file_list;         //РЎРїРёСЃРѕРє СЃРѕРґРµСЂР¶РёРјРѕРіРѕ С„Р°Р№Р»РѕРІ, РІ РєРѕС‚РѕСЂС‹С… РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ РїРѕРёСЃРє
+    bool initialized = false;                   //РЈРєР°Р·С‹РІР°РµС‚ РЅР° РёРЅРёС†РёР°Р»РёР·Р°С†РёСЋ РєРѕРЅРІРµСЂС‚РµСЂР°
+    std::string config_path = "config.json";    //РџСѓС‚СЊ РґРѕ config.json
+    std::string requests_path= "requests.json"; //РџСѓС‚СЊ РґРѕ requests.json
+    std::string answers_path= "answers.json";   //РџСѓС‚СЊ РґРѕ answers.json
 };

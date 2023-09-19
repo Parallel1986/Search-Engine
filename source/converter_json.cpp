@@ -22,80 +22,80 @@ ConverterJSON::~ConverterJSON(){}
 
 std::vector<std::string> ConverterJSON::GetTextDocuments()
 {
-    if (!initialized)		//Проверка на инициализированность
+    if (!initialized)		//РџСЂРѕРІРµСЂРєР° РЅР° РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅРЅРѕСЃС‚СЊ
         Initialize();
 	
-    return file_list;		//Возвращаем список содержимого файлов
+    return file_list;		//Р’РѕР·РІСЂР°С‰Р°РµРј СЃРїРёСЃРѕРє СЃРѕРґРµСЂР¶РёРјРѕРіРѕ С„Р°Р№Р»РѕРІ
 }
 
 int ConverterJSON::GetResponsesLimit()
 {
-    if (!initialized)		//Проверка на инициализированность
+    if (!initialized)		//РџСЂРѕРІРµСЂРєР° РЅР° РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅРЅРѕСЃС‚СЊ
         Initialize();
 	
-    return max_responses;	//Возвращаем максимальное количество запросов
+    return max_responses;	//Р’РѕР·РІСЂР°С‰Р°РµРј РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ Р·Р°РїСЂРѕСЃРѕРІ
 }
 
 std::vector<std::string> ConverterJSON::GetRequests()
 {
-    if (!initialized)		//Проверка на инициализированность
+    if (!initialized)		//РџСЂРѕРІРµСЂРєР° РЅР° РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅРЅРѕСЃС‚СЊ
         Initialize();
 
-    return requests;		//Возвращаем содержимое запросов
+    return requests;		//Р’РѕР·РІСЂР°С‰Р°РµРј СЃРѕРґРµСЂР¶РёРјРѕРµ Р·Р°РїСЂРѕСЃРѕРІ
 }
 
 void ConverterJSON::PutAnswers(std::vector<std::vector<std::pair<int, float>>>& answers)
 {
-    nlohmann::json answers_template;				//Создаём шаблон для заполнения ответа
-    std::ofstream answer_file(answers_path);	//Открываем файл для записи ответа
+    nlohmann::json answers_template;				//РЎРѕР·РґР°С‘Рј С€Р°Р±Р»РѕРЅ РґР»СЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ РѕС‚РІРµС‚Р°
+    std::ofstream answer_file(answers_path);	//РћС‚РєСЂС‹РІР°РµРј С„Р°Р№Р» РґР»СЏ Р·Р°РїРёСЃРё РѕС‚РІРµС‚Р°
     if (answer_file.is_open())
-        answer_file.clear();						//Очищаем содержимое файла
-    for (int i = 0; i < answers.size(); i++)	//Проходим по вектору ответов и заполнгяем шаблон
+        answer_file.clear();						//РћС‡РёС‰Р°РµРј СЃРѕРґРµСЂР¶РёРјРѕРµ С„Р°Р№Р»Р°
+    for (int i = 0; i < answers.size(); i++)	//РџСЂРѕС…РѕРґРёРј РїРѕ РІРµРєС‚РѕСЂСѓ РѕС‚РІРµС‚РѕРІ Рё Р·Р°РїРѕР»РЅРіСЏРµРј С€Р°Р±Р»РѕРЅ
 	{		
-        if (answers[i].size() == 0)				//Если ответ пустой, значит ничего не нашлось
+        if (answers[i].size() == 0)				//Р•СЃР»Рё РѕС‚РІРµС‚ РїСѓСЃС‚РѕР№, Р·РЅР°С‡РёС‚ РЅРёС‡РµРіРѕ РЅРµ РЅР°С€Р»РѕСЃСЊ
             answers_template["answers"][GetRequestNumber(i)]["result"] = false;
-        else									//Заполняем поля ответа
+        else									//Р—Р°РїРѕР»РЅСЏРµРј РїРѕР»СЏ РѕС‚РІРµС‚Р°
 		{
-            answers_template["answers"][GetRequestNumber(i)]["result"] = true;		//Результат
-            std::vector< std::pair<std::pair<std::string, int>, std::pair<std::string, float>>> outVector;	// Вспомогательный вектор для записи результатов
+            answers_template["answers"][GetRequestNumber(i)]["result"] = true;		//Р РµР·СѓР»СЊС‚Р°С‚
+            std::vector< std::pair<std::pair<std::string, int>, std::pair<std::string, float>>> outVector;	// Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Р№ РІРµРєС‚РѕСЂ РґР»СЏ Р·Р°РїРёСЃРё СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
 			for (auto& result : answers[i])
 				outVector.push_back({ {"docid", result.first},{"rank", result.second}});
             answers_template["answers"][GetRequestNumber(i)]["relevance"] = outVector;
 		}		
 	}
-    std::stringstream unformat_stream;			//Строковый поток для неотформатированного вывода
-    std::string unformat_line, format_line;		//Строки с неотформатированым и отформатированым результатами
+    std::stringstream unformat_stream;			//РЎС‚СЂРѕРєРѕРІС‹Р№ РїРѕС‚РѕРє РґР»СЏ РЅРµРѕС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРЅРѕРіРѕ РІС‹РІРѕРґР°
+    std::string unformat_line, format_line;		//РЎС‚СЂРѕРєРё СЃ РЅРµРѕС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅС‹Рј Рё РѕС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅС‹Рј СЂРµР·СѓР»СЊС‚Р°С‚Р°РјРё
 
-    unformat_stream << answers_template;		//Создаём неотформатированый результат
-    std::getline(unformat_stream, unformat_line); //Записываем неформатированый результат в строку
-    size_t tabs = 0;		//Счётчик табуляций
+    unformat_stream << answers_template;		//РЎРѕР·РґР°С‘Рј РЅРµРѕС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚
+    std::getline(unformat_stream, unformat_line); //Р—Р°РїРёСЃС‹РІР°РµРј РЅРµС„РѕСЂРјР°С‚РёСЂРѕРІР°РЅС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚ РІ СЃС‚СЂРѕРєСѓ
+    size_t tabs = 0;		//РЎС‡С‘С‚С‡РёРє С‚Р°Р±СѓР»СЏС†РёР№
 	for (size_t i = 0; i < unformat_line.length(); i++)
 	{
-		if (unformat_line[i] == '{'			//После открывающих скобок переходим на новую строку
+		if (unformat_line[i] == '{'			//РџРѕСЃР»Рµ РѕС‚РєСЂС‹РІР°СЋС‰РёС… СЃРєРѕР±РѕРє РїРµСЂРµС…РѕРґРёРј РЅР° РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ
             || unformat_line[i] == '['
 			|| unformat_line[i] == '(')
 		{
 			format_line += unformat_line[i];
-            tabs++;							//Смещаем счётчик табуляций на +1
+            tabs++;							//РЎРјРµС‰Р°РµРј СЃС‡С‘С‚С‡РёРє С‚Р°Р±СѓР»СЏС†РёР№ РЅР° +1
 			format_line += '\n';
 			for (size_t j = 0; j < tabs; j++)
 			{
-                format_line += '\t';		//Добавляем нужное количество табуляций
+                format_line += '\t';		//Р”РѕР±Р°РІР»СЏРµРј РЅСѓР¶РЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ С‚Р°Р±СѓР»СЏС†РёР№
 			}
 		}
-		else if (unformat_line[i] == '}'	//После закрывающих скобок переходим на новую строку
+		else if (unformat_line[i] == '}'	//РџРѕСЃР»Рµ Р·Р°РєСЂС‹РІР°СЋС‰РёС… СЃРєРѕР±РѕРє РїРµСЂРµС…РѕРґРёРј РЅР° РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ
             || unformat_line[i] == ']'
 			|| unformat_line[i] == ')')
 		{
-            tabs--;							//Смещаем счётчик табуляции на -1
+            tabs--;							//РЎРјРµС‰Р°РµРј СЃС‡С‘С‚С‡РёРє С‚Р°Р±СѓР»СЏС†РёРё РЅР° -1
 			format_line += '\n';
 			for (size_t j = 0; j < tabs; j++)
 			{
-                format_line += '\t';		//Добавляем нужное количество табуляций
+                format_line += '\t';		//Р”РѕР±Р°РІР»СЏРµРј РЅСѓР¶РЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ С‚Р°Р±СѓР»СЏС†РёР№
 			}
 			format_line += unformat_line[i];
 		}		
-		else if (unformat_line[i] == ',')	//После запятой переходим на новую строку
+		else if (unformat_line[i] == ',')	//РџРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№ РїРµСЂРµС…РѕРґРёРј РЅР° РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ
         {
             format_line += unformat_line[i];
 			format_line += '\n';
@@ -107,166 +107,166 @@ void ConverterJSON::PutAnswers(std::vector<std::vector<std::pair<int, float>>>& 
 		else
 			format_line += unformat_line[i];
 	}
-    answer_file << format_line;         //Записываем шаблон в файл
-    answer_file.close();				//Закрываем файл
+    answer_file << format_line;         //Р—Р°РїРёСЃС‹РІР°РµРј С€Р°Р±Р»РѕРЅ РІ С„Р°Р№Р»
+    answer_file.close();				//Р—Р°РєСЂС‹РІР°РµРј С„Р°Р№Р»
 }
 
 void ConverterJSON::Initialize()
 {
-    std::ifstream config_file(config_path);	//Открываем файл с настройками
+    std::ifstream config_file(config_path);	//РћС‚РєСЂС‹РІР°РµРј С„Р°Р№Р» СЃ РЅР°СЃС‚СЂРѕР№РєР°РјРё
     if (!config_file.is_open())
-        throw(std::exception("config.json is missing\n"));	//Если файл не открылся, выбрасыфваем исклюение
-	else		//Иначе, считываем поля
+        throw(std::exception("config.json is missing\n"));	//Р•СЃР»Рё С„Р°Р№Р» РЅРµ РѕС‚РєСЂС‹Р»СЃСЏ, РІС‹Р±СЂР°СЃС‹С„РІР°РµРј РёСЃРєР»СЋРµРЅРёРµ
+	else		//РРЅР°С‡Рµ, СЃС‡РёС‚С‹РІР°РµРј РїРѕР»СЏ
 	{
-        nlohmann::json config;	//Объект для чтения JSON файла
-         config_file >> config;	//Записываем содержимое файла в объект
-        config_file.close();		//Закрываем файл настроек
+        nlohmann::json config;	//РћР±СЉРµРєС‚ РґР»СЏ С‡С‚РµРЅРёСЏ JSON С„Р°Р№Р»Р°
+         config_file >> config;	//Р—Р°РїРёСЃС‹РІР°РµРј СЃРѕРґРµСЂР¶РёРјРѕРµ С„Р°Р№Р»Р° РІ РѕР±СЉРµРєС‚
+        config_file.close();		//Р—Р°РєСЂС‹РІР°РµРј С„Р°Р№Р» РЅР°СЃС‚СЂРѕРµРє
 
 		if (config.find("config") == config.end())	
-            throw(std::exception("Config file is empty\n"));	//Если отсутствует поле "config", то выбрасывается исключение
+            throw(std::exception("Config file is empty\n"));	//Р•СЃР»Рё РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РїРѕР»Рµ "config", С‚Рѕ РІС‹Р±СЂР°СЃС‹РІР°РµС‚СЃСЏ РёСЃРєР»СЋС‡РµРЅРёРµ
 		else if (config.find("files") == config.end() || config["files"].size() == 0)
-            throw(std::exception("File list is missing\n"));	//Если отсутствует список файлов, то выбрасываем исключение
+            throw(std::exception("File list is missing\n"));	//Р•СЃР»Рё РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ СЃРїРёСЃРѕРє С„Р°Р№Р»РѕРІ, С‚Рѕ РІС‹Р±СЂР°СЃС‹РІР°РµРј РёСЃРєР»СЋС‡РµРЅРёРµ
 		else
-		{	//Заполняем поля конфигурации //Filling configuration fields
-            engine_name = config["config"]["name"];				//Записываем имя поискового двигателя
-            engine_version = config["config"]["version"];		//Записываем версию поискового двигателя
-            max_responses = config["config"]["max_responses"];	//Записываем максимавльное число запросов
+		{	//Р—Р°РїРѕР»РЅСЏРµРј РїРѕР»СЏ РєРѕРЅС„РёРіСѓСЂР°С†РёРё //Filling configuration fields
+            engine_name = config["config"]["name"];				//Р—Р°РїРёСЃС‹РІР°РµРј РёРјСЏ РїРѕРёСЃРєРѕРІРѕРіРѕ РґРІРёРіР°С‚РµР»СЏ
+            engine_version = config["config"]["version"];		//Р—Р°РїРёСЃС‹РІР°РµРј РІРµСЂСЃРёСЋ РїРѕРёСЃРєРѕРІРѕРіРѕ РґРІРёРіР°С‚РµР»СЏ
+            max_responses = config["config"]["max_responses"];	//Р—Р°РїРёСЃС‹РІР°РµРј РјР°РєСЃРёРјР°РІР»СЊРЅРѕРµ С‡РёСЃР»Рѕ Р·Р°РїСЂРѕСЃРѕРІ
 			
 			std::vector<std::string> file_paths;
-			config.at("files").get_to(file_paths);		//Заполняем список содержимого файлов по которым будет производиться поиск
+			config.at("files").get_to(file_paths);		//Р—Р°РїРѕР»РЅСЏРµРј СЃРїРёСЃРѕРє СЃРѕРґРµСЂР¶РёРјРѕРіРѕ С„Р°Р№Р»РѕРІ РїРѕ РєРѕС‚РѕСЂС‹Рј Р±СѓРґРµС‚ РїСЂРѕРёР·РІРѕРґРёС‚СЊСЃСЏ РїРѕРёСЃРє
 			for (auto& file : file_paths)
 			{
 				std::ifstream document(file);
 				if (!document.is_open())
-				{	//Если файл не удалось открыть, то выбрасываем исключение
+				{	//Р•СЃР»Рё С„Р°Р№Р» РЅРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ, С‚Рѕ РІС‹Р±СЂР°СЃС‹РІР°РµРј РёСЃРєР»СЋС‡РµРЅРёРµ
 					//Throwing the exception if can not open the file
                     throw (std::exception(("Could not open " + file + "\n").c_str()));
 				}
 				else
 				{
-                    std::string content;	//Строка с содержимым файла
+                    std::string content;	//РЎС‚СЂРѕРєР° СЃ СЃРѕРґРµСЂР¶РёРјС‹Рј С„Р°Р№Р»Р°
 					std::getline(document, content);
-                    file_list.push_back(content);	//Добавляем содержимое документа в список содержимого
+                    file_list.push_back(content);	//Р”РѕР±Р°РІР»СЏРµРј СЃРѕРґРµСЂР¶РёРјРѕРµ РґРѕРєСѓРјРµРЅС‚Р° РІ СЃРїРёСЃРѕРє СЃРѕРґРµСЂР¶РёРјРѕРіРѕ
 				}
 			}
 		}
     }
 	
-    std::ifstream request_file(requests_path);		//Открываем файл с поисковыми запросами
+    std::ifstream request_file(requests_path);		//РћС‚РєСЂС‹РІР°РµРј С„Р°Р№Р» СЃ РїРѕРёСЃРєРѕРІС‹РјРё Р·Р°РїСЂРѕСЃР°РјРё
     if (!request_file.is_open())
-        throw(std::exception("requests.json is missing\n"));	//Выбрасыванм исключение если файл не открывается
+        throw(std::exception("requests.json is missing\n"));	//Р’С‹Р±СЂР°СЃС‹РІР°РЅРј РёСЃРєР»СЋС‡РµРЅРёРµ РµСЃР»Рё С„Р°Р№Р» РЅРµ РѕС‚РєСЂС‹РІР°РµС‚СЃСЏ
 
     else
 	{
-        nlohmann::json requests_container;	//Создаём объект для чтения из файла запроса
-        request_file >> requests_container;	//Заполняем объект содержимым файла запросов
-        request_file.close();				//Закрываем файл запросов
+        nlohmann::json requests_container;	//РЎРѕР·РґР°С‘Рј РѕР±СЉРµРєС‚ РґР»СЏ С‡С‚РµРЅРёСЏ РёР· С„Р°Р№Р»Р° Р·Р°РїСЂРѕСЃР°
+        request_file >> requests_container;	//Р—Р°РїРѕР»РЅСЏРµРј РѕР±СЉРµРєС‚ СЃРѕРґРµСЂР¶РёРјС‹Рј С„Р°Р№Р»Р° Р·Р°РїСЂРѕСЃРѕРІ
+        request_file.close();				//Р—Р°РєСЂС‹РІР°РµРј С„Р°Р№Р» Р·Р°РїСЂРѕСЃРѕРІ
 
-        requests_container.at("requests").get_to(requests);	//Заполняем список запросов
+        requests_container.at("requests").get_to(requests);	//Р—Р°РїРѕР»РЅСЏРµРј СЃРїРёСЃРѕРє Р·Р°РїСЂРѕСЃРѕРІ
 	}
-    initialized = true;		//Выставляем флаг инициализации
+    initialized = true;		//Р’С‹СЃС‚Р°РІР»СЏРµРј С„Р»Р°Рі РёРЅРёС†РёР°Р»РёР·Р°С†РёРё
 }
 
-//Вносим изменения в настройки
+//Р’РЅРѕСЃРёРј РёР·РјРµРЅРµРЅРёСЏ РІ РЅР°СЃС‚СЂРѕР№РєРё
 void ConverterJSON::SetPreferences(Preference& pref)
 {
-    while (pref.changes != 0)                       //Проверяем все изменения
+    while (pref.changes != 0)                       //РџСЂРѕРІРµСЂСЏРµРј РІСЃРµ РёР·РјРµРЅРµРЅРёСЏ
     {
         switch (pref.changes)
         {
-        case CHANGES::NEW_CONFIG:                   //Сгенерировать файл config.json
+        case CHANGES::NEW_CONFIG:                   //РЎРіРµРЅРµСЂРёСЂРѕРІР°С‚СЊ С„Р°Р№Р» config.json
             GenerateConfig(pref);
-            pref.changes &=~CHANGES::NEW_CONFIG;    //Убрать отметку об изменении
+            pref.changes &=~CHANGES::NEW_CONFIG;    //РЈР±СЂР°С‚СЊ РѕС‚РјРµС‚РєСѓ РѕР± РёР·РјРµРЅРµРЅРёРё
             break;
-        case CHANGES::PATH_TO_CONFIG:               //Изменить путь до config.json
+        case CHANGES::PATH_TO_CONFIG:               //РР·РјРµРЅРёС‚СЊ РїСѓС‚СЊ РґРѕ config.json
             (!std::filesystem::is_regular_file(pref.config_path))
                 ? config_path =pref.config_path + "config.json"
                 : config_path =pref.config_path;
-            pref.changes &=~CHANGES::PATH_TO_CONFIG;    //Убрать отметку об изменении
+            pref.changes &=~CHANGES::PATH_TO_CONFIG;    //РЈР±СЂР°С‚СЊ РѕС‚РјРµС‚РєСѓ РѕР± РёР·РјРµРЅРµРЅРёРё
             break;
-        case CHANGES::PATH_TO_REQUESTS:             //Изменить путь доа requests.json
+        case CHANGES::PATH_TO_REQUESTS:             //РР·РјРµРЅРёС‚СЊ РїСѓС‚СЊ РґРѕР° requests.json
             (!std::filesystem::is_regular_file(pref.requests_path))
                 ? requests_path =pref.requests_path + "requests.json"
                 : requests_path =pref.requests_path;
-                pref.changes &=~CHANGES::PATH_TO_REQUESTS;  //Убрать отметку об изменении
+                pref.changes &=~CHANGES::PATH_TO_REQUESTS;  //РЈР±СЂР°С‚СЊ РѕС‚РјРµС‚РєСѓ РѕР± РёР·РјРµРЅРµРЅРёРё
             break;
-        case CHANGES::PATH_TO_ANSWERS:              //Изменить путь до answers.json
+        case CHANGES::PATH_TO_ANSWERS:              //РР·РјРµРЅРёС‚СЊ РїСѓС‚СЊ РґРѕ answers.json
             (!std::filesystem::is_regular_file(pref.answers_path))
                 ? requests_path =pref.answers_path + "requests.json"
                 : answers_path =pref.answers_path;
-                pref.changes &=~CHANGES::PATH_TO_ANSWERS;   //Убрать отметку об изменении
+                pref.changes &=~CHANGES::PATH_TO_ANSWERS;   //РЈР±СЂР°С‚СЊ РѕС‚РјРµС‚РєСѓ РѕР± РёР·РјРµРЅРµРЅРёРё
             break;
-        case CHANGES::RESPONSES:                    //Изменить число ответов
+        case CHANGES::RESPONSES:                    //РР·РјРµРЅРёС‚СЊ С‡РёСЃР»Рѕ РѕС‚РІРµС‚РѕРІ
             max_responses = pref.max_response;
-            pref.changes &=~CHANGES::RESPONSES;     //Убрать отметку об изменении
+            pref.changes &=~CHANGES::RESPONSES;     //РЈР±СЂР°С‚СЊ РѕС‚РјРµС‚РєСѓ РѕР± РёР·РјРµРЅРµРЅРёРё
             break;
-        case CHANGES::REQUESTS_ADDED:               //Добавить запросы
+        case CHANGES::REQUESTS_ADDED:               //Р”РѕР±Р°РІРёС‚СЊ Р·Р°РїСЂРѕСЃС‹
             for (auto& request:pref.requests_adds)
             {
                 requests.push_back(request);
             }
-            pref.changes &=~CHANGES::REQUESTS_ADDED;    //Убрать отметку об изменении
+            pref.changes &=~CHANGES::REQUESTS_ADDED;    //РЈР±СЂР°С‚СЊ РѕС‚РјРµС‚РєСѓ РѕР± РёР·РјРµРЅРµРЅРёРё
             break;
-        case CHANGES::FILES_TO_SEARCH_ADDED:        //Добавить файлы для индексирования
+        case CHANGES::FILES_TO_SEARCH_ADDED:        //Р”РѕР±Р°РІРёС‚СЊ С„Р°Р№Р»С‹ РґР»СЏ РёРЅРґРµРєСЃРёСЂРѕРІР°РЅРёСЏ
             for (auto& file:pref.file_list_adds)
             {
                 file_list.push_back(file);
             }
-            pref.changes &=~CHANGES::FILES_TO_SEARCH_ADDED; //Убрать отметку об изменении
+            pref.changes &=~CHANGES::FILES_TO_SEARCH_ADDED; //РЈР±СЂР°С‚СЊ РѕС‚РјРµС‚РєСѓ РѕР± РёР·РјРµРЅРµРЅРёРё
             break;
-        default:    //Не должно попасть сюда
+        default:    //РќРµ РґРѕР»Р¶РЅРѕ РїРѕРїР°СЃС‚СЊ СЃСЋРґР°
             break;
         }
     }
 }
 
-//Генерируем файл config.json
+//Р“РµРЅРµСЂРёСЂСѓРµРј С„Р°Р№Р» config.json
 void ConverterJSON::GenerateConfig(Preference& pref)
 {
-    nlohmann::json config_template;				//Создаём шаблон для заполнения настроек
-    std::ofstream config_file(config_path);     //Открываем файл для записи настроек
+    nlohmann::json config_template;				//РЎРѕР·РґР°С‘Рј С€Р°Р±Р»РѕРЅ РґР»СЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ РЅР°СЃС‚СЂРѕРµРє
+    std::ofstream config_file(config_path);     //РћС‚РєСЂС‹РІР°РµРј С„Р°Р№Р» РґР»СЏ Р·Р°РїРёСЃРё РЅР°СЃС‚СЂРѕРµРє
     if (config_file.is_open())
-        config_file.clear();					//Очищаем содержимое файла
-    config_template["config"]["name"] = "SearchEngine - autogen";	//Записываем имя поискового двигателя
-    config_template["config"]["version"] = "1.0 - autogen";         //Записываем версию поискового двигателя
-    config_template["config"]["max_responses"] = pref.max_response;	//Записываем максимавльное число запросов
+        config_file.clear();					//РћС‡РёС‰Р°РµРј СЃРѕРґРµСЂР¶РёРјРѕРµ С„Р°Р№Р»Р°
+    config_template["config"]["name"] = "SearchEngine - autogen";	//Р—Р°РїРёСЃС‹РІР°РµРј РёРјСЏ РїРѕРёСЃРєРѕРІРѕРіРѕ РґРІРёРіР°С‚РµР»СЏ
+    config_template["config"]["version"] = "1.0 - autogen";         //Р—Р°РїРёСЃС‹РІР°РµРј РІРµСЂСЃРёСЋ РїРѕРёСЃРєРѕРІРѕРіРѕ РґРІРёРіР°С‚РµР»СЏ
+    config_template["config"]["max_responses"] = pref.max_response;	//Р—Р°РїРёСЃС‹РІР°РµРј РјР°РєСЃРёРјР°РІР»СЊРЅРѕРµ С‡РёСЃР»Рѕ Р·Р°РїСЂРѕСЃРѕРІ
 
-    for (auto& file : pref.file_list_adds)          //Добавляем файлы для индексирования
+    for (auto& file : pref.file_list_adds)          //Р”РѕР±Р°РІР»СЏРµРј С„Р°Р№Р»С‹ РґР»СЏ РёРЅРґРµРєСЃРёСЂРѕРІР°РЅРёСЏ
     {
         config_template["files"].push_back(file);
     }
-    std::stringstream unformat_stream;              //Строковый поток для неотформатированного вывода
-    std::string unformat_line, format_line;         //Строки с неотформатированым и отформатированым результатами
-    unformat_stream << config_template;             //Создаём неотформатированый результат
-    std::getline(unformat_stream, unformat_line);   //Записываем неформатированый результат в строку
-    size_t tabs = 0;                                //Счётчик табуляций
+    std::stringstream unformat_stream;              //РЎС‚СЂРѕРєРѕРІС‹Р№ РїРѕС‚РѕРє РґР»СЏ РЅРµРѕС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРЅРѕРіРѕ РІС‹РІРѕРґР°
+    std::string unformat_line, format_line;         //РЎС‚СЂРѕРєРё СЃ РЅРµРѕС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅС‹Рј Рё РѕС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅС‹Рј СЂРµР·СѓР»СЊС‚Р°С‚Р°РјРё
+    unformat_stream << config_template;             //РЎРѕР·РґР°С‘Рј РЅРµРѕС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚
+    std::getline(unformat_stream, unformat_line);   //Р—Р°РїРёСЃС‹РІР°РµРј РЅРµС„РѕСЂРјР°С‚РёСЂРѕРІР°РЅС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚ РІ СЃС‚СЂРѕРєСѓ
+    size_t tabs = 0;                                //РЎС‡С‘С‚С‡РёРє С‚Р°Р±СѓР»СЏС†РёР№
     for (size_t i = 0; i < unformat_line.length(); i++)
     {
-        if (unformat_line[i] == '{'			//После открывающих скобок переходим на новую строку
+        if (unformat_line[i] == '{'			//РџРѕСЃР»Рµ РѕС‚РєСЂС‹РІР°СЋС‰РёС… СЃРєРѕР±РѕРє РїРµСЂРµС…РѕРґРёРј РЅР° РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ
             || unformat_line[i] == '['
             || unformat_line[i] == '(')
         {
             format_line += unformat_line[i];
-            tabs++;							//Смещаем счётчик табуляций на +1
+            tabs++;							//РЎРјРµС‰Р°РµРј СЃС‡С‘С‚С‡РёРє С‚Р°Р±СѓР»СЏС†РёР№ РЅР° +1
             format_line += '\n';
             for (size_t j = 0; j < tabs; j++)
             {
-                format_line += '\t';		//Добавляем нужное количество табуляций
+                format_line += '\t';		//Р”РѕР±Р°РІР»СЏРµРј РЅСѓР¶РЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ С‚Р°Р±СѓР»СЏС†РёР№
             }
         }
-        else if (unformat_line[i] == '}'	//После закрывающих скобок переходим на новую строку
+        else if (unformat_line[i] == '}'	//РџРѕСЃР»Рµ Р·Р°РєСЂС‹РІР°СЋС‰РёС… СЃРєРѕР±РѕРє РїРµСЂРµС…РѕРґРёРј РЅР° РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ
             || unformat_line[i] == ']'
             || unformat_line[i] == ')')
         {
-            tabs--;							//Смещаем счётчик табуляции на -1
+            tabs--;							//РЎРјРµС‰Р°РµРј СЃС‡С‘С‚С‡РёРє С‚Р°Р±СѓР»СЏС†РёРё РЅР° -1
             format_line += '\n';
             for (size_t j = 0; j < tabs; j++)
             {
-                format_line += '\t';		//Добавляем нужное количество табуляций
+                format_line += '\t';		//Р”РѕР±Р°РІР»СЏРµРј РЅСѓР¶РЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ С‚Р°Р±СѓР»СЏС†РёР№
             }
             format_line += unformat_line[i];
         }
-        else if (unformat_line[i] == ',')	//После запятой переходим на новую строку
+        else if (unformat_line[i] == ',')	//РџРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№ РїРµСЂРµС…РѕРґРёРј РЅР° РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ
         {
             format_line += unformat_line[i];
             format_line += '\n';
@@ -278,11 +278,11 @@ void ConverterJSON::GenerateConfig(Preference& pref)
         else
             format_line += unformat_line[i];
     }
-    config_file << format_line;             //Записываем шаблон в файл
-    config_file.close();                    //Закрываем файл
+    config_file << format_line;             //Р—Р°РїРёСЃС‹РІР°РµРј С€Р°Р±Р»РѕРЅ РІ С„Р°Р№Р»
+    config_file.close();                    //Р—Р°РєСЂС‹РІР°РµРј С„Р°Р№Р»
 }
 
-//Преобразуем номер запроса в строку
+//РџСЂРµРѕР±СЂР°Р·СѓРµРј РЅРѕРјРµСЂ Р·Р°РїСЂРѕСЃР° РІ СЃС‚СЂРѕРєСѓ
 std::string ConverterJSON::GetRequestNumber(int number)
 {
 	if (number < 10)
