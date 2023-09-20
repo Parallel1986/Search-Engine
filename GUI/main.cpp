@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+
 #include "./include/engine_core.h"
 
 #include<iostream>
@@ -6,16 +6,9 @@
 #include <QApplication>
 #include <QStringList>
 
-
-enum Comands
-{
-    CONFIG_PATH     = 1,    //set path to config.json
-    REQUESTS_PATH   = 2,    //set path to requests.json
-    ANSWERS_PATH    = 4,    //set path to answers.json
-    MAX_RESPONSE    = 8,    //set maximum response's count
-    GUI_MODE        = 16,   //set mode with GUI
-    MANUAL_MODE     = 32    //set mode without *json files - all settings are required in comand line
-};
+#ifdef GUI
+#include "mainwindow.h"
+#endif
 
 #define COMAND_LINE
 //#define COMAND_LINE_TEST
@@ -25,10 +18,35 @@ enum Comands
 #endif
 
 #ifdef COMAND_LINE
-//Proccessing command line
-int processCommandLine(EngineCore& engine,int argc, char** argv)
+enum ComandLineOrders
 {
-    QStringList arguments;
+    NO_ORDERS               = 0,    //Do not do anything
+    CHANGE_CONFIG_FILE      = 1,    //Change comfigurations' file
+    CHANGE_REQUESTS_FILE    = 2,    //Change requests' file
+    CHANGE_ANSWERS_FILE     = 4,    //Change answers' file
+    CHANGE_MAX_RESPONSE     = 8,    //Change response limit
+    ADD_FILES_FOR_SEARCH    = 16,   //Add files for search to the end of file list
+    ADD_REQUEST             = 32,   //Add requests to the end of request list
+    GENERATE_CONFIG         = 64,   //Create new configurations' file
+    NO_CONFIG_MODE          = 128,  //Do not use configurations' file
+    NO_REQUESTS_MODE        = 256,  //Do not use requests' file
+    MANUAL_MODE             = 512,  //Do not use confirations' and requests' files
+    ERROR                   = 1024  //Error in processing
+};
+
+struct Prefrence
+{
+    QString config_path, request_path, answers_path;    //Pathes tp files
+    int max_response = 0;                               //Response limit
+    QStringList requests, files;                        //Lists of files and requests
+    short comands = ComandLineOrders::NO_ORDERS;        //Contains required orders
+};
+
+//Proccessing command line
+Prefrence processCommandLine(const EngineCore& engine,int argc,char** argv)
+{
+    Prefrence pref;         //Prefrence for accumulating comand line orders
+    QStringList arguments;    
     for (int arg_ptr = 1;arg_ptr <= argc; ++arg_ptr)
     {
         arguments.append(argv[arg_ptr]);
@@ -36,144 +54,133 @@ int processCommandLine(EngineCore& engine,int argc, char** argv)
     auto arg_end = arguments.end();
     for (auto arg = arguments.begin(); arg!= arguments.end();++arg)
     {
-        if (*arg == "-cp")         //Set path to a configurations' file
+        if (*arg == "-c")         //Set configurations' file
         {
             ++arg;
             if (arg != arg_end
                 && arg->at(0) != '-')
             {
-                engine.SetConfigPath(*arg);
+                pref.config_path = *arg;
+                pref.comands |= ComandLineOrders::CHANGE_CONFIG_FILE;
             }
             else
             {
-                std::cerr << "Missing path to config file! Application will be terminated\n";
-                return 1;
+                std::cerr << "Missing path to config file!\n"
+                             "Application will be terminated\n";
+                pref.comands = ComandLineOrders::ERROR;
+                return pref;
             }
         }
-        else if (*arg == "-rp")	//Указать путь к requests.json
+        else if (*arg == "-r")	//Set requests; file
         {
             ++arg;
             if (arg != arg_end
             && arg->at(0) != '-')
             {
-                engine.SetRequestsPath(*arg);
+                pref.request_path = *arg;
+                pref.comands |= ComandLineOrders::CHANGE_REQUESTS_FILE;
             }
             else
             {
-                std::cerr << "Missing path to requests.json! Application will be terminated\n";
-                return 2;
+                std::cerr << "Missing path to requests.json!\n"
+                             "Application will be terminated\n";
+                pref.comands = ComandLineOrders::ERROR;
+                return pref;
             }
         }
-        else if (*arg == "-ap")	//Указать путь к answers.json
+        else if (*arg == "-a")	//Set answers' file
         {
             ++arg;
             if (arg != arg_end
             && arg->at(0) != '-')
             {
-               engine.SetAnswersPath(*arg);
+               pref.answers_path =*arg;
+               pref.comands |= ComandLineOrders::CHANGE_ANSWERS_FILE;
             }
             else
             {
-                std::cerr << "Missing path to answers.json! Application will be terminated\n";
-                return 3;
+                std::cerr << "Missing path to answers.json!\n"
+                             "Application will be terminated\n";
+                pref.comands = ComandLineOrders::ERROR;
+                return pref;
             }
         }
-        else if (*arg == "-ra")	//Добавить поисковый запрос в начало списка запросов
+        else if (*arg == "-ra")	//add requests to end of list
         {
             ++arg;
             if (arg != arg_end && arg->at(0) != '-')
             {
                 while (arg != arg_end && arg->at(0) != '-')
                 {
-                    engine.AddRequest(*arg);
+                    pref.requests.append(*arg);
                     ++arg;
                 }
+                pref.comands |= ComandLineOrders::ADD_REQUEST;
             }
             else
             {
-                std::cerr << "Missing request! Application will be terminated\n";
-                return 4;
+                std::cerr << "Missing request!\n"
+                             "Application will be terminated\n";
+                pref.comands = ComandLineOrders::ERROR;
+                return pref;
             }
         }
-        else if (*arg == "-mr")	//Задать максимальное количество ответов
+        else if (*arg == "-mr")	//Set response limit
         {
             ++arg;
             if (arg != arg_end
-            && arg->at(0) != '-')
+            && arg->at(0) != '-'
+            && arg->toInt() != 0)
             {
-                engine.SetMaxRequests(arg->toInt());
+                pref.max_response = arg->toInt();
+                pref.comands |= ComandLineOrders::CHANGE_MAX_RESPONSE;
             }
             else
             {
-                std::cerr << "Missing maximum requests count! Application will be terminated\n";
-                return 5;
+                std::cerr << "Incorrect maximum requests count!\n"
+                             "Application will be terminated\n";
+                pref.comands = ComandLineOrders::ERROR;
+                return pref;
             }
         }
-        else if (*arg == "-cg")	//Сгенерировать config.json в формате 'path_to_config.json' 'max_response_count' 'path_to_file_for_search\\filename'
+        else if (*arg == "-cg")	//Generate config.json
         {
-            ++arg;
-            if (arg != arg_end && arg->at(0) != '-')
-            {
-                QStringList pref;
-                int max_response;
-                pref.append(*arg);
-                pref.append("AutoGen");
-                pref.append("AutoGen V.0");
-                ++arg;
-                if (arg != arg_end && arg->at(0) != '-')
-                {
-                    max_response = arg->toInt();
-                    ++arg;
-                }
-                else
-                {
-                    std::cerr << "Missing maximum response count! Application will be terminated\n";
-                    return 6;
-                }
-                if (arg != arg_end && arg->at(0) != '-')
-                {
-                    while (arg != arg_end && arg->at(0) != '-')
-                    {
-                        pref.append(*arg);
-                        ++arg;
-                    }
-                }
-                else
-                {
-                    std::cerr << "Missing path to file for search! Application will be terminated\n";
-                    return 6;
-                }
-                engine.GenerateConfigFile(pref,max_response);
-            }
-            else
-            {
-                std::cerr << "Missing path to config.json! Application will be terminated\n";
-                return 6;
-            }
+            pref.comands |= ComandLineOrders::GENERATE_CONFIG;
+            ++arg;            
         }
-        else if (*arg == "-fa")	//Добавить файлы для индексирования в наало списка
+        else if (*arg == "-fa")	//Add files for search to the end of the list
         {
             ++arg;
             if (arg != arg_end && arg->at(0) != '-')
             {
                 while (arg != arg_end && arg->at(0) != '-')
                 {
-                    engine.AddSearchFile(*arg);
+                    pref.files.append(*arg);
                     ++arg;
                 }
+                pref.comands |= ComandLineOrders::ADD_FILES_FOR_SEARCH;
             }
             else
             {
-                std::cerr << "Missing request! Application will be terminated\n";
-                return 7;
+                std::cerr << "Missing request!\n"
+                             "Application will be terminated\n";
+                pref.comands = ComandLineOrders::ERROR;
+                return pref;
             }
+        }
+        else if (*arg == "-mm")
+        {
+            pref.comands |= ComandLineOrders::MANUAL_MODE;
         }
         else
         {
-            std::cerr << "Unknown command! Aplication will be terminated\n";
+            std::cerr << "Unknown command!\n"
+                         "Aplication will be terminated\n";
+            pref.comands = ComandLineOrders::ERROR;
+            return pref;
         }
     }
-    return 0;
+    return pref;
 }
 #endif
 
@@ -181,21 +188,190 @@ int main(int argC, char *argV[])
 {
     EngineCore engine;
 
-    engine.Initialize();
-    engine.Search();
-
 #ifdef GUI
     QApplication a(argC, argV);
     MainWindow w;
 #endif // GUI
 
 #ifdef COMAND_LINE
-
     if (argC > 1)
     {
-        int res = processCommandLine(engine, argC,argV);
-        if (res != 0)
-            return 1;
+        auto res = processCommandLine(engine, argC,argV);
+        if (res.comands == ComandLineOrders::ERROR)
+            return -1;
+        else if (res.comands != ComandLineOrders::NO_ORDERS)
+        {
+            if (res.comands & ComandLineOrders::CHANGE_ANSWERS_FILE)
+                engine.SetAnswersPath(res.answers_path);
+
+            if (res.comands & ComandLineOrders::CHANGE_CONFIG_FILE)
+                engine.SetConfigPath(res.config_path);
+
+            if (res.comands & ComandLineOrders::CHANGE_REQUESTS_FILE)
+                engine.SetRequestsPath(res.request_path);
+
+            if (res.comands & ComandLineOrders::CHANGE_MAX_RESPONSE)
+                engine.SetMaxRequests(res.max_response);
+
+            if (res.comands & ComandLineOrders::MANUAL_MODE)
+            {
+                engine.SetMode(EngineMode::MANUAL);
+                if (res.max_response == 0)
+                {
+                    std::cerr << "Incorrect maximum response limit!\n"
+                                 "Application will be terminated!\n";
+                    return -1;
+                }
+                else
+                    engine.SetMaxRequests(res.max_response);
+
+                if (res.requests.isEmpty())
+                {
+                    std::cerr << "Requests are required for manual mode!\n"
+                                 "Application will be terminated!\n";
+                    return -1;
+                }
+                else
+                {
+                    for (auto& request : res.requests)
+                    {
+                        engine.AddRequest(request);
+                    }
+                }
+
+                if (res.files.isEmpty())
+                {
+                    std::cerr << "Files for search are required!\n"
+                                 "Application will be terminated!\n";
+                    return -1;
+                }
+                else
+                {
+                    for (auto& file : res.files)
+                    {
+                        engine.AddSearchFile(file);
+                    }
+                }
+            }
+
+            if (res.comands & ComandLineOrders::GENERATE_CONFIG)
+            {
+                if(res.files.isEmpty())
+                {
+                    std::cerr << "Files for search are required!\n"
+                                 "Aplication will be terminated!\n";
+                    return -1;
+                }
+
+                if (res.requests.isEmpty())
+                {
+                    std::cerr << "Requests are required!\n"
+                                 "Application will be terminated!\n";
+                    return -1;
+                }
+
+                if (res.max_response == 0)
+                {
+                    std::cerr << "Incorrect response limit!\n"
+                                 "Application will be terminated!\n";
+                    return -1;
+                }
+                engine.GenerateConfigFile(res.files, res.max_response, res.requests);
+            }
+
+            if ((res.comands & ComandLineOrders::NO_CONFIG_MODE)
+                &&!(res.comands & ComandLineOrders::MANUAL_MODE)
+                &&!(res.comands & ComandLineOrders::NO_REQUESTS_MODE))
+            {
+                if(res.files.isEmpty())
+                {
+                    std::cerr << "Files for search are required!\n"
+                                 "Aplication will be terminated!\n";
+                    return -1;
+                }
+
+                if (res.max_response == 0)
+                {
+                    std::cerr << "Incorrect response limit!\n"
+                                 "Application will be terminated!\n";
+                    return -1;
+                }
+
+                for (auto& file : res.files)
+                {
+                    engine.AddSearchFile(file);
+                }
+                engine.SetMaxRequests(res.max_response);
+                engine.SetMode(EngineMode::NO_CONFIG);
+            }
+            else
+            {
+                std::cerr << "Only one mode is allowed!\n"
+                             "Application will be terminated!\n";
+                return -1;
+            }
+
+            if ((res.comands & ComandLineOrders::NO_REQUESTS_MODE)
+                &&!(res.comands & ComandLineOrders::MANUAL_MODE)
+                &&!(res.comands & ComandLineOrders::NO_CONFIG_MODE))
+            {
+                if (res.requests.isEmpty())
+                {
+                    std::cerr << "Requests are required!\n"
+                                 "Application will be terminated!\n";
+                    return -1;
+                }
+
+                for (auto& request : res.requests)
+                {
+                    engine.AddRequest(request);
+                }
+                engine.SetMode(EngineMode::NO_REQUESTS);
+            }
+            else
+            {
+                std::cerr << "Only one mode is allowed!\n"
+                             "Application will be terminated!\n";
+                return -1;
+            }
+
+            if ((res.comands & ComandLineOrders::ADD_FILES_FOR_SEARCH)
+                && !(res.comands & ComandLineOrders::GENERATE_CONFIG)
+                && !(res.comands & ComandLineOrders::MANUAL_MODE)
+                && !(res.comands & ComandLineOrders::NO_CONFIG_MODE))
+            {
+                if(res.files.isEmpty())
+                {
+                    std::cerr << "Files for search are required!\n"
+                                 "Aplication will be terminated!\n";
+                    return -1;
+                }
+
+                for (auto& file : res.files)
+                {
+                    engine.AddSearchFile(file);
+                }
+            }
+
+            if ((res.comands & ComandLineOrders::ADD_REQUEST)
+                && !(res.comands & ComandLineOrders::MANUAL_MODE)
+                && !(res.comands & ComandLineOrders::NO_REQUESTS_MODE))
+            {
+                if (res.requests.isEmpty())
+                {
+                    std::cerr << "Requests are required for manual mode!\n"
+                                 "Application will be terminated!\n";
+                    return -1;
+                }
+                else
+                {
+                    for (auto& request : res.requests)
+                    {
+                        engine.AddRequest(request);
+                    }
+                }
+            }
+        }
     }
 
 #endif
@@ -208,7 +384,8 @@ int main(int argC, char *argV[])
 #endif
 
 #ifndef GUI
-
+    engine.Initialize();
+    engine.Search();
 #endif
 
 #ifdef GUI

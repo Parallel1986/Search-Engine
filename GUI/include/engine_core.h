@@ -11,6 +11,14 @@
 #include "./inverted_index.h"
 #include "./file_index.h"
 
+enum EngineMode
+{
+    STANDARD,       //Standard mode
+    AUTOCONFIG,     //Autoconfigure configurations' file
+    MANUAL,         //Mode without configurations' and requests' file
+    NO_CONFIG,      //Mode without configurations' file
+    NO_REQUESTS     //Mode without requests' file
+};
 
 //Main core class
 class EngineCore : public QObject
@@ -49,7 +57,8 @@ public:
 
     void AddRequest(QString);
     void AddSearchFile(QString);
-    void GenerateConfigFile(QStringList, int);
+    void GenerateConfigFile(QStringList, int, QStringList);
+    void SetMode(EngineMode);
 
 signals:
     void ConfigPathChanged(QString);
@@ -85,6 +94,7 @@ private:
     QList<QString> file_list;                   //List of files for search
     QList<QString> file_paths;                  //List of files` paths for search
     char engine_status = 0;                     //Search engine state
+    EngineMode mode = EngineMode::STANDARD;     //Mode of engine
 };
 
 #endif // ENGINE_CORE_H

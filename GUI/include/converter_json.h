@@ -43,13 +43,13 @@ enum ConverterStatus
 };
 
 //Used to reset part of engine status
-enum ConverterStatusReset
-{
-    RESET_CONFIG_STATUS     = 192,  //To reset all configurations' statuses
-    RESET_REQUESTS_STATUS   = 63,   //To reset all requests' statuses
-    RESET_SEARCH_FILES      = 251,  //To reset status of files for serach
-    RESET_ALL               = 0     //To reset all statuses
-};
+//enum ConverterStatusReset
+//{
+//    RESET_CONFIG_STATUS     = 192,  //To reset all configurations' statuses
+//    RESET_REQUESTS_STATUS   = 63,   //To reset all requests' statuses
+//    RESET_SEARCH_FILES      = 251,  //To reset status of files for serach
+//    RESET_ALL               = 0     //To reset all statuses
+//};
 
 
 class ConverterJSON : public QObject
