@@ -77,33 +77,8 @@ QList<QString> ConverterJSON::GetTextDocuments()
     if (config_loaded
         || (!config_loaded && LoadConfigs()))
     {
-        QList<QFuture<QString>> open_file_threads;
         QList<QString> documents_text;
-        for (auto& file : GetFilesPaths())
-        {
-            open_file_threads.append(QtConcurrent::run([file, this]()
-            {
-                QFile document_file(file);
-                if (document_file.open(QIODevice::ReadOnly | QIODevice::Text))
-                {
-                    QString content = document_file.readAll();
-                    return content;
-                }
-                else
-                {
-                    emit FileOpenFailure(file);
-                    return QString();
-                }
-            }));
-        }
-        for (auto& thread : open_file_threads)
-        {
-            thread.waitForFinished();
-        }
-        for (auto& thread : open_file_threads)
-        {
-            documents_text.append(thread.result());
-        }
+        Loader::LoadFileContent(documents_text,GetFilesPaths());
         return documents_text;
     }
     return QList<QString>();
@@ -311,7 +286,7 @@ QString ConverterJSON::MakeRequestNumber(std::size_t number)
 //Check the configurations' file for errors
 char ConverterJSON::ConfigCorrectionCheck()
 {
-    char result = ConverterStatusReset::RESET_ALL;
+    char result = ConverterStatus::NO_ERRORS;
     QFile config(config_file_path);
     if (config.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -342,7 +317,7 @@ char ConverterJSON::ConfigCorrectionCheck()
 //Check the requests' file for errors
 char ConverterJSON::RequestsCorrectionCheck()
 {
-    char result = ConverterStatusReset::RESET_ALL;
+    char result = ConverterStatus::NO_ERRORS;
     QFile requests_file(requests_file_path);
     if (requests_file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -408,6 +383,36 @@ bool ConverterJSON::LoadRequests()
         }
     }
     return true;
+}
+
+void Loader::LoadFileContent(QList<QString>& destination,const QList<QString>& source_pathes)
+{
+    destination.clear();
+    QList<QFuture<QString>> open_file_threads;
+    for (auto& file : source_pathes)
+    {
+        open_file_threads.append(QtConcurrent::run([file, destination]()
+        {
+            QFile document_file(file);
+            if (document_file.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                QString content = document_file.readAll();
+                return content;
+            }
+            else
+            {
+                return QString();
+            }
+        }));
+    }
+    for (auto& thread : open_file_threads)
+    {
+        thread.waitForFinished();
+    }
+    for (auto& thread : open_file_threads)
+    {
+        destination.append(thread.result());
+    }
 }
 
 //Removed to engine_core.cpp

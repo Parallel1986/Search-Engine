@@ -57,7 +57,7 @@ bool EngineCore::IsInitialized()
 //Check if configurations are initialized
 bool EngineCore::IsConfigInitialized()
 {
-    engine_status &= ConverterStatusReset::RESET_CONFIG_STATUS;
+    engine_status &= ConverterStatus::NO_CONFIG_ERRORS;
     return (!(engine_status&ConverterStatus::CONFIG_FIELD_MISSED)
         &&!(engine_status&ConverterStatus::CONFIG_MISSED)
         &&!(engine_status&ConverterStatus::SEARCH_FILES_MISSED));
@@ -66,7 +66,7 @@ bool EngineCore::IsConfigInitialized()
 //Check if requests are initialized
 bool EngineCore::IsRequestsInitialized()
 {
-    engine_status &= ConverterStatusReset::RESET_REQUESTS_STATUS;
+    engine_status &= ConverterStatus::NO_REQUESTS_ERRORS;
     return (!(engine_status&ConverterStatus::REQUESTS_MISSED)
         &&!(engine_status&ConverterStatus::REQUESTS_EMPTY));
 }
@@ -92,7 +92,7 @@ void EngineCore::InitializeConfig()
         if (!(engine_status&ConverterStatus::SEARCH_FILES_MISSED))
         {
             file_list = converter->GetTextDocuments();
-            file_paths = converter->GetFilesPaths();
+            files_paths = converter->GetFilesPaths();
         }
     }
 }
@@ -120,13 +120,79 @@ void EngineCore::Initialize()
     InitializeRequests();
 }
 
+//Add requests
+void EngineCore::AddRequest(QString new_request)
+{
+    requests.append(new_request);
+}
+
+//Add file for search
+void EngineCore::AddSearchFile(QString new_file)
+{
+    file_list.append(new_file);
+}
+
+//Create configurations' file config.json and add fields to it
+void EngineCore::GenerateConfigFile(QStringList files, int response_limit)
+{
+    ConfigList configurations;
+    configurations.enegine_name = "Autogen Name";
+    configurations.engine_ver = "Autogen V0.1.0";
+    configurations.max_responses = response_limit;
+    for (auto& file : files)
+    {
+        configurations.files.append(file);
+    }
+    converter->PutConfig(configurations, "./config.json");
+}
+
+//Set engine's mode
+void EngineCore::SetMode(EngineMode new_mode)
+{
+    mode = new_mode;
+}
+
 //Make search
 void EngineCore::Search()
 {
-    index->UpdateDocumentBase(converter->GetTextDocuments());
-    server->setMaxResponse(converter->GetResponsesLimit());
-    search_result = (server->search(converter->GetRequests()));
-    converter->PutAnswers(search_result);
+    switch (mode) {
+    case EngineMode::AUTOCONFIG:
+        InitializeConfig();
+    case EngineMode::STANDARD:
+        index->UpdateDocumentBase(converter->GetTextDocuments());
+        server->setMaxResponse(converter->GetResponsesLimit());
+        search_result = (server->search(converter->GetRequests()));
+        converter->PutAnswers(search_result);
+        break;
+
+    case EngineMode::NO_CONFIG:
+        Loader::LoadFileContent(file_list, file_list);
+        index->UpdateDocumentBase(file_list);
+        server->setMaxResponse(max_responses);
+        search_result = (server->search(converter->GetRequests()));
+        converter->PutAnswers(search_result);
+        break;
+
+    case EngineMode::NO_REQUESTS:
+        index->UpdateDocumentBase(converter->GetTextDocuments());
+        server->setMaxResponse(converter->GetResponsesLimit());
+        search_result = (server->search(requests));
+        converter->PutAnswers(search_result);
+        break;
+
+    case EngineMode::MANUAL:
+        Loader::LoadFileContent(file_list, file_list);
+        index->UpdateDocumentBase(file_list);
+        server->setMaxResponse(max_responses);
+        search_result = (server->search(requests));
+        converter->PutAnswers(search_result);
+        break;
+
+    //Should not get here
+    default:
+        break;
+    }
+
 }
 
 //Excluded

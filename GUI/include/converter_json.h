@@ -51,6 +51,11 @@ enum ConverterStatus
 //    RESET_ALL               = 0     //To reset all statuses
 //};
 
+namespace Loader
+{
+    void LoadFileContent(QList<QString>&,const QList<QString>&);
+}
+
 
 class ConverterJSON : public QObject
 {

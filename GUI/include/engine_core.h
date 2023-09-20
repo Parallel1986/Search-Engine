@@ -57,7 +57,7 @@ public:
 
     void AddRequest(QString);
     void AddSearchFile(QString);
-    void GenerateConfigFile(QStringList, int, QStringList);
+    void GenerateConfigFile(QStringList, int);
     void SetMode(EngineMode);
 
 signals:
@@ -85,14 +85,13 @@ private:
     ConverterJSON* converter = nullptr;
     InvertedIndex* index = nullptr;
     SearchServer* server = nullptr;
-    QList<QString> requests_list;
     QList<QList<RelativeIndex>> search_result;
     QString engine_name;                        //Search engine name
     QString engine_version;                     //Search eengine version
     int max_responses = 5;                      //Maximum number of responses
     QList<QString> requests;                    //List of requests
-    QList<QString> file_list;                   //List of files for search
-    QList<QString> file_paths;                  //List of files` paths for search
+    QList<QString> file_list;                   //List of files` content for search
+    QList<QString> files_paths;                  //List of files` paths for search
     char engine_status = 0;                     //Search engine state
     EngineMode mode = EngineMode::STANDARD;     //Mode of engine
 };
