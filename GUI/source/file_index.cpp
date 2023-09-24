@@ -10,17 +10,20 @@
 #include <QSet>
 #include <QRegularExpression>
 
-void SearchServer::setMaxResponse(int max_response)
-{	//Устанавливаем максимальное число ответов
+//Sets maximal count of answers
+void SearchServer::SetMaxResponse(int max_response)
+{
 	this->max_response = max_response; 
 }
 
-QList<QList<RelativeIndex>> SearchServer::search(const QList<QString>& queries_input)
+//Make search
+QList<QList<RelativeIndex>> SearchServer::Search(const QList<QString>& queries_input)
 {
-    QList<QList<RelativeIndex>> result;				//Итоговый список для вывода
+    QList<QList<RelativeIndex>> result;
 
 	for (auto& request_line : queries_input)
     {
+        //Spliting requests to separate words
         QSet<QString> words_list;
         QRegExp words("\\W+");
         auto word_list = request_line.split(words, Qt::SkipEmptyParts);
@@ -31,41 +34,41 @@ QList<QList<RelativeIndex>> SearchServer::search(const QList<QString>& queries_i
             words_list.insert(*request);
         }
 
-        QList<RelativeIndex> request_result;		//Результат запроса
-        QMultiMap<int, QString> sorted_words;		//Отсортированный список слов по частоте встречаемости
+        QList<RelativeIndex> request_result;
+        QMultiMap<int, QString> sorted_words;
 
-        auto iterator = words_list.begin();         //Начало списка слов
-        auto iterator_end = words_list.end();       //Конец списка слов
+        auto iterator = words_list.begin();
+        auto iterator_end = words_list.end();
 
-
-        while (iterator != iterator_end)			//Проходим по списку и считаем количество совпадений для каждого слова
+        //Counting count of word's instances
+        while (iterator != iterator_end)
 		{
-            QList<Entry> helper(_index.GetWordCount(*iterator));	//Получаем список документов содержащих слово и его количество
-            if (!helper.empty())									//Если список пуст, то меняем флаг not_matched на true и выходим из цикла
+            QList<Entry> helper(_index.GetWordCount(*iterator));
+            if (!helper.empty())
 			{
-                int counter = 0;					//Количество вхождений слова
-                for (auto& entry : helper)			//Проходим по списку документов и считаем количество
+                int counter = 0;
+                for (auto& entry : helper)
 				{
 					counter += entry.count;
 				}
-                sorted_words.insert( counter, (*iterator));	//Добавляем в список слов отсортированный по количеству вхождений
+                sorted_words.insert( counter, (*iterator));
 			}
-            iterator++;		//Смещаем итератор на следующее слово
-        }	//На выходе получаем список слов отсортированных по частоте вхождений
+            iterator++;
+        }
 
-        if (sorted_words.empty())	//Если отсутствует слово во всех документах выводим пустой вектор
+        if (sorted_words.empty())
 		{
             QList<RelativeIndex> empty_vector;
             result.append(empty_vector);
 		}
-        else	//Иначе считаем абсолютную и относительную релевантность
-        {
-            //Получаем список документов содержащих самое редкое слово и колчичество его вхождений
+        else
+        {            
 			auto it = sorted_words.begin();
             auto it_end = sorted_words.end();
-            QMap<int/*doc_id*/, int/*relevance*/> doc_absolute_relevance;		//Список документов для подсчёта релевантности
-            QList<Entry> helper(_index.GetWordCount(it.value()));               //Вспомогательный список
-			while (doc_absolute_relevance.size() < max_response && it != it_end)
+            QMap<int/*doc_id*/, int/*relevance*/> doc_absolute_relevance;
+            QList<Entry> helper(_index.GetWordCount(it.value()));
+            //Counting absolute relevance
+            while (doc_absolute_relevance.size() < max_response && it != it_end)
 			{
 				for (auto& entry : helper)
 				{
@@ -82,8 +85,6 @@ QList<QList<RelativeIndex>> SearchServer::search(const QList<QString>& queries_i
 				}
 			}
 
-            //Проходим по оставшимся словам и добавляем их количество вхождений к имеющемуся,
-            //попутно вычисляя максимальное количество вхождений
 			if (it != it_end)
 			{
 				it++;
@@ -97,30 +98,31 @@ QList<QList<RelativeIndex>> SearchServer::search(const QList<QString>& queries_i
                         doc_absolute_relevance[entry.doc_id] += entry.count;
 				}
 				it++;
-            }	//На выходе получаем заполненый список документов с абсолютными релевантностями
+            }
+
+            //Counting maximal absolute relevance
             int max_count = 0;
             for (auto& count:doc_absolute_relevance)
             {
                 if (max_count < count)
                     max_count = count;
-            }   //На выходе получаем значение максимальной абсолютной релевантности
+            }
 
-            //Проходим по списку и считаем относительную релевантность, добавляя в новый список релевантности
-            std::multimap<float, size_t, std::greater<float>> relevance_map;    //для сортировки по убыванию релевантности
+            //Counting relative relevance
+            std::multimap<float, size_t, std::greater<float>> relevance_map;
             for (auto document = doc_absolute_relevance.begin(); document != doc_absolute_relevance.end(); document++)
 			{
                 relevance_map.insert({ ((float)((float)document.value() / (float)max_count)), document.key() });
-            }	//На выходе получаем отсортированный список релевантности документов
+            }
 
-            //Заполняем список релевантностей
+            //Filling relevance list
 			for (auto& rel : relevance_map)
 			{
 				RelativeIndex ri;
 				ri.rank = rel.first;
 				ri.doc_id = rel.second;
                 request_result.append(ri);
-			}
-            //Добавляем список результата в главный список
+			}            
             result.append(request_result);
 		}		
 	}

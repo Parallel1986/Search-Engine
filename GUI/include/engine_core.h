@@ -1,5 +1,5 @@
 //***************************************************************************//
-//  This file comtains the main core of search engine. It links together all //
+//  This file contains the main core of search engine. It links together all //
 // other modules of the engine and contains engine's configurations.         //
 //***************************************************************************//
 #ifndef ENGINE_CORE_H
@@ -29,7 +29,6 @@ public:
 
     virtual ~EngineCore();
 
-
     /**
      * @brief Gets the status of search engine
      * @return Returns a byte with engine's status that are described
@@ -55,21 +54,37 @@ public:
      */
     bool IsRequestsInitialized();
 
+    /**
+     * @brief Adds requests to the end of requests' list
+     */
     void AddRequest(QString);
+
+    /**
+     * @brief Adds path to file for search in the end of files' list
+     */
     void AddSearchFile(QString);
+
+    /**
+     * @brief Create configurations' file with given settings
+     */
     void GenerateConfigFile(QStringList, int);
+
+    /**
+     * @brief Sets a mode of the search engine
+     */
     void SetMode(EngineMode);
 
 signals:
-    void ConfigPathChanged(QString);
-    void OpenConfigRequest();
-    void RequestsPathChanged (QString);
-    void AnswersPathChanged (QString);
-    void SearchResult(QList<QList<RelativeIndex>>);
+/**/void ConfigPathChanged(QString);            //Is emited when path to configurations' file is changed
+/**/void OpenConfigRequest();                   //Is emited?
+/**/void RequestsPathChanged (QString);         //Is emited when path to requests' file is changed
+/**/void AnswersPathChanged (QString);          //Is emited when path to answers' file is chamged
+    void SearchResult(QList<QList<RelativeIndex>>);     //Is emited when search result is ready
 
 public slots:
-    void Search();
-    void CheckConfigPath();
+    void Search();                              //To make search with existing conditions
+/**/void CheckConfigPath(char);                 //Checks correction of configurations' file
+/**/void CheckRequestsPath(char);               //Checks correction of requests' file
     void SetConfigPath(QString);                //Sets path to config.json when it is changed
     void SetRequestsPath(QString);              //Sets path to requests.json when it is changed
     void SetAnswersPath(QString);               //Sets path to answers.json when it is changed
@@ -77,15 +92,15 @@ public slots:
     void SetMaxRequests(int);                   //Sets response limit when it is changed
 
 private:
-    void ConfigError();
-    void RequestsError();
+/**/void ConfigError();
+/**/void RequestsError();
     void InitializeConfig();                    //Loads configuration from the config.json file
     void InitializeRequests();                  //Loading data from the requests.json file
     void InitializeCheck();                     //Checking initialization
-    ConverterJSON* converter = nullptr;
-    InvertedIndex* index = nullptr;
-    SearchServer* server = nullptr;
-    QList<QList<RelativeIndex>> search_result;
+    ConverterJSON* converter = nullptr;         //Pointer to converter class
+    InvertedIndex* index = nullptr;             //Pointer to inverted index class
+    SearchServer* server = nullptr;             //Pointer to search server class
+    QList<QList<RelativeIndex>> search_result;  //Results of the search
     QString engine_name;                        //Search engine name
     QString engine_version;                     //Search eengine version
     int max_responses = 5;                      //Maximum number of responses

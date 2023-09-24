@@ -119,7 +119,7 @@ public:
     /**
      * @brief Gets the list of files' content
      * @return Returns list of files' content from files
-     * are included in the config.json
+     * that are included in the config.json
      */
     QList<QString> GetFilesPaths();
 
@@ -129,6 +129,49 @@ public:
      */
     QString GetRequestsPath();
 
+    /**
+     * @brief Checks configurations' file for errors
+     * @return char in format of ConvewrterStatus
+     */
+    char ConfigCorrectionCheck();
+
+    /**
+     * @brief Checking requests' file for errors
+     * @return char in format of ConvewrterStatus
+     */
+    char RequestsCorrectionCheck();
+
+public slots:
+
+    void ChangeConfigPath(QString);           //Changes path to config.json
+    void ChangeRequestsPath(QString);         //Changes path to requests.json
+    void ChangeAnswersPath(QString);          //Changes path to answers.json
+
+signals:
+    void ConfigLoaded(char);                  //Is emited when configuration is loaded from config.json
+    void RequestsLoaded(char);                //Is emited when requests are loaded from requests.json
+/**/void AnswersSaved();                      //Is emited when answers is successfully saved
+/**/void AnswersSaveError();                  //Is emited when answers is not saved
+    void ConfigUpdated(char);                 //Is emited when configurations is succrsfully changed
+    void RequestsUpdated(char);               //Is emited when requests is succrsfully changed
+    void AnswersUpdated();                    //Is emited when answers is succrsfully changed
+    void FileOpenFailure(QString);            //Is emited when can not open a file
+
+private:
+    ConverterJSON() = default;                //Removing constructor for the Singletone pattern
+    QString MakeRequestNumber(std::size_t);   //Generates string of a request for writing to answers.json
+    bool LoadConfigs();                       //Loads configuration from the configurations' file
+    bool LoadRequests();                      //Loads requests from  requests' file
+    static ConverterJSON* instance;           //Incstance of the converter
+    QString config_file_path = "config.json";       //Configuration file`s path
+    QString requests_file_path = "requests.json";   //Requests file`s path
+    QString answers_file_path = "answers.json";     //Answers file`s path
+    bool config_loaded = false;               //True if configurations loaded already
+    bool requests_loaded = false;             //True if requests loaded already
+    QJsonDocument* configuration = nullptr;   //Configurations as JSON document that are loaded from the file
+    QJsonDocument* requests = nullptr;        //Requests as JSON document that are loaded from the file
+};
+#endif
 //Removed to engine_core.h
 //    /**
 //     * @brief Gets the status of search engine
@@ -155,42 +198,8 @@ public:
 //     */
 //    bool IsRequestsInitialized();
 
-    char ConfigCorrectionCheck();             //Checking the config.json file for errors, returns a status
-    char RequestsCorrectionCheck();           //Checking the requests.json file for errors, returns a status
-public slots:
-//Removed to engine_core.h
-    void ChangeConfigPath(QString);           //Changes path to config.json
-    void ChangeRequestsPath(QString);         //Changes path to requests.json
-    void ChangeAnswersPath(QString);          //Changes path to answers.json
 //    void Initialize();                      //Initialise the engine
 //    void SetMaxRequests(int);               //Sets response limit when it is changed
-
-signals:
-    void ConfigLoaded(char);                  //Is emited when configuration is loaded from config.json
-    void RequestsLoaded(char);                //Is emited when requests are loaded from requests.json
-/**/void AnswersSaved();                      //Is emited when answers is successfully saved
-/**/void AnswersSaveError();                  //Is emited when answers is not saved
-    void ConfigUpdated(char);                 //Is emited when configurations is succrsfully changed
-    void RequestsUpdated(char);               //Is emited when requests is succrsfully changed
-    void AnswersUpdated();                    //Is emited when answers is succrsfully changed
-    void FileOpenFailure(QString);            //Is emited when can not open a file
-
-private:
-    ConverterJSON() = default;                //Removing constructor for the Singletone pattern
-    QString MakeRequestNumber(std::size_t);   //Generates string of a request for writing to answers.json
-    bool LoadConfigs();                       //Loads configuration from the configurations' file
-    bool LoadRequests();                      //Loads requests from  requests' file
-    static ConverterJSON* instance;           //Incstance of the converter
-    QString config_file_path = "./config.json";       //Configuration file`s path
-    QString requests_file_path = "./requests.json";   //Requests file`s path
-    QString answers_file_path = "./answers.json";     //Answers file`s path
-    bool config_loaded = false;               //True if configurations loaded already
-    bool requests_loaded = false;             //True if requests loaded already
-    QJsonDocument* configuration = nullptr;   //Configurations as JSON document that are loaded from the file
-    QJsonDocument* requests = nullptr;        //Requests as JSON document that are loaded from the file
-
-//Removed to engine_core.h
-
 //    void LoadSearchFiles();                 //Loads pathes of files for index from the config.json file
 //    void LoadSearchFiles(QJsonDocument&);   //Loads pathes of files for index from receivwed JSON document
 //    void InitializeConfig();                //Loads configuration from the config.json file
@@ -203,5 +212,3 @@ private:
 //    QList<QString> fileList;                //List of files for search
 //    QList<QString> file_paths;              //List of files` paths for search
 //    char engine_status = 0;                 //Search engine state
-};
-#endif
