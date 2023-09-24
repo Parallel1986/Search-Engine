@@ -17,6 +17,10 @@
 #include <QList>
 #include <QDir>
 
+enum {
+    MIN_RESPONSE    = 5
+};
+
 //List of configurations
 struct ConfigList
 {    
