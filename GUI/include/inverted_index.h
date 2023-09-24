@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INVERTED_INDEX_H
+#define INVERTED_INDEX_H
 #include <vector>
 #include <map>
 #include <string>
@@ -7,6 +8,7 @@
 #include <QMap>
 #include <QObject>
 
+//Structure of word's entry
 struct Entry
 {
     int doc_id, count;
@@ -41,7 +43,8 @@ public:
     QList<Entry> GetWordCount(const QString& word);
 
 private:
-    void CreateFrequencyDictionary();
-    QList<QString> docs;                            // список содержимого документов
-    QMap<QString, QList<Entry>> freq_dictionary;    // частотный словарь
+    void CreateFrequencyDictionary();               //Creqtes frequency dictionary
+    QList<QString> docs;                            //Contains list of documens' content
+    QMap<QString, QList<Entry>> freq_dictionary;    //Frequency dictionary
 };
+#endif

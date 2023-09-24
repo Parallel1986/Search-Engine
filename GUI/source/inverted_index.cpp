@@ -10,49 +10,47 @@
 #include <iostream>
 #include <sstream>
 
-
-
-
+//Updates documens' base
 void InvertedIndex::UpdateDocumentBase(QList<QString> input_docs)
-{	//Проходим по входящим документам и вставляем их в список
+{
     docs.clear();
     for (auto& document : input_docs)
 	{
         docs.append(document);
 	}
-    CreateFrequencyDictionary();	//Создаём частотный словарь
+    CreateFrequencyDictionary();
 }
 
+//Gets word's count in frequency dictionary
 QList<Entry> InvertedIndex::GetWordCount(const QString& word)
 {
-    if (freq_dictionary.empty())	//Если частотный словарь пустой, то создаёт его
+    if (freq_dictionary.empty())
 		CreateFrequencyDictionary();
 	if (freq_dictionary.find(word) == freq_dictionary.end())
-    {	//Если слово отсутствует, то возвращает пустой список
+    {
         QList<Entry> list;
 		return list;
 	}
 	else
-    {	//Инае возвращает список документов и количество вхождений
+    {
         QList<Entry> list = freq_dictionary.value(word);
 		return list;
 	}
 }
 
+//Creates frequency dictionary
 void InvertedIndex::CreateFrequencyDictionary()
 {
     freq_dictionary.clear();
-    size_t doc_id = 0;		//Для генерации номеров документов
+    size_t doc_id = 0;
 
-    QList<QFuture<void>> index_threads;     //Список для потоков
+    QList<QFuture<void>> index_threads;
 	for (auto& document : docs)
     {
-        //Создаём поток для каждого документа
         index_threads.append(QtConcurrent::run([&document, doc_id,/*dictionaries,*/ this]()
 			{                
-                QMap<QString,Entry> dictionary; //Частотный словарь документа
-
-                //Разбиваем текст документа на отдельные слова и вносим их в словарь
+                QMap<QString,Entry> dictionary;
+                //Spliting document to separate words
                 for (auto& word : document.split(QRegExp("\\W+"), Qt::SkipEmptyParts))
                 {
                     if (dictionary.contains(word))
@@ -62,6 +60,7 @@ void InvertedIndex::CreateFrequencyDictionary()
                         dictionary[word] = Entry(doc_id,1);
                     }
                 }
+                //Inserting entries to the dictionary
                 for (auto word = dictionary.begin();
                     word != dictionary.end()
                     ; ++word)
@@ -75,7 +74,7 @@ void InvertedIndex::CreateFrequencyDictionary()
             }));
             ++doc_id;
 	}
-    //Ожидаем завершения всех потоков
+
 	for (auto& thread : index_threads)
 	{
 		thread.waitForFinished();		
