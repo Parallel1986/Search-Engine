@@ -157,8 +157,8 @@ void EngineCore::Search()
 {
     switch (mode) {
     case EngineMode::AUTOCONFIG:
-        InitializeConfig();
     case EngineMode::STANDARD:
+        Initialize();
         index->UpdateDocumentBase(converter->GetTextDocuments());
         server->setMaxResponse(converter->GetResponsesLimit());
         search_result = (server->search(converter->GetRequests()));
@@ -166,6 +166,7 @@ void EngineCore::Search()
         break;
 
     case EngineMode::NO_CONFIG:
+        InitializeRequests();
         Loader::LoadFileContent(file_list, file_list);
         index->UpdateDocumentBase(file_list);
         server->setMaxResponse(max_responses);
@@ -174,6 +175,7 @@ void EngineCore::Search()
         break;
 
     case EngineMode::NO_REQUESTS:
+        InitializeConfig();
         index->UpdateDocumentBase(converter->GetTextDocuments());
         server->setMaxResponse(converter->GetResponsesLimit());
         search_result = (server->search(requests));

@@ -46,8 +46,32 @@ void ConverterJSON::ChangeConfigPath(QString new_path)
 {
     if (config_file_path != new_path)
     {
-      config_file_path = new_path;
-      emit ConfigUpdated(ConfigCorrectionCheck());
+        QFileInfo new_target(new_path);
+        if (new_target.exists())
+        {
+            if (new_target.isFile())
+            {
+                if (new_target.isReadable())
+                {
+                    config_file_path = new_path;
+                    emit ConfigUpdated(ConfigCorrectionCheck());
+                }
+                else
+                    emit FileOpenFailure(new_path);
+            }
+            else if (new_target.isDir())
+            {
+                if (new_target.isReadable())
+                {
+                    config_file_path = new_path + "/config.json";
+                    emit ConfigUpdated(ConfigCorrectionCheck());
+                }
+            }
+            else
+                emit FileOpenFailure(new_path);
+        }
+        else
+            emit FileOpenFailure(new_path);
     }
 }
 
@@ -56,8 +80,32 @@ void ConverterJSON::ChangeRequestsPath(QString new_path)
 {
     if (requests_file_path != new_path)
     {
-      requests_file_path = new_path;
-      emit RequestsUpdated(RequestsCorrectionCheck());
+        QFileInfo new_target(new_path);
+                if (new_target.exists())
+        {
+            if (new_target.isFile())
+            {
+                if (new_target.isReadable())
+                {
+                    requests_file_path = new_path;
+                    emit RequestsUpdated(RequestsCorrectionCheck());
+                }
+                else
+                    emit FileOpenFailure(new_path);
+            }
+            else if (new_target.isDir())
+            {
+                if (new_target.isReadable())
+                {
+                    requests_file_path = new_path + "/requests.json";
+                    emit RequestsUpdated(RequestsCorrectionCheck());
+                }
+            }
+            else
+                emit FileOpenFailure(new_path);
+        }
+        else
+            emit FileOpenFailure(new_path);
     }
 }
 
@@ -66,8 +114,44 @@ void ConverterJSON::ChangeAnswersPath(QString new_path)
 {
     if (answers_file_path != new_path)
     {
-        answers_file_path = new_path;
-        emit AnswersUpdated();
+        QFileInfo new_target(new_path);
+        if (new_target.exists())
+        {
+            if (new_target.isFile())
+            {
+                if (new_target.isWritable())
+                {
+                    answers_file_path = new_path;
+                    emit AnswersUpdated();
+                }
+                else
+                    emit FileOpenFailure(new_path);
+            }
+            else if (new_target.isDir())
+            {
+                if (new_target.isReadable())
+                {
+                    answers_file_path = new_path + "/answers.json";
+                    emit AnswersUpdated();
+                }
+            }
+            else
+                emit FileOpenFailure(new_path);
+        }
+        else
+            if (new_target.isWritable())
+            {
+                if (new_target.isDir())
+                {
+                    answers_file_path = new_path + "/answers.json";
+                    emit AnswersUpdated();
+                }
+                else if (new_target.isFile())
+                {
+                    answers_file_path = new_path;
+                    emit AnswersUpdated();
+                }
+            }
     }
 }
 

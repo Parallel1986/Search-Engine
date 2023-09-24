@@ -17,7 +17,7 @@
 #include <QList>
 #include <QDir>
 
-//List of engine's settings
+//List of configurations
 struct ConfigList
 {    
     QString enegine_name,           //Engine's name
@@ -177,9 +177,9 @@ private:
     bool LoadConfigs();                       //Loads configuration from the configurations' file
     bool LoadRequests();                      //Loads requests from  requests' file
     static ConverterJSON* instance;           //Incstance of the converter
-    QString config_file_path = "/config.json";       //Configuration file`s path
-    QString requests_file_path = "/requests.json";   //Requests file`s path
-    QString answers_file_path = "/answers.json";     //Answers file`s path
+    QString config_file_path = "./config.json";       //Configuration file`s path
+    QString requests_file_path = "./requests.json";   //Requests file`s path
+    QString answers_file_path = "./answers.json";     //Answers file`s path
     bool config_loaded = false;               //True if configurations loaded already
     bool requests_loaded = false;             //True if requests loaded already
     QJsonDocument* configuration = nullptr;   //Configurations as JSON document that are loaded from the file
