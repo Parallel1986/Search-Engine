@@ -102,12 +102,12 @@ private:
     SearchServer* server = nullptr;             //Pointer to search server class
     QList<QList<RelativeIndex>> search_result;  //Results of the search
     QString engine_name;                        //Search engine name
-    QString engine_version;                     //Search eengine version
-    int max_responses = 5;                      //Maximum number of responses
+    QString engine_version;                     //Search engine version
+    int max_responses = MIN_RESPONSE;           //Maximum number of responses
     QList<QString> requests;                    //List of requests
     QList<QString> file_list;                   //List of files` content for search
-    QList<QString> files_paths;                  //List of files` paths for search
-    char engine_status = 0;                     //Search engine state
+    QList<QString> files_paths;                 //List of files` paths for search
+    char engine_status = ConverterStatus::NO_ERRORS;    //Search engine state
     EngineMode mode = EngineMode::STANDARD;     //Mode of engine
 };
 

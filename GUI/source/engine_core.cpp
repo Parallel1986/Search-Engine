@@ -116,8 +116,22 @@ char EngineCore::GetEngineStatus()
 //Initialize search engine
 void EngineCore::Initialize()
 {
-    InitializeConfig();
-    InitializeRequests();
+    switch (mode) {
+    case EngineMode::STANDARD:
+    case EngineMode::AUTOCONFIG:
+        InitializeConfig();
+        InitializeRequests();
+        break;
+    case EngineMode::NO_CONFIG:
+        InitializeRequests();
+        break;
+    case EngineMode::NO_REQUESTS:
+        InitializeConfig();
+        break;
+    case::EngineMode::MANUAL:
+    default:
+        break;
+    }
 }
 
 //Add requests
@@ -158,35 +172,32 @@ void EngineCore::Search()
     switch (mode) {
     case EngineMode::AUTOCONFIG:
     case EngineMode::STANDARD:
-        Initialize();
         index->UpdateDocumentBase(converter->GetTextDocuments());
-        server->setMaxResponse(converter->GetResponsesLimit());
-        search_result = (server->search(converter->GetRequests()));
+        server->SetMaxResponse(converter->GetResponsesLimit());
+        search_result = (server->Search(converter->GetRequests()));
         converter->PutAnswers(search_result);
         break;
 
     case EngineMode::NO_CONFIG:
-        InitializeRequests();
         Loader::LoadFileContent(file_list, file_list);
         index->UpdateDocumentBase(file_list);
-        server->setMaxResponse(max_responses);
-        search_result = (server->search(converter->GetRequests()));
+        server->SetMaxResponse(max_responses);
+        search_result = (server->Search(converter->GetRequests()));
         converter->PutAnswers(search_result);
         break;
 
     case EngineMode::NO_REQUESTS:
-        InitializeConfig();
         index->UpdateDocumentBase(converter->GetTextDocuments());
-        server->setMaxResponse(converter->GetResponsesLimit());
-        search_result = (server->search(requests));
+        server->SetMaxResponse(converter->GetResponsesLimit());
+        search_result = (server->Search(requests));
         converter->PutAnswers(search_result);
         break;
 
     case EngineMode::MANUAL:
         Loader::LoadFileContent(file_list, file_list);
         index->UpdateDocumentBase(file_list);
-        server->setMaxResponse(max_responses);
-        search_result = (server->search(requests));
+        server->SetMaxResponse(max_responses);
+        search_result = (server->Search(requests));
         converter->PutAnswers(search_result);
         break;
 
@@ -194,6 +205,16 @@ void EngineCore::Search()
     default:
         break;
     }
+
+}
+
+void EngineCore::CheckConfigPath(char status)
+{
+
+}
+
+void EngineCore::CheckRequestsPath(char status)
+{
 
 }
 
