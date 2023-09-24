@@ -15,7 +15,7 @@ struct Entry
     Entry(){}
     Entry(int in_doc_id, int in_count) : doc_id(in_doc_id), count(in_count){}
 
-    // Данный оператор необходим для проведения тестовых сценариев
+    // Required for unit tests
     bool operator ==(const Entry& other) const {
         return (doc_id == other.doc_id &&
                 count == other.count);
@@ -27,19 +27,17 @@ class InvertedIndex
 
 public:
     InvertedIndex() = default;
-/*
-* Обновить или заполнить базу документов, по которой будем совершать
-поиск
-* @param texts_input содержимое документов
+/**
+* Updates documents' base for search
+* @param texts_input documents' content
 */
     void UpdateDocumentBase(QList<QString> input_docs);
 
-/*
-* Метод определяет количество вхождений слова word в загруженной базе
-документов
-* @param word слово, частоту вхождений которого необходимо определить
-* @return возвращает подготовленный список с частотой слов
-*/
+/**
+ * Method gets count of word's entries in the loaded base of documents
+ * @param word word that count of entries needs to get
+ * @return returns list of word.s entries
+ */
     QList<Entry> GetWordCount(const QString& word);
 
 private:
