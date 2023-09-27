@@ -6,20 +6,21 @@
 
 class MainWindow;
 
-ConfigWindow::ConfigWindow(QWidget *parent, ConverterJSON *converter)
+ConfigWindow::ConfigWindow(QWidget *parent, EngineCore *core)
     : QMainWindow(parent)
     , ui(new Ui::Config_window)
+    , core(core)
 {
     ui->setupUi(this);
-    this->converter = converter;
+    this->core = core;
     this->hide();
     search_files_list = new QStringListModel();
-    converter->initialize();
+    core->initialize();
     fillSettings();
     fillFields();
 }
 
-//Заполнить поля
+//Loading text fields
 void ConfigWindow::fillFields()
 {
     ui->max_response_spin->setValue(settings.max_responses);
@@ -33,16 +34,16 @@ void ConfigWindow::fillFields()
     emit ready();
 }
 
-//Загрузить настройки
+//Loading configurations
 void ConfigWindow::fillSettings()
 {
-    settings.enegine_name = converter->getEngineName();
-    settings.engine_ver = converter->getEngineVersion();
-    settings.max_responses = converter->GetResponsesLimit();
+    settings.enegine_name = core->getEngineName();
+    settings.engine_ver = core->getEngineVersion();
+    settings.max_responses = core->getResponsesLimit();
     settings.files.clear();
     bad_files.clear();
     bad_files.append("    Error files! Could not open:");
-    for (auto& file : converter->getFilesPaths())
+    for (auto& file : core->getFilesPaths())
     {
         QDir check(file);
         if (check.isReadable())
@@ -53,10 +54,9 @@ void ConfigWindow::fillSettings()
 
 }
 
-//Деструктор
 ConfigWindow::~ConfigWindow() {delete ui;}
 
-//Нажата кнопка "Ок"
+//Ok button is pressed
 void ConfigWindow::clickedOk()
 {
     settings.enegine_name = ui->engine_name_edit->text();
@@ -70,8 +70,8 @@ void ConfigWindow::clickedOk()
         else
             break;
     }
-    converter->putConfig(settings, config_path);
-    converter->initialize();
+    core->putConfig(settings, config_path);
+    core->initialize();
     emit configPathChanged(config_path);
     if (settings.files.empty())
     {
@@ -81,28 +81,28 @@ void ConfigWindow::clickedOk()
         this->close();
 }
 
-//Нажата кнопка "Cancel"
+//Cancel button is pressed
 void ConfigWindow::clickedCancel()
 {
     emit noConfigChanges();
     this->close();
 }
 
-//Нажата кнопка "Remove"
+//Remove button is pressed
 void ConfigWindow::clickedRemove()
 {
-    QItemSelectionModel* selection = ui->file_listView->selectionModel();   //Выделенный элемент
-    if (!selection->selectedIndexes().empty())                  //Проверяем что выделение не пустое
+    QItemSelectionModel* selection = ui->file_listView->selectionModel();
+    if (!selection->selectedIndexes().empty())
     {
-        QModelIndexList index = selection->selectedIndexes();   //Список выбраных строк
-        int row = index[0].row();                               //Первая выбранная строка
-        search_files_list->removeRows(row,1,QModelIndex());     //Удаляем строку row
-        ui->file_listView->setModel(search_files_list);         //Переназначаем список строк
+        QModelIndexList index = selection->selectedIndexes();
+        int row = index[0].row();
+        search_files_list->removeRows(row,1,QModelIndex());
+        ui->file_listView->setModel(search_files_list);
     }
     settings.files = search_files_list->stringList();
 }
 
-//Нажата кнопка "Add"
+//Add button is pressed
 void ConfigWindow::clickedAdd()
 {
     QFileDialog* dlg = new QFileDialog();

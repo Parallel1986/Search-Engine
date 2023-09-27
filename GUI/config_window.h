@@ -6,7 +6,7 @@
 #include <QStringListModel>
 
 //Включения поискового движка //Search engine`s includes
-#include "include/converter_json.h"
+#include "include/engine_core.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -20,7 +20,7 @@ class ConfigWindow : public QMainWindow
 
     friend class MainWindow;
 public:
-    ConfigWindow(QWidget *parent = nullptr, ConverterJSON *converter = nullptr);
+    ConfigWindow(QWidget *parent = nullptr, EngineCore *core = nullptr);
     ~ConfigWindow();    
 
 public slots:
@@ -38,7 +38,7 @@ private:
     void fillSettings();
     bool config_ready = false;
     Ui::Config_window *ui;
-    ConverterJSON* converter;
+    EngineCore* core;
     QStringListModel *search_files_list;
     ConfigList settings;
     QList<QString> bad_files {"    Error files! Could not open:"};

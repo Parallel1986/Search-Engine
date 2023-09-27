@@ -5,15 +5,13 @@
 #include <QDir>
 #include <QMessageBox>
 
-//Включения формы настроек config.json //Includes of settings of config.json
+//Includes of settings of config.json
 #include "config_window.h"
 
-//Включения поискового движка //Search engine`s includes
-#include "include/file_index.h"
-#include "include/converter_json.h"
-#include "include/inverted_index.h"
+//Search engine`s includes
+#include "include/engine_core.h"
 
-//Включение виджетов
+//Widgets
 #include "include/requestadddialog.h"
 
 class EngineCore;
@@ -27,7 +25,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     friend class ConfigWindow;
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget *parent = nullptr, EngineCore* search_engine = nullptr);
     ~MainWindow();
     void initializeSearchEngine();
 
@@ -52,7 +50,7 @@ private:
     void configError();
     void requestsError();
     void loadRequests();
-    void readynessCheck();
+    void readinessCheck();
     bool config_ready = false;
     bool requests_ready = false;
     bool has_result = false;
