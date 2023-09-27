@@ -1,5 +1,5 @@
-#ifndef MAINWINDOWZCEKNQ_H
-#define MAINWINDOWZCEKNQ_H
+#ifndef MAINWINDOWGMPYSP_H
+#define MAINWINDOWGMPYSP_H
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QAction>
@@ -279,6 +279,7 @@ public:
         QObject::connect(config_change, SIGNAL(clicked()), MainWindow, SLOT(modifyConfig()));
         QObject::connect(search_button, SIGNAL(clicked()), MainWindow, SLOT(search()));
         QObject::connect(save_button, SIGNAL(clicked()), MainWindow, SLOT(saveResult()));
+        QObject::connect(mode_select, SIGNAL(currentIndexChanged(int)), MainWindow, SLOT(changeMode()));
 
         mode_select->setCurrentIndex(0);
 
@@ -335,4 +336,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // MAINWINDOWZCEKNQ_H
+#endif // MAINWINDOWGMPYSP_H
