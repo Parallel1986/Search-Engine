@@ -34,69 +34,69 @@ public:
      * @return Returns a byte with engine's status that are described
      * in the enum ConverterStatus
      */
-    char GetEngineStatus();
+    char getEngineStatus();
 
     /**
      * @return Returns true if the engine is initialised
      * by the config.json and requests.json
      */
-    bool IsInitialized();
+    bool isInitialized();
 
     /**
      * @return Returns true if the engine is initialised
      * by the config.json
      */
-    bool IsConfigInitialized();
+    bool isConfigInitialized();
 
     /**
      * @return Returns true if the engine is initialised
      * by the requests.json
      */
-    bool IsRequestsInitialized();
+    bool isRequestsInitialized();
 
     /**
      * @brief Adds requests to the end of requests' list
      */
-    void AddRequest(QString);
+    void addRequest(QString);
 
     /**
      * @brief Adds path to file for search in the end of files' list
      */
-    void AddSearchFile(QString);
+    void addSearchFile(QString);
 
     /**
      * @brief Create configurations' file with given settings
      */
-    void GenerateConfigFile(QStringList, int);
+    void generateConfigFile(QStringList, int);
 
     /**
      * @brief Sets a mode of the search engine
      */
-    void SetMode(EngineMode);
+    void setMode(EngineMode);
 
 signals:
-/**/void ConfigPathChanged(QString);            //Is emited when path to configurations' file is changed
-/**/void OpenConfigRequest();                   //Is emited?
-/**/void RequestsPathChanged (QString);         //Is emited when path to requests' file is changed
-/**/void AnswersPathChanged (QString);          //Is emited when path to answers' file is chamged
-    void SearchResult(QList<QList<RelativeIndex>>);     //Is emited when search result is ready
+/**/void configPathChanged(QString);            //Is emited when path to configurations' file is changed
+/**/void openConfigRequest();                   //Is emited?
+/**/void requestsPathChanged (QString);         //Is emited when path to requests' file is changed
+/**/void answersPathChanged (QString);          //Is emited when path to answers' file is chamged
+    void searchResult(QList<QList<RelativeIndex>>);     //Is emited when search result is ready
 
 public slots:
-    void Search();                              //To make search with existing conditions
-/**/void CheckConfigPath(char);                 //Checks correction of configurations' file
-/**/void CheckRequestsPath(char);               //Checks correction of requests' file
-    void SetConfigPath(QString);                //Sets path to config.json when it is changed
-    void SetRequestsPath(QString);              //Sets path to requests.json when it is changed
-    void SetAnswersPath(QString);               //Sets path to answers.json when it is changed
-    void Initialize();                          //Initialise the engine
-    void SetMaxRequests(int);                   //Sets response limit when it is changed
+    void search();                              //To make search with existing conditions
+/**/void checkConfigPath(char);                 //Checks correction of configurations' file
+/**/void checkRequestsPath(char);               //Checks correction of requests' file
+    void setConfigPath(QString);                //Sets path to config.json when it is changed
+    void setRequestsPath(QString);              //Sets path to requests.json when it is changed
+    void setAnswersPath(QString);               //Sets path to answers.json when it is changed
+    void initialize();                          //Initialise the engine
+    void setMaxRequests(int);                   //Sets response limit when it is changed
 
 private:
-/**/void ConfigError();
-/**/void RequestsError();
-    void InitializeConfig();                    //Loads configuration from the config.json file
-    void InitializeRequests();                  //Loading data from the requests.json file
-    void InitializeCheck();                     //Checking initialization
+/**/void configError();
+/**/void requestsError();
+    void initializeConfig();                    //Loads configuration from the config.json file
+    void initializeRequests();                  //Loading data from the requests.json file
+    void initializeCheck();                     //Checking initialization
     ConverterJSON* converter = nullptr;         //Pointer to converter class
     InvertedIndex* index = nullptr;             //Pointer to inverted index class
     SearchServer* server = nullptr;             //Pointer to search server class

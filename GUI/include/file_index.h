@@ -33,14 +33,14 @@ public:
     * @return returns sorted list of relevant answers
     * for given requests
 	*/
-    QList<QList<RelativeIndex>> Search(const
+    QList<QList<RelativeIndex>> search(const
         QList<QString>& queries_input);
 
     /**
      * @brief sets maximal requests' count
      * @param max_response
      */
-    void SetMaxResponse(int max_response);
+    void setMaxResponse(int max_response);
 private:
     InvertedIndex _index;
 	int max_response = 5;

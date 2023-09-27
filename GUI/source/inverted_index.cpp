@@ -11,21 +11,21 @@
 #include <sstream>
 
 //Updates documens' base
-void InvertedIndex::UpdateDocumentBase(QList<QString> input_docs)
+void InvertedIndex::updateDocumentBase(QList<QString> input_docs)
 {
     docs.clear();
     for (auto& document : input_docs)
 	{
         docs.append(document);
 	}
-    CreateFrequencyDictionary();
+    createFrequencyDictionary();
 }
 
 //Gets word's count in frequency dictionary
-QList<Entry> InvertedIndex::GetWordCount(const QString& word)
+QList<Entry> InvertedIndex::getWordCount(const QString& word)
 {
     if (freq_dictionary.empty())
-		CreateFrequencyDictionary();
+        createFrequencyDictionary();
 	if (freq_dictionary.find(word) == freq_dictionary.end())
     {
         QList<Entry> list;
@@ -39,7 +39,7 @@ QList<Entry> InvertedIndex::GetWordCount(const QString& word)
 }
 
 //Creates frequency dictionary
-void InvertedIndex::CreateFrequencyDictionary()
+void InvertedIndex::createFrequencyDictionary()
 {
     freq_dictionary.clear();
     size_t doc_id = 0;

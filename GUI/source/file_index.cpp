@@ -11,13 +11,13 @@
 #include <QRegularExpression>
 
 //Sets maximal count of answers
-void SearchServer::SetMaxResponse(int max_response)
+void SearchServer::setMaxResponse(int max_response)
 {
 	this->max_response = max_response; 
 }
 
 //Make search
-QList<QList<RelativeIndex>> SearchServer::Search(const QList<QString>& queries_input)
+QList<QList<RelativeIndex>> SearchServer::search(const QList<QString>& queries_input)
 {
     QList<QList<RelativeIndex>> result;
 
@@ -43,7 +43,7 @@ QList<QList<RelativeIndex>> SearchServer::Search(const QList<QString>& queries_i
         //Counting count of word's instances
         while (iterator != iterator_end)
 		{
-            QList<Entry> helper(_index.GetWordCount(*iterator));
+            QList<Entry> helper(_index.getWordCount(*iterator));
             if (!helper.empty())
 			{
                 int counter = 0;
@@ -66,7 +66,7 @@ QList<QList<RelativeIndex>> SearchServer::Search(const QList<QString>& queries_i
 			auto it = sorted_words.begin();
             auto it_end = sorted_words.end();
             QMap<int/*doc_id*/, int/*relevance*/> doc_absolute_relevance;
-            QList<Entry> helper(_index.GetWordCount(it.value()));
+            QList<Entry> helper(_index.getWordCount(it.value()));
             //Counting absolute relevance
             while (doc_absolute_relevance.size() < max_response && it != it_end)
 			{
@@ -81,7 +81,7 @@ QList<QList<RelativeIndex>> SearchServer::Search(const QList<QString>& queries_i
 				{
                     ++it;
 					if (it != it_end)
-                        helper = _index.GetWordCount(it.value());
+                        helper = _index.getWordCount(it.value());
 				}
 			}
 
@@ -91,7 +91,7 @@ QList<QList<RelativeIndex>> SearchServer::Search(const QList<QString>& queries_i
             }
             while (it != it_end)
 			{
-                helper = _index.GetWordCount(it.value());
+                helper = _index.getWordCount(it.value());
 				for (auto& entry : helper)
 				{
                     if (doc_absolute_relevance.contains(entry.doc_id))

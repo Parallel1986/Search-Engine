@@ -31,17 +31,17 @@ public:
 * Updates documents' base for search
 * @param texts_input documents' content
 */
-    void UpdateDocumentBase(QList<QString> input_docs);
+    void updateDocumentBase(QList<QString> input_docs);
 
 /**
  * Method gets count of word's entries in the loaded base of documents
  * @param word word that count of entries needs to get
  * @return returns list of word.s entries
  */
-    QList<Entry> GetWordCount(const QString& word);
+    QList<Entry> getWordCount(const QString& word);
 
 private:
-    void CreateFrequencyDictionary();               //Creqtes frequency dictionary
+    void createFrequencyDictionary();               //Creqtes frequency dictionary
     QList<QString> docs;                            //Contains list of documens' content
     QMap<QString, QList<Entry>> freq_dictionary;    //Frequency dictionary
 };
