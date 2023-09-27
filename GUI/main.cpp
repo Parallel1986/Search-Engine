@@ -202,20 +202,20 @@ int main(int argC, char *argV[])
         else if (res.comands != ComandLineOrders::NO_ORDERS)
         {
             if (res.comands & ComandLineOrders::CHANGE_ANSWERS_FILE)
-                engine.SetAnswersPath(res.answers_path);
+                engine.setAnswersPath(res.answers_path);
 
             if (res.comands & ComandLineOrders::CHANGE_CONFIG_FILE)
-                engine.SetConfigPath(res.config_path);
+                engine.setConfigPath(res.config_path);
 
             if (res.comands & ComandLineOrders::CHANGE_REQUESTS_FILE)
-                engine.SetRequestsPath(res.request_path);
+                engine.setRequestsPath(res.request_path);
 
             if (res.comands & ComandLineOrders::CHANGE_MAX_RESPONSE)
-                engine.SetMaxRequests(res.max_response);
+                engine.setMaxRequests(res.max_response);
 
             if (res.comands & ComandLineOrders::MANUAL_MODE)
             {
-                engine.SetMode(EngineMode::MANUAL);
+                engine.setMode(EngineMode::MANUAL);
                 if (res.max_response == 0)
                 {
                     std::cerr << "Incorrect maximum response limit!\n"
@@ -223,7 +223,7 @@ int main(int argC, char *argV[])
                     return -1;
                 }
                 else
-                    engine.SetMaxRequests(res.max_response);
+                    engine.setMaxRequests(res.max_response);
 
                 if (res.requests.isEmpty())
                 {
@@ -235,7 +235,7 @@ int main(int argC, char *argV[])
                 {
                     for (auto& request : res.requests)
                     {
-                        engine.AddRequest(request);
+                        engine.addRequest(request);
                     }
                 }
 
@@ -249,7 +249,7 @@ int main(int argC, char *argV[])
                 {
                     for (auto& file : res.files)
                     {
-                        engine.AddSearchFile(file);
+                        engine.addSearchFile(file);
                     }
                 }
             }
@@ -276,7 +276,7 @@ int main(int argC, char *argV[])
                                  "Application will be terminated!\n";
                     return -1;
                 }
-                engine.GenerateConfigFile(res.files, res.max_response, res.requests);
+                engine.generateConfigFile(res.files, res.max_response);
             }
 
             if ((res.comands & ComandLineOrders::NO_CONFIG_MODE)
@@ -299,10 +299,10 @@ int main(int argC, char *argV[])
 
                 for (auto& file : res.files)
                 {
-                    engine.AddSearchFile(file);
+                    engine.addSearchFile(file);
                 }
-                engine.SetMaxRequests(res.max_response);
-                engine.SetMode(EngineMode::NO_CONFIG);
+                engine.setMaxRequests(res.max_response);
+                engine.setMode(EngineMode::NO_CONFIG);
             }
             else
             {
@@ -324,9 +324,9 @@ int main(int argC, char *argV[])
 
                 for (auto& request : res.requests)
                 {
-                    engine.AddRequest(request);
+                    engine.addRequest(request);
                 }
-                engine.SetMode(EngineMode::NO_REQUESTS);
+                engine.setMode(EngineMode::NO_REQUESTS);
             }
             else
             {
@@ -349,7 +349,7 @@ int main(int argC, char *argV[])
 
                 for (auto& file : res.files)
                 {
-                    engine.AddSearchFile(file);
+                    engine.addSearchFile(file);
                 }
             }
 
@@ -367,7 +367,7 @@ int main(int argC, char *argV[])
                 {
                     for (auto& request : res.requests)
                     {
-                        engine.AddRequest(request);
+                        engine.addRequest(request);
                     }
                 }
             }
@@ -384,8 +384,8 @@ int main(int argC, char *argV[])
 #endif
 
 #ifndef GUI
-    engine.Initialize();
-    engine.Search();
+    engine.initialize();
+    engine.search();
 #endif
 
 #ifdef GUI
