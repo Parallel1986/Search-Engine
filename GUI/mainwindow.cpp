@@ -373,3 +373,8 @@ void MainWindow::reloadFiles()
     files_list_model->setStringList(core->getFiles());
 }
 
+//
+void MainWindow::saveResultAsText()
+{
+    core->saveResultAsText();
+}
