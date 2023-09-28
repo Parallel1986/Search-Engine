@@ -13,25 +13,9 @@ MainWindow::MainWindow(QWidget *parent, EngineCore* search_engine)
     r_dialog = new RequestAddDialog(this);          //Creating add request dialog
     request_list_model = new QStringListModel;      //Creating model for results view
     files_list_model = new QStringListModel;        //Creating model for files view
-    //Connecting slots and signals
     connect(r_dialog,&RequestAddDialog::newRequest, this, &MainWindow::modifyRequests);
     checkUI();                                      //Checking states of UI warnings
     ui->results_tree_widget->setColumnCount(1);     //Setting number of columns in result's model
-//    readinessCheck();                               //Checking readiness
-
-//Removed with conf_ui
-//    conf_ui = new ConfigWindow(this,search_engine); //Creatign window for settings
-//    loadRequests();                                 //Checking requests
-//    conf_ui->close();                               //Closing settings window
-//    if (!(core->getEngineStatus()&ConverterStatus::CONFIG_MISSED))     //Проверка наличия файла config.json
-//        ui->config_path_edit->setText(conf_ui->config_path);                //Выводим путь config.json в главном окне
-//Moved to main.cpp
-//    connect(core,&EngineCore::openConfigRequest, this,&MainWindow::openConfig);
-//    connect(core, &EngineCore::noConfigChanges, this, &MainWindow::checkConfigPath);
-//    connect(core, &EngineCore::configPathChanged, this, &MainWindow::setConfigPath);
-//    connect(core, &EngineCore::configPathChanged,this,&MainWindow::setConfigPath);
-//    connect(core,&EngineCore::requestsPathChanged,this,&MainWindow::setRequestsPath);
-//    connect(core,&EngineCore::answersPathChanged,this,&MainWindow::setAnswersPath);
 }
 
 MainWindow::~MainWindow()
@@ -43,54 +27,6 @@ MainWindow::~MainWindow()
     if (r_dialog != nullptr)
         delete r_dialog;            //Deleting add requests dialog
 }
-
-//Checking configuration
-//void MainWindow::checkConfigPath()
-//{
-//    if (core->getEngineStatus()&ConverterStatus::CONFIG_MISSED)
-//    {
-//        ui->config_path_edit->clear();
-//        ui->no_config_mark->show();
-//        config_ready = false;
-//    }
-//    else if ((core->getEngineStatus()&ConverterStatus::CONFIG_FIELD_MISSED)
-//            ||(core->getEngineStatus()&ConverterStatus::SEARCH_FILES_MISSED)
-//            )
-//    {
-//        ui->no_config_mark->show();
-//        config_ready = false;
-//        configError();
-//    }
-//    readinessCheck();
-//}
-
-//Initialising search engine
-//void MainWindow::initializeSearchEngine()
-//{
-//    if (!core->isConfigInitialized())
-//    {
-//        configError();
-//        config_ready = false;
-//    }
-//    else
-//    {
-//        ui->no_config_mark->hide();
-//        config_ready = true;
-//    }
-
-//    if (!core->isRequestsInitialized())
-//    {
-//        requestsError();
-//        requests_ready = false;
-//    }
-//    else
-//    {
-//        ui->no_requests_mark->hide();
-//        requests_ready = true;
-//    }
-
-//    readinessCheck();
-//}
 
 //Open configurations' file
 void MainWindow::openConfig()
@@ -154,14 +90,6 @@ void MainWindow::deleteRequests()
         emit deletedRequest(index[0].data().toString());
     }
 }
-
-//Modifying configuration
-//void MainWindow::modifyConfig()
-//{
-//    conf_ui->fillSettings();
-//    conf_ui->fillFields();
-//    conf_ui->show();
-//}
 
 //Changing requests
 void MainWindow::modifyRequests(QString new_request)
@@ -445,11 +373,3 @@ void MainWindow::reloadFiles()
     files_list_model->setStringList(core->getFiles());
 }
 
-//void MainWindow::search()
-//{
-//Removed to engine_core.cpp
-//    index->UpdateDocumentBase(converter->GetTextDocuments());                   //Обновляем список документов в индексе
-//    server = new SearchServer(*index);                                          //Создаём поисковый сервер
-//    server->setMaxResponse(converter->GetResponsesLimit());                     //Устанавливаем максимальное количество результатов
-//    search_result = (server->search(converter->GetRequests()));                 //Проводим поиск и записываем результат
-//}

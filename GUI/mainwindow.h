@@ -15,6 +15,7 @@
 //Widgets
 #include "include/requestadddialog.h"
 
+//Modes in main window
 enum EngineMode_MW
 {
     STAND   = 0,
@@ -36,59 +37,49 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr, EngineCore* search_engine = nullptr);
     ~MainWindow();
-//    void initializeSearchEngine();
 
 signals:
-/**/void savedConfig(ConfigList);
-/**/void addedFile(QString);
-/**/void addedRequest(QString);
-/**/void deletedRequest(QString);
-/**/void deletedFile(QString);
-/**/void changedResponseLimit(int);
-/**/void changedMode(EngineMode);
+    void savedConfig(ConfigList);   //Is emited when configurations is saved
+    void addedFile(QString);        //Is emited when file is added
+    void addedRequest(QString);     //Is emited when request is added
+    void deletedRequest(QString);   //Is emited when request in the list is deleted
+    void deletedFile(QString);      //Is emited when file in the list is deleted
+    void changedResponseLimit(int); //Is emited when response count is changed
+    void changedMode(EngineMode);   //Is emited when changed mode in mode's selector
 
 public slots:
-    void search();
-    void openConfig();
-    void openRequests();
-    void openAnswers();
-    void addRequests();
-    void deleteRequests();
-//    void modifyConfig();
-    void modifyRequests(QString);
-    void setConfigPath(QString);
-    void setRequestsPath(QString);
-    void setAnswersPath(QString);
-//    void checkConfigPath();
-    void saveResult();
-/**/void changeMode(EngineMode);
-    void configSave();
-    void addFile();
-    void deleteFile();
-    void showResult(QList<QList<RelativeIndex>>);
-    void loadConfig(ConfigList);
-    void loadRequests(QStringList);
-    void configError(char);
-private:    
-    void checkUI();
-    void reloadFiles();
-    void requestsError();    
-    void readinessCheck();
-    bool config_ready = false;
-    bool requests_ready = false;
-    bool has_result = false;
-    Ui::MainWindow *ui = nullptr;
-//    ConfigWindow *conf_ui = nullptr;
-    RequestAddDialog* r_dialog = nullptr;
-    QStringListModel *request_list_model = nullptr;
-    QStringListModel *files_list_model = nullptr;
-    EngineCore* core = nullptr;
-
-//Removed to engine_core.h
-//    QList<QList<RelativeIndex>> search_result;
-//    QList<QString> requests_list;
-//    ConverterJSON* converter = nullptr;
-//    InvertedIndex* index = nullptr;
-//    SearchServer* server = nullptr;
+    void search();                  //Search button is presed
+    void openConfig();              //Open configurations' file button is pressed
+    void openRequests();            //Open requests' file button is pressed
+    void openAnswers();             //Open answers' file button is pressed
+    void addRequests();             //Add request button is pressed
+    void deleteRequests();          //Delete request button is pressed
+    void modifyRequests(QString);   //New request is added
+    void setConfigPath(QString);    //New path to configurations' file is setted
+    void setRequestsPath(QString);  //New path to requests' file is setted
+    void setAnswersPath(QString);   //New path to answers' file is setted
+    void saveResult();              //Save result as JSON file
+    void saveResultAsText();        //Save result as text file
+    void changeMode(EngineMode);    //Change mode of engine
+    void configSave();              //Save button in configurations' section
+    void addFile();                 //Add button in requests' section is pressed
+    void deleteFile();              //Delete button in files' section is pressed
+    void showResult(QList<QList<RelativeIndex>>);   //Fill results of search
+    void loadConfig(ConfigList);    //Fill filelds of configurations
+    void loadRequests(QStringList); //Fill requests' field
+    void configError(char);         //Open configurations' error window
+    void requestsError();           //Open requests' error window
+private:
+    void checkUI();                 //Checkes error marks
+    void reloadFiles();             //is needed?//Reloads files' list
+    void readinessCheck();          //Checkes readiness to search
+    bool config_ready = false;      //Flag of configurations' readiness
+    bool requests_ready = false;    //Flag of requests' readiness
+    bool has_result = false;        //Flag of existing result
+    Ui::MainWindow *ui = nullptr;   //User interface
+    RequestAddDialog* r_dialog = nullptr;           //Request add dialog window
+    QStringListModel *request_list_model = nullptr; //List model for requests' field
+    QStringListModel *files_list_model = nullptr;   //List model for files' field
+    EngineCore* core = nullptr;     //Pointer to core of search engine
 };
 #endif // MAINWINDOW_H
