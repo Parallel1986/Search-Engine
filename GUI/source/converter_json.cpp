@@ -13,14 +13,6 @@
 #include <QFile>
 #include <QtConcurrent/QtConcurrent>
 
-//Get instance of the converter
-//ConverterJSON& ConverterJSON::getInstance()
-//{
-//    if (!instance)
-//        instance = new ConverterJSON();
-//    return *instance;
-//}
-
 //Destructor
 ConverterJSON::~ConverterJSON()
 {
@@ -34,11 +26,6 @@ ConverterJSON::~ConverterJSON()
         delete requests;
         requests = nullptr;
     }
-//    if (instance)
-//    {
-//        delete instance;
-//        instance = nullptr;
-//    }
 }
 
 //Change path to a configurations' file
@@ -516,9 +503,9 @@ bool ConverterJSON::loadRequests()
     return true;
 }
 
+//Loads contents of files by path that is contained in source to list passed in result
 void Loader::LoadFileContent(QStringList& result, const QStringList& source)
 {
-//    destination.clear();
     QList<QFuture<QString>> open_file_threads;
     for (auto& file : source)
     {
@@ -548,6 +535,7 @@ void Loader::LoadFileContent(QStringList& result, const QStringList& source)
     }
 }
 
+//Checks file's path for correction
 FileErrors Loader::checkFilePath(QString& file_path)
 {
     QFileInfo file(file_path);
@@ -560,15 +548,19 @@ FileErrors Loader::checkFilePath(QString& file_path)
     return FileErrors::NO_ERR;
 }
 
-
+//Returns path to configurations' file
 QString ConverterJSON::getConfigsPath() const
 {
     return QFileInfo(config_file_path).filePath();
 }
+
+//Returns path to requests' file
 QString ConverterJSON::getRequestsPath() const
 {
     return QFileInfo(requests_file_path).filePath();
 }
+
+//Returns path to answers' file
 QString ConverterJSON::getAnswersPath() const
 {
     return QFileInfo(answers_file_path).filePath();
