@@ -9,15 +9,18 @@
 enum ExceptionType{
     OpenFileError,
     WriteFileError,
+    ReadFileError,
+    OpenDirectoryError,
+    WriteDirectoryError,
     FileNotExistError,
     NoDataError
 };
 
-class EngineError : public QException
+struct EngineError
 {
 public:
-    void raise() const override { throw *this; }
-    EngineError *clone() const override { return new EngineError(*this); }
+    EngineError(ExceptionType exc, QString source, QString info):
+    ex(exc),source(source),additional_data(info){}
     ExceptionType getExceptionType() const {return ex;}
     QString getExceptionSource() const {return source;}
     QString getAdditionalData() const {return additional_data;}
