@@ -37,11 +37,11 @@ void MainWindow::openConfig()
     {
         auto config_file = dlg->selectedFiles();
         ui->config_path_edit->setText(config_file[0]);
-        core->setConfigPath(config_file[0]);        
+        core->setConfigPath(config_file[0]);
     }
     dlg->close();
     delete dlg;
-    return checkUI();
+    checkUI();
 }
 
 //Open requests' file
@@ -84,9 +84,9 @@ void MainWindow::deleteRequests()
     if (!selection->selectedIndexes().empty())
     {
         QModelIndexList index = selection->selectedIndexes();
-        int row = index[0].row();
-        request_list_model->removeRows(row,1,QModelIndex());
-        ui->requests_line_list->setModel(request_list_model);
+//        int row = index[0].row();
+//        request_list_model->removeRows(row,1,QModelIndex());
+//        ui->requests_line_list->setModel(request_list_model);
         emit deletedRequest(index[0].data().toString());
     }
 }
@@ -126,6 +126,7 @@ void MainWindow::loadConfig(ConfigList configs)
         ui->no_files_mark->hide();
         config_ready = true;
     }
+    checkUI();
     readinessCheck();
 }
 
@@ -144,6 +145,7 @@ void MainWindow::loadRequests(QStringList requests)
         ui->no_requests_mark_2->show();
         requests_ready = false;
     }
+    checkUI();
     readinessCheck();
 }
 
@@ -217,6 +219,13 @@ void MainWindow::configError(char engine_status)
     }
 }
 
+void MainWindow::loadSearchFiles(QStringList files)
+{
+    files_list_model->setStringList(QStringList());
+    files_list_model->setStringList(files);
+    ui->file_view->setModel(files_list_model);
+}
+
 //Make search
 void MainWindow::search()
 {
@@ -262,13 +271,24 @@ void MainWindow::checkUI()
     char status = core->getEngineStatus();
     if (status&ConverterStatus::REQUESTS_EMPTY)
         ui->no_requests_mark_2->show();
+    else
+        ui->no_requests_mark_2->hide();
+
     if (status&ConverterStatus::REQUESTS_MISSED)
         ui->no_requests_path_mark->show();
+    else
+        ui->no_requests_path_mark->hide();
+
     if (status&ConverterStatus::CONFIG_MISSED
         ||status&ConverterStatus::CONFIG_FIELD_MISSED)
         ui->no_config_mark->show();
+    else
+        ui->no_config_mark->hide();
+
     if (status&ConverterStatus::SEARCH_FILES_MISSED)
         ui->no_files_mark->show();
+    else
+        ui->no_files_mark->hide();
 }
 
 //Calling requests error
@@ -285,7 +305,7 @@ void MainWindow::requestsError()
     delete error_message;
 }
 
-void MainWindow::changeMode(EngineMode new_mode)
+void MainWindow::changeMode(int new_mode)
 {
     switch (new_mode) {
     case EngineMode_MW::STAND:
@@ -361,9 +381,9 @@ void MainWindow::deleteFile()
     {
         QModelIndexList index = selection->selectedIndexes();
         emit deletedFile(index[0].data().toString());
-        int row = index[0].row();
-        files_list_model->removeRows(row,1,QModelIndex());
-        ui->file_view->setModel(files_list_model);
+//        int row = index[0].row();
+//        files_list_model->removeRows(row,1,QModelIndex());
+//        ui->file_view->setModel(files_list_model);
     }
 }
 
@@ -377,4 +397,10 @@ void MainWindow::reloadFiles()
 void MainWindow::saveResultAsText()
 {
     core->saveResultAsText();
+}
+
+
+void MainWindow::generateConfig()
+{
+    core->generateConfigFile(files_list_model->stringList(),ui->max_response_spin->value());
 }

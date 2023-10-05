@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>920</width>
-    <height>551</height>
+    <width>681</width>
+    <height>614</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,137 +20,56 @@
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="1" column="0">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="7" column="0">
-       <widget class="QLabel" name="requests_fieeld_line">
+      <item row="8" column="4">
+       <widget class="QPushButton" name="config_save_button">
         <property name="text">
-         <string>Requests</string>
+         <string>Save</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0" colspan="4">
-       <widget class="QListView" name="requests_line_list">
-        <property name="editTriggers">
-         <set>QAbstractItemView::SelectedClicked</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="config_path_line">
-        <property name="text">
-         <string>Path to Config.json</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0" colspan="5">
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="answers_field_line">
-        <property name="text">
-         <string>Results</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="4">
-       <widget class="QPushButton" name="search_button">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Search</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="answers_path_line">
         <property name="text">
          <string>Path to Answers.json</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="4">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QPushButton" name="requests_add_button">
-          <property name="text">
-           <string>Add...</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="requests_delete_button">
-          <property name="text">
-           <string>Delete...</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
-      <item row="11" column="0" colspan="5">
-       <widget class="QTreeWidget" name="results_tree_widget">
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
+      <item row="2" column="4">
+       <widget class="QPushButton" name="config_path_button">
+        <property name="text">
+         <string>Open...</string>
         </property>
-        <property name="showDropIndicator" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="alternatingRowColors">
-         <bool>false</bool>
-        </property>
-        <property name="selectionMode">
-         <enum>QAbstractItemView::NoSelection</enum>
-        </property>
-        <property name="rootIsDecorated">
-         <bool>true</bool>
-        </property>
-        <property name="columnCount">
-         <number>3</number>
-        </property>
-        <attribute name="headerVisible">
-         <bool>false</bool>
-        </attribute>
-        <column>
-         <property name="text">
-          <string notr="true">1</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string notr="true">2</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string notr="true">3</string>
-         </property>
-        </column>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="17" column="0" colspan="5">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
        <widget class="QLabel" name="requests_path_line">
         <property name="text">
          <string>Path to Requests.json</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="3" colspan="2">
+      <item row="7" column="0" colspan="5">
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0" colspan="5">
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="4">
        <widget class="QComboBox" name="mode_select">
         <property name="currentText">
          <string>Standard</string>
@@ -186,45 +108,363 @@
         </item>
        </widget>
       </item>
-      <item row="1" column="4">
-       <widget class="QPushButton" name="config_path_button">
-        <property name="text">
-         <string>Open...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0" colspan="5">
-       <widget class="Line" name="line_2">
+      <item row="14" column="0" colspan="5">
+       <widget class="Line" name="line_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="12" column="4">
-       <widget class="QPushButton" name="save_button">
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Save</string>
+         <string>Configuration</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="1" colspan="2">
+      <item row="16" column="0" colspan="4">
+       <widget class="QListView" name="requests_line_list">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::SelectedClicked</set>
+        </property>
+       </widget>
+      </item>
+      <item row="16" column="4">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QPushButton" name="requests_add_button">
+          <property name="text">
+           <string>Add...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="requests_delete_button">
+          <property name="text">
+           <string>Delete</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="20" column="1" colspan="3">
+       <widget class="QPushButton" name="save_as_text_button">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Save as text</string>
+        </property>
+       </widget>
+      </item>
+      <item row="19" column="0" colspan="5">
+       <widget class="QTreeWidget" name="results_tree_widget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="showDropIndicator" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>false</bool>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::NoSelection</enum>
+        </property>
+        <property name="rootIsDecorated">
+         <bool>true</bool>
+        </property>
+        <property name="columnCount">
+         <number>3</number>
+        </property>
+        <attribute name="headerVisible">
+         <bool>false</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string notr="true">1</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string notr="true">2</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string notr="true">3</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item row="18" column="0">
+       <widget class="QLabel" name="answers_field_line">
+        <property name="text">
+         <string>Results</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="engine_name_line">
+          <property name="text">
+           <string>Engine's name</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="engine_name_edit">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="engine_version_line">
+          <property name="text">
+           <string>Engine's version</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="engine_version_edit">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Response limit</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="max_response_spin">
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>999</number>
+          </property>
+          <property name="value">
+           <number>5</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="9" column="3">
        <widget class="QLabel" name="label">
         <property name="text">
          <string>Engine's mode</string>
         </property>
        </widget>
       </item>
+      <item row="12" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="files_line">
+          <property name="text">
+           <string>Files</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="no_files_mark">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap>icons/warning_small.png</pixmap>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="18" column="4">
+       <widget class="QPushButton" name="search_button">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Search</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0" colspan="4">
+       <widget class="QListView" name="file_view">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
-       <widget class="QLineEdit" name="config_path_edit"/>
+       <widget class="QLabel" name="config_path_line">
+        <property name="text">
+         <string>Path to Config.json</string>
+        </property>
+       </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLineEdit" name="requests_path_edit"/>
+      <item row="13" column="4">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QPushButton" name="add_file_button">
+          <property name="text">
+           <string>Add...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="delete_file_button">
+          <property name="text">
+           <string>Delete</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </item>
-      <item row="5" column="0">
-       <widget class="QLineEdit" name="answers_path_edit"/>
+      <item row="20" column="4">
+       <widget class="QPushButton" name="save_button">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Save as JSON</string>
+        </property>
+       </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QLabel" name="no_requests_mark">
+      <item row="15" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="requests_fieeld_line">
+          <property name="text">
+           <string>Requests</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="no_requests_mark_2">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap>icons/warning_small.png</pixmap>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="4">
+       <widget class="QPushButton" name="generate_config_button">
+        <property name="text">
+         <string>Generate</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="4">
+       <widget class="QPushButton" name="requests_path_button">
+        <property name="text">
+         <string>Open...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="4">
+       <widget class="QPushButton" name="answers_path_button">
+        <property name="text">
+         <string>Open...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QLabel" name="no_requests_path_mark">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -236,7 +476,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="3">
        <widget class="QLabel" name="no_config_mark">
         <property name="enabled">
          <bool>true</bool>
@@ -249,26 +489,14 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="2" colspan="3">
-       <widget class="QPushButton" name="requests_path_button">
-        <property name="text">
-         <string>Open...</string>
-        </property>
-       </widget>
+      <item row="6" column="0" colspan="3">
+       <widget class="QLineEdit" name="answers_path_edit"/>
       </item>
-      <item row="5" column="2" colspan="3">
-       <widget class="QPushButton" name="answers_path_button">
-        <property name="text">
-         <string>Open...</string>
-        </property>
-       </widget>
+      <item row="4" column="0" colspan="3">
+       <widget class="QLineEdit" name="requests_path_edit"/>
       </item>
-      <item row="1" column="2" colspan="2">
-       <widget class="QPushButton" name="config_change">
-        <property name="text">
-         <string>Configure...</string>
-        </property>
-       </widget>
+      <item row="2" column="0" colspan="3">
+       <widget class="QLineEdit" name="config_path_edit"/>
       </item>
      </layout>
     </item>
@@ -328,33 +556,17 @@
  <resources/>
  <connections>
   <connection>
-   <sender>config_path_button</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>openConfig()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>909</x>
-     <y>52</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>913</x>
-     <y>33</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>requests_path_button</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>openRequests()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>909</x>
-     <y>102</y>
+     <x>670</x>
+     <y>112</y>
     </hint>
     <hint type="destinationlabel">
-     <x>916</x>
+     <x>750</x>
      <y>95</y>
     </hint>
    </hints>
@@ -366,11 +578,11 @@
    <slot>openAnswers()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>909</x>
-     <y>151</y>
+     <x>670</x>
+     <y>161</y>
     </hint>
     <hint type="destinationlabel">
-     <x>916</x>
+     <x>750</x>
      <y>153</y>
     </hint>
    </hints>
@@ -382,11 +594,11 @@
    <slot>addRequests()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>908</x>
-     <y>216</y>
+     <x>669</x>
+     <y>416</y>
     </hint>
     <hint type="destinationlabel">
-     <x>916</x>
+     <x>750</x>
      <y>218</y>
     </hint>
    </hints>
@@ -398,11 +610,11 @@
    <slot>deleteRequests()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>908</x>
-     <y>245</y>
+     <x>669</x>
+     <y>445</y>
     </hint>
     <hint type="destinationlabel">
-     <x>914</x>
+     <x>750</x>
      <y>283</y>
     </hint>
    </hints>
@@ -411,7 +623,7 @@
    <sender>config_path_edit</sender>
    <signal>textChanged(QString)</signal>
    <receiver>MainWindow</receiver>
-   <slot>modifyConfig()</slot>
+   <slot>setConfigPath(QString)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>342</x>
@@ -427,11 +639,11 @@
    <sender>requests_path_edit</sender>
    <signal>textChanged(QString)</signal>
    <receiver>MainWindow</receiver>
-   <slot>modifyRequests()</slot>
+   <slot>setRequestsPath(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>517</x>
-     <y>100</y>
+     <x>422</x>
+     <y>110</y>
     </hint>
     <hint type="destinationlabel">
      <x>533</x>
@@ -443,31 +655,15 @@
    <sender>answers_path_edit</sender>
    <signal>textChanged(QString)</signal>
    <receiver>MainWindow</receiver>
-   <slot>modifyAnswers()</slot>
+   <slot>setAnswersPath(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>646</x>
-     <y>149</y>
+     <x>422</x>
+     <y>159</y>
     </hint>
     <hint type="destinationlabel">
      <x>677</x>
      <y>24</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>config_change</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>modifyConfig()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>826</x>
-     <y>52</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>839</x>
-     <y>29</y>
     </hint>
    </hints>
   </connection>
@@ -478,11 +674,11 @@
    <slot>search()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>909</x>
-     <y>367</y>
+     <x>670</x>
+     <y>499</y>
     </hint>
     <hint type="destinationlabel">
-     <x>789</x>
+     <x>750</x>
      <y>385</y>
     </hint>
    </hints>
@@ -494,8 +690,8 @@
    <slot>saveResult()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>877</x>
-     <y>528</y>
+     <x>670</x>
+     <y>603</y>
     </hint>
     <hint type="destinationlabel">
      <x>741</x>
@@ -507,15 +703,111 @@
    <sender>mode_select</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>MainWindow</receiver>
-   <slot>changeMode()</slot>
+   <slot>changeMode(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>830</x>
-     <y>180</y>
+     <x>670</x>
+     <y>226</y>
     </hint>
     <hint type="destinationlabel">
-     <x>849</x>
+     <x>750</x>
      <y>314</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>delete_file_button</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>deleteFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>669</x>
+     <y>328</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>615</x>
+     <y>304</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>add_file_button</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>addFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>669</x>
+     <y>299</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>590</x>
+     <y>212</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>config_save_button</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>configSave()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>636</x>
+     <y>182</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>529</x>
+     <y>171</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>generate_config_button</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>generateConfig()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>670</x>
+     <y>32</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>497</x>
+     <y>68</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>config_path_button</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openConfig()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>670</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>750</x>
+     <y>33</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>save_as_text_button</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveResultAsText()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>496</x>
+     <y>603</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>375</x>
+     <y>305</y>
     </hint>
    </hints>
   </connection>
@@ -526,11 +818,18 @@
   <slot>openAnswers()</slot>
   <slot>addRequests()</slot>
   <slot>deleteRequests()</slot>
-  <slot>modifyConfig()</slot>
-  <slot>modifyRequests()</slot>
-  <slot>modifyAnswers()</slot>
+  <slot>setConfigPath(QString)</slot>
+  <slot>setRequestsPath(QString)</slot>
+  <slot>setAnswersPath(QString)</slot>
   <slot>search()</slot>
   <slot>saveResult()</slot>
-  <slot>changeMode()</slot>
+  <slot>changeMode(int)</slot>
+  <slot>deleteFile()</slot>
+  <slot>addFile()</slot>
+  <slot>changeEngineName()</slot>
+  <slot>changeEngineVersion()</slot>
+  <slot>configSave()</slot>
+  <slot>generateConfig()</slot>
+  <slot>saveResultAsText()</slot>
  </slots>
 </ui>

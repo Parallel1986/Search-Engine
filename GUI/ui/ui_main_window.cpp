@@ -1,5 +1,5 @@
-#ifndef MAINWINDOWQAUTZD_H
-#define MAINWINDOWQAUTZD_H
+#ifndef MAINWINDOWUGTHQY_H
+#define MAINWINDOWUGTHQY_H
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QAction>
@@ -33,10 +33,8 @@ public:
     QWidget *centralwidget;
     QGridLayout *gridLayout_2;
     QGridLayout *gridLayout;
-    QLabel *no_config_mark;
     QPushButton *config_save_button;
     QLabel *answers_path_line;
-    QLineEdit *requests_path_edit;
     QPushButton *config_path_button;
     QFrame *line;
     QLabel *requests_path_line;
@@ -44,7 +42,6 @@ public:
     QFrame *line_4;
     QComboBox *mode_select;
     QFrame *line_3;
-    QLineEdit *answers_path_edit;
     QLabel *label_2;
     QListView *requests_line_list;
     QVBoxLayout *verticalLayout;
@@ -61,11 +58,7 @@ public:
     QLineEdit *engine_version_edit;
     QLabel *label_4;
     QSpinBox *max_response_spin;
-    QPushButton *requests_path_button;
-    QLabel *no_requests_path_mark;
     QLabel *label;
-    QPushButton *generate_config_button;
-    QLineEdit *config_path_edit;
     QHBoxLayout *horizontalLayout_3;
     QLabel *files_line;
     QLabel *no_files_mark;
@@ -73,7 +66,6 @@ public:
     QPushButton *search_button;
     QListView *file_view;
     QLabel *config_path_line;
-    QPushButton *answers_path_button;
     QVBoxLayout *verticalLayout_3;
     QPushButton *add_file_button;
     QPushButton *delete_file_button;
@@ -83,6 +75,14 @@ public:
     QLabel *requests_fieeld_line;
     QLabel *no_requests_mark_2;
     QSpacerItem *horizontalSpacer_2;
+    QPushButton *generate_config_button;
+    QPushButton *requests_path_button;
+    QPushButton *answers_path_button;
+    QLabel *no_requests_path_mark;
+    QLabel *no_config_mark;
+    QLineEdit *answers_path_edit;
+    QLineEdit *requests_path_edit;
+    QLineEdit *config_path_edit;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -131,13 +131,6 @@ public:
         gridLayout_2->setObjectName(QString::fromUtf8("gridLayout_2"));
         gridLayout = new QGridLayout();
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-        no_config_mark = new QLabel(centralwidget);
-        no_config_mark->setObjectName(QString::fromUtf8("no_config_mark"));
-        no_config_mark->setEnabled(true);
-        no_config_mark->setPixmap(QPixmap(QString::fromUtf8("icons/warning_small.png")));
-
-        gridLayout->addWidget(no_config_mark, 2, 1, 1, 1);
-
         config_save_button = new QPushButton(centralwidget);
         config_save_button->setObjectName(QString::fromUtf8("config_save_button"));
 
@@ -147,11 +140,6 @@ public:
         answers_path_line->setObjectName(QString::fromUtf8("answers_path_line"));
 
         gridLayout->addWidget(answers_path_line, 5, 0, 1, 1);
-
-        requests_path_edit = new QLineEdit(centralwidget);
-        requests_path_edit->setObjectName(QString::fromUtf8("requests_path_edit"));
-
-        gridLayout->addWidget(requests_path_edit, 4, 0, 1, 1);
 
         config_path_button = new QPushButton(centralwidget);
         config_path_button->setObjectName(QString::fromUtf8("config_path_button"));
@@ -202,11 +190,6 @@ public:
         line_3->setFrameShadow(QFrame::Sunken);
 
         gridLayout->addWidget(line_3, 14, 0, 1, 5);
-
-        answers_path_edit = new QLineEdit(centralwidget);
-        answers_path_edit->setObjectName(QString::fromUtf8("answers_path_edit"));
-
-        gridLayout->addWidget(answers_path_edit, 6, 0, 1, 1);
 
         label_2 = new QLabel(centralwidget);
         label_2->setObjectName(QString::fromUtf8("label_2"));
@@ -320,32 +303,10 @@ public:
 
         gridLayout->addLayout(horizontalLayout_2, 9, 0, 1, 2);
 
-        requests_path_button = new QPushButton(centralwidget);
-        requests_path_button->setObjectName(QString::fromUtf8("requests_path_button"));
-
-        gridLayout->addWidget(requests_path_button, 4, 3, 1, 2);
-
-        no_requests_path_mark = new QLabel(centralwidget);
-        no_requests_path_mark->setObjectName(QString::fromUtf8("no_requests_path_mark"));
-        no_requests_path_mark->setEnabled(true);
-        no_requests_path_mark->setPixmap(QPixmap(QString::fromUtf8("icons/warning_small.png")));
-
-        gridLayout->addWidget(no_requests_path_mark, 4, 1, 1, 1);
-
         label = new QLabel(centralwidget);
         label->setObjectName(QString::fromUtf8("label"));
 
         gridLayout->addWidget(label, 9, 3, 1, 1);
-
-        generate_config_button = new QPushButton(centralwidget);
-        generate_config_button->setObjectName(QString::fromUtf8("generate_config_button"));
-
-        gridLayout->addWidget(generate_config_button, 2, 3, 1, 1);
-
-        config_path_edit = new QLineEdit(centralwidget);
-        config_path_edit->setObjectName(QString::fromUtf8("config_path_edit"));
-
-        gridLayout->addWidget(config_path_edit, 2, 0, 1, 1);
 
         horizontalLayout_3 = new QHBoxLayout();
         horizontalLayout_3->setObjectName(QString::fromUtf8("horizontalLayout_3"));
@@ -385,11 +346,6 @@ public:
         config_path_line->setObjectName(QString::fromUtf8("config_path_line"));
 
         gridLayout->addWidget(config_path_line, 1, 0, 1, 1);
-
-        answers_path_button = new QPushButton(centralwidget);
-        answers_path_button->setObjectName(QString::fromUtf8("answers_path_button"));
-
-        gridLayout->addWidget(answers_path_button, 6, 3, 1, 2);
 
         verticalLayout_3 = new QVBoxLayout();
         verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
@@ -437,6 +393,50 @@ public:
 
         gridLayout->addLayout(horizontalLayout_4, 15, 0, 1, 1);
 
+        generate_config_button = new QPushButton(centralwidget);
+        generate_config_button->setObjectName(QString::fromUtf8("generate_config_button"));
+
+        gridLayout->addWidget(generate_config_button, 1, 4, 1, 1);
+
+        requests_path_button = new QPushButton(centralwidget);
+        requests_path_button->setObjectName(QString::fromUtf8("requests_path_button"));
+
+        gridLayout->addWidget(requests_path_button, 4, 4, 1, 1);
+
+        answers_path_button = new QPushButton(centralwidget);
+        answers_path_button->setObjectName(QString::fromUtf8("answers_path_button"));
+
+        gridLayout->addWidget(answers_path_button, 6, 4, 1, 1);
+
+        no_requests_path_mark = new QLabel(centralwidget);
+        no_requests_path_mark->setObjectName(QString::fromUtf8("no_requests_path_mark"));
+        no_requests_path_mark->setEnabled(true);
+        no_requests_path_mark->setPixmap(QPixmap(QString::fromUtf8("icons/warning_small.png")));
+
+        gridLayout->addWidget(no_requests_path_mark, 4, 3, 1, 1);
+
+        no_config_mark = new QLabel(centralwidget);
+        no_config_mark->setObjectName(QString::fromUtf8("no_config_mark"));
+        no_config_mark->setEnabled(true);
+        no_config_mark->setPixmap(QPixmap(QString::fromUtf8("icons/warning_small.png")));
+
+        gridLayout->addWidget(no_config_mark, 2, 3, 1, 1);
+
+        answers_path_edit = new QLineEdit(centralwidget);
+        answers_path_edit->setObjectName(QString::fromUtf8("answers_path_edit"));
+
+        gridLayout->addWidget(answers_path_edit, 6, 0, 1, 3);
+
+        requests_path_edit = new QLineEdit(centralwidget);
+        requests_path_edit->setObjectName(QString::fromUtf8("requests_path_edit"));
+
+        gridLayout->addWidget(requests_path_edit, 4, 0, 1, 3);
+
+        config_path_edit = new QLineEdit(centralwidget);
+        config_path_edit->setObjectName(QString::fromUtf8("config_path_edit"));
+
+        gridLayout->addWidget(config_path_edit, 2, 0, 1, 3);
+
 
         gridLayout_2->addLayout(gridLayout, 1, 0, 1, 1);
 
@@ -447,12 +447,12 @@ public:
         QObject::connect(answers_path_button, SIGNAL(clicked()), MainWindow, SLOT(openAnswers()));
         QObject::connect(requests_add_button, SIGNAL(clicked()), MainWindow, SLOT(addRequests()));
         QObject::connect(requests_delete_button, SIGNAL(clicked()), MainWindow, SLOT(deleteRequests()));
-        QObject::connect(config_path_edit, SIGNAL(textChanged(QString)), MainWindow, SLOT(modifyConfig()));
-        QObject::connect(requests_path_edit, SIGNAL(textChanged(QString)), MainWindow, SLOT(modifyRequests()));
-        QObject::connect(answers_path_edit, SIGNAL(textChanged(QString)), MainWindow, SLOT(modifyAnswers()));
+        QObject::connect(config_path_edit, SIGNAL(textChanged(QString)), MainWindow, SLOT(setConfigPath(QString)));
+        QObject::connect(requests_path_edit, SIGNAL(textChanged(QString)), MainWindow, SLOT(setRequestsPath(QString)));
+        QObject::connect(answers_path_edit, SIGNAL(textChanged(QString)), MainWindow, SLOT(setAnswersPath(QString)));
         QObject::connect(search_button, SIGNAL(clicked()), MainWindow, SLOT(search()));
         QObject::connect(save_button, SIGNAL(clicked()), MainWindow, SLOT(saveResult()));
-        QObject::connect(mode_select, SIGNAL(currentIndexChanged(int)), MainWindow, SLOT(changeMode()));
+        QObject::connect(mode_select, SIGNAL(currentIndexChanged(int)), MainWindow, SLOT(changeMode(int)));
         QObject::connect(delete_file_button, SIGNAL(clicked()), MainWindow, SLOT(deleteFile()));
         QObject::connect(add_file_button, SIGNAL(clicked()), MainWindow, SLOT(addFile()));
         QObject::connect(config_save_button, SIGNAL(clicked()), MainWindow, SLOT(configSave()));
@@ -483,7 +483,6 @@ public:
 #endif // QT_CONFIG(tooltip)
         actionExit->setText(QCoreApplication::translate("MainWindow", "Exit", nullptr));
         actionabout->setText(QCoreApplication::translate("MainWindow", "About...", nullptr));
-        no_config_mark->setText(QString());
         config_save_button->setText(QCoreApplication::translate("MainWindow", "Save", nullptr));
         answers_path_line->setText(QCoreApplication::translate("MainWindow", "Path to Answers.json", nullptr));
         config_path_button->setText(QCoreApplication::translate("MainWindow", "Open...", nullptr));
@@ -502,20 +501,21 @@ public:
         engine_name_line->setText(QCoreApplication::translate("MainWindow", "Engine's name", nullptr));
         engine_version_line->setText(QCoreApplication::translate("MainWindow", "Engine's version", nullptr));
         label_4->setText(QCoreApplication::translate("MainWindow", "Response limit", nullptr));
-        requests_path_button->setText(QCoreApplication::translate("MainWindow", "Open...", nullptr));
-        no_requests_path_mark->setText(QString());
         label->setText(QCoreApplication::translate("MainWindow", "Engine's mode", nullptr));
-        generate_config_button->setText(QCoreApplication::translate("MainWindow", "Generate", nullptr));
         files_line->setText(QCoreApplication::translate("MainWindow", "Files", nullptr));
         no_files_mark->setText(QString());
         search_button->setText(QCoreApplication::translate("MainWindow", "Search", nullptr));
         config_path_line->setText(QCoreApplication::translate("MainWindow", "Path to Config.json", nullptr));
-        answers_path_button->setText(QCoreApplication::translate("MainWindow", "Open...", nullptr));
         add_file_button->setText(QCoreApplication::translate("MainWindow", "Add...", nullptr));
         delete_file_button->setText(QCoreApplication::translate("MainWindow", "Delete", nullptr));
         save_button->setText(QCoreApplication::translate("MainWindow", "Save as JSON", nullptr));
         requests_fieeld_line->setText(QCoreApplication::translate("MainWindow", "Requests", nullptr));
         no_requests_mark_2->setText(QString());
+        generate_config_button->setText(QCoreApplication::translate("MainWindow", "Generate", nullptr));
+        requests_path_button->setText(QCoreApplication::translate("MainWindow", "Open...", nullptr));
+        answers_path_button->setText(QCoreApplication::translate("MainWindow", "Open...", nullptr));
+        no_requests_path_mark->setText(QString());
+        no_config_mark->setText(QString());
     } // retranslateUi
 
 };
@@ -526,4 +526,4 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-#endif // MAINWINDOWQAUTZD_H
+#endif // MAINWINDOWUGTHQY_H

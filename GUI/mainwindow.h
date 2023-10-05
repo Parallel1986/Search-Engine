@@ -60,17 +60,20 @@ public slots:
     void setAnswersPath(QString);   //New path to answers' file is setted
     void saveResult();              //Save result as JSON file
     void saveResultAsText();        //Save result as text file
-    void changeMode(EngineMode);    //Change mode of engine
+    void changeMode(int);           //Change mode of engine
     void configSave();              //Save button in configurations' section
     void addFile();                 //Add button in requests' section is pressed
     void deleteFile();              //Delete button in files' section is pressed
     void showResult(QList<QList<RelativeIndex>>);   //Fill results of search
     void loadConfig(ConfigList);    //Fill filelds of configurations
     void loadRequests(QStringList); //Fill requests' field
+    void loadSearchFiles(QStringList);  //Fill files for search
     void configError(char);         //Open configurations' error window
     void requestsError();           //Open requests' error window
-private:
+    void generateConfig();          //Generates configurations' file with files' list
     void checkUI();                 //Checkes error marks
+
+private:
     void reloadFiles();             //is needed?//Reloads files' list
     void readinessCheck();          //Checkes readiness to search
     bool config_ready = false;      //Flag of configurations' readiness

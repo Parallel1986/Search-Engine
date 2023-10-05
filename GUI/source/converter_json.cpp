@@ -14,12 +14,12 @@
 #include <QtConcurrent/QtConcurrent>
 
 //Get instance of the converter
-ConverterJSON& ConverterJSON::getInstance()
-{
-    if (!instance)
-        instance = new ConverterJSON();
-    return *instance;
-}
+//ConverterJSON& ConverterJSON::getInstance()
+//{
+//    if (!instance)
+//        instance = new ConverterJSON();
+//    return *instance;
+//}
 
 //Destructor
 ConverterJSON::~ConverterJSON()
@@ -34,11 +34,11 @@ ConverterJSON::~ConverterJSON()
         delete requests;
         requests = nullptr;
     }
-    if (instance)
-    {
-        delete instance;
-        instance = nullptr;
-    }
+//    if (instance)
+//    {
+//        delete instance;
+//        instance = nullptr;
+//    }
 }
 
 //Change path to a configurations' file
@@ -54,6 +54,8 @@ void ConverterJSON::changeConfigPath(QString new_path)
                 if (new_target.isReadable())
                 {
                     config_file_path = new_path;
+                    config_loaded = false;
+                    emit configPathChanged(config_file_path);
                     emit configUpdated(configCorrectionCheck());
                 }
                 else
@@ -64,6 +66,8 @@ void ConverterJSON::changeConfigPath(QString new_path)
                 if (new_target.isReadable())
                 {
                     config_file_path = new_path + "/config.json";
+                    config_loaded = false;
+                    emit configPathChanged(config_file_path);
                     emit configUpdated(configCorrectionCheck());
                 }
             }
@@ -88,6 +92,8 @@ void ConverterJSON::changeRequestsPath(QString new_path)
                 if (new_target.isReadable())
                 {
                     requests_file_path = new_path;
+                    requests_loaded = false;
+                    emit requestsPathChanged(requests_file_path);
                     emit requestsUpdated(requestsCorrectionCheck());
                 }
                 else
@@ -98,6 +104,8 @@ void ConverterJSON::changeRequestsPath(QString new_path)
                 if (new_target.isReadable())
                 {
                     requests_file_path = new_path + "/requests.json";
+                    requests_loaded = false;
+                    emit requestsPathChanged(requests_file_path);
                     emit requestsUpdated(requestsCorrectionCheck());
                 }
             }
@@ -122,7 +130,7 @@ void ConverterJSON::changeAnswersPath(QString new_path)
                 if (new_target.isWritable())
                 {
                     answers_file_path = new_path;
-                    emit answersUpdated();
+                    emit answersPathChanged(answers_file_path);
                 }
                 else
                     emit fileOpenFailure(new_path);
@@ -132,36 +140,35 @@ void ConverterJSON::changeAnswersPath(QString new_path)
                 if (new_target.isReadable())
                 {
                     answers_file_path = new_path + "/answers.json";
-                    emit answersUpdated();
+                    void answersPathChanged(QString);
                 }
             }
             else
                 emit fileOpenFailure(new_path);
         }
-        else
-            if (new_target.isWritable())
+        else if (new_target.isWritable())
+        {
+            if (new_target.isDir())
             {
-                if (new_target.isDir())
-                {
-                    answers_file_path = new_path + "/answers.json";
-                    emit answersUpdated();
-                }
-                else if (new_target.isFile())
-                {
-                    answers_file_path = new_path;
-                    emit answersUpdated();
-                }
+                answers_file_path = new_path + "/answers.json";
+                void answersPathChanged(QString);
             }
+            else if (new_target.isFile())
+            {
+                answers_file_path = new_path;
+                void answersPathChanged(QString);
+            }
+        }
     }
 }
 
 //Get documents' content
-QList<QString> ConverterJSON::getTextDocuments()
+QStringList ConverterJSON::getTextDocuments()
 {
     if (config_loaded
         || (!config_loaded && loadConfigs()))
     {
-        QList<QString> documents_text;
+        QStringList documents_text;
         Loader::LoadFileContent(documents_text,getFilesPaths());
         return documents_text;
     }
@@ -181,14 +188,14 @@ int ConverterJSON::getResponsesLimit()
 }
 
 //Get list of requests
-QList<QString> ConverterJSON::getRequests()
+QStringList ConverterJSON::getRequests()
 {
     if (requests_loaded
     ||(!requests_loaded && loadRequests()))
     {
         QList<QString> req;
         auto json_requests_field = requests->object()["requests"].toArray();
-        if (json_requests_field.isEmpty())
+        if (!json_requests_field.isEmpty())
         {
             for (auto it = json_requests_field.begin();
             it != json_requests_field.end();
@@ -263,6 +270,7 @@ void ConverterJSON::putConfig(const ConfigList settings, QString conf_file)
                 emit fileOpenFailure(conf_file);
                 return;
             }
+        emit configPathChanged(conf_file);
     }
     QFile config_file(conf_file);
     if (config_file.open(QIODevice::WriteOnly|QIODevice::Text))
@@ -352,7 +360,7 @@ QString ConverterJSON::getEngineVersion()
 }
 
 //Get pathes to files for search
-QList<QString> ConverterJSON::getFilesPaths()
+QStringList ConverterJSON::getFilesPaths()
 {
     if (config_loaded
         || (!config_loaded && loadConfigs()))
@@ -397,20 +405,35 @@ char ConverterJSON::configCorrectionCheck()
         QJsonDocument configuration(QJsonDocument::fromJson(QByteArray(config.readAll())));
         config.close();
 
-        auto json_files_field = configuration.object()["files"].toArray();
-        auto json_config_field = configuration.object()["config"];
+        if (!(configuration.isNull()||configuration.isEmpty()))
+        {
+            if (!configuration.object().isEmpty())
+            {
+                if (!configuration.object().contains("files")
+                    || configuration.object()["files"].toArray().isEmpty())
+                {
+                    result |= ConverterStatus::SEARCH_FILES_MISSED;
+                }
 
-        if (!json_config_field.toObject().contains("name"))
-            result |= ConverterStatus::ENGINE_NAME_MISSED;
+                if (configuration.object().contains("config"))
+                {
+                    auto json_config_field = configuration.object()["config"];
+                    if (!json_config_field.toObject().contains("name"))
+                        result |= ConverterStatus::ENGINE_NAME_MISSED;
 
-        if (!json_config_field.toObject().contains("version"))
-            result |= ConverterStatus::ENGINE_VERSION_MISSED;
+                    if (!json_config_field.toObject().contains("version"))
+                        result |= ConverterStatus::ENGINE_VERSION_MISSED;
 
-        if (!json_config_field.toObject().contains("max_responses"))
-            result |= ConverterStatus::MAX_RESPONSES_MISSED;
-
-        if (json_files_field.isEmpty())
-            result |= ConverterStatus::SEARCH_FILES_MISSED;
+                    if (!json_config_field.toObject().contains("max_responses"))
+                        result |= ConverterStatus::MAX_RESPONSES_MISSED;
+                }
+                else result = ConverterStatus::CONFIG_FIELD_MISSED;
+            }
+            else
+                result |= ConverterStatus::SEARCH_FILES_MISSED|ConverterStatus::CONFIG_FIELD_MISSED;
+        }
+        else
+            result |= ConverterStatus::SEARCH_FILES_MISSED|ConverterStatus::CONFIG_FIELD_MISSED;
     }
     else
         result |= ConverterStatus::CONFIG_MISSED;
@@ -447,12 +470,12 @@ char ConverterJSON::requestsCorrectionCheck()
 bool ConverterJSON::loadConfigs()
 {
     if (!config_loaded
-        && (ConverterStatus::NO_CONFIG_ERRORS & configCorrectionCheck()))
+        && !(ConverterStatus::NO_CONFIG_ERRORS & configCorrectionCheck()))
     {
         QFile config_file(config_file_path);
         if (config_file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            *configuration = QJsonDocument::fromJson(QByteArray(config_file.readAll()));
+            configuration = new QJsonDocument(QJsonDocument::fromJson(QByteArray(config_file.readAll())));
             config_file.close();
             config_loaded = true;
         }
@@ -472,12 +495,12 @@ bool ConverterJSON::loadConfigs()
 bool ConverterJSON::loadRequests()
 {
     if (!requests_loaded
-        && (ConverterStatus::NO_REQUESTS_ERRORS & requestsCorrectionCheck()))
+        && !(ConverterStatus::NO_REQUESTS_ERRORS & requestsCorrectionCheck()))
     {
         QFile requests_file(requests_file_path);
         if (requests_file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            *requests = QJsonDocument::fromJson(QByteArray(requests_file.readAll().toLower()));
+            requests = new QJsonDocument(QJsonDocument::fromJson(QByteArray(requests_file.readAll().toLower())));
             requests_file.close();
             requests_loaded = true;
         }
@@ -493,20 +516,20 @@ bool ConverterJSON::loadRequests()
     return true;
 }
 
-void Loader::LoadFileContent(QList<QString>& destination,const QList<QString>& source_pathes)
+void Loader::LoadFileContent(QStringList& result, const QStringList& source)
 {
-    destination.clear();
+//    destination.clear();
     QList<QFuture<QString>> open_file_threads;
-    for (auto& file : source_pathes)
+    for (auto& file : source)
     {
-        open_file_threads.append(QtConcurrent::run([file, destination]()
+        open_file_threads.append(QtConcurrent::run([file, result]()
         {
             QFile document_file(file);
             if (document_file.open(QIODevice::ReadOnly | QIODevice::Text))
             {
                 QString content = document_file.readAll();
                 document_file.close();
-                content =content.toLower();
+                content = content.toLower();
                 return content;
             }
             else
@@ -521,10 +544,35 @@ void Loader::LoadFileContent(QList<QString>& destination,const QList<QString>& s
     }
     for (auto& thread : open_file_threads)
     {
-        destination.append(thread.result());
+        result.append(thread.result());
     }
 }
 
+FileErrors Loader::checkFilePath(QString& file_path)
+{
+    QFileInfo file(file_path);
+    if (!file.isFile())
+        return FileErrors::NOT_A_FILE;
+    if (file.isReadable())
+        return FileErrors::READ_ERR;
+    if (!file.isWritable())
+        return FileErrors::WRITE_ERR;
+    return FileErrors::NO_ERR;
+}
+
+
+QString ConverterJSON::getConfigsPath() const
+{
+    return QFileInfo(config_file_path).filePath();
+}
+QString ConverterJSON::getRequestsPath() const
+{
+    return QFileInfo(requests_file_path).filePath();
+}
+QString ConverterJSON::getAnswersPath() const
+{
+    return QFileInfo(answers_file_path).filePath();
+}
 //Removed to engine_core.cpp
 ////Проверка на инициализацию
 //bool ConverterJSON::IsInitialized()

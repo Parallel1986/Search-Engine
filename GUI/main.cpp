@@ -1,14 +1,10 @@
-
+#include "mainwindow.h"
 #include "./include/engine_core.h"
 
 #include<iostream>
 
 #include <QApplication>
 #include <QStringList>
-
-#ifdef GUI
-#include "mainwindow.h"
-#endif
 
 #define COMAND_LINE
 //#define COMAND_LINE_TEST
@@ -31,32 +27,45 @@ enum ComandLineOrders
     NO_CONFIG_MODE          = 128,  //Do not use configurations' file
     NO_REQUESTS_MODE        = 256,  //Do not use requests' file
     MANUAL_MODE             = 512,  //Do not use confirations' and requests' files
-    ERROR                   = 1024  //Error in processing
+    USE_UI                  = 1024, //Use GUI
+    ERROR                   = 2048  //Error in processing
 };
 
+//Structure for setting upo engine's core
 struct Prefrence
 {
-    QString config_path, request_path, answers_path;    //Pathes tp files
+    QString config_path, request_path, answers_path;    //Pathes to files
     int max_response = 0;                               //Response limit
     QStringList requests, files;                        //Lists of files and requests
     short comands = ComandLineOrders::NO_ORDERS;        //Contains required orders
 };
 
 //Proccessing command line
-Prefrence processCommandLine(const EngineCore& engine,int argc,char** argv)
+Prefrence processCommandLine(int argc,char** argv)
 {
     Prefrence pref;         //Prefrence for accumulating comand line orders
-    QStringList arguments;    
-    for (int arg_ptr = 1;arg_ptr <= argc; ++arg_ptr)
+    QList<QString> arguments;
+    for (int arg_ptr = 1;arg_ptr < argc; ++arg_ptr)
     {
+//        std::cout << argv[arg_ptr] << std::endl;
         arguments.append(argv[arg_ptr]);
+//        std::cout << arguments.back().toStdString() << std::endl;
     }
-    auto arg_end = arguments.end();
-    for (auto arg = arguments.begin(); arg!= arguments.end();++arg)
+
+    for (auto it = arguments.begin(); it != arguments.end(); ++it)
     {
+        std::cout << it->toStdString() << std::endl;
+    }
+
+    auto arg_end = arguments.end();
+    for (auto arg = arguments.begin(); arg!= arg_end;++arg)
+    {
+        std::cout << "Argument in: " << arg->toStdString() << std::endl;
         if (*arg == "-c")         //Set configurations' file
         {
+            std::cout << "Entered to -c processor with command "<< arg->toStdString() << std::endl;
             ++arg;
+            std::cout << "Next argument: "<< arg->toStdString() << std::endl;
             if (arg != arg_end
                 && arg->at(0) != '-')
             {
@@ -73,7 +82,9 @@ Prefrence processCommandLine(const EngineCore& engine,int argc,char** argv)
         }
         else if (*arg == "-r")	//Set requests; file
         {
+            std::cout << "Entered to -r processor with command "<< arg->toStdString() << std::endl;
             ++arg;
+            std::cout << "Next argument: "<< arg->toStdString() << std::endl;
             if (arg != arg_end
             && arg->at(0) != '-')
             {
@@ -90,12 +101,15 @@ Prefrence processCommandLine(const EngineCore& engine,int argc,char** argv)
         }
         else if (*arg == "-a")	//Set answers' file
         {
+            std::cout << "Entered to -a processor with command "<< arg->toStdString() << std::endl;
             ++arg;
+            std::cout << "Next argument: "<< arg->toStdString() << std::endl;
             if (arg != arg_end
             && arg->at(0) != '-')
             {
-               pref.answers_path =*arg;
-               pref.comands |= ComandLineOrders::CHANGE_ANSWERS_FILE;
+                std::cout << "Added new answer path: "<< arg->toStdString() << std::endl;
+                pref.answers_path =*arg;
+                pref.comands |= ComandLineOrders::CHANGE_ANSWERS_FILE;
             }
             else
             {
@@ -107,14 +121,18 @@ Prefrence processCommandLine(const EngineCore& engine,int argc,char** argv)
         }
         else if (*arg == "-ra")	//add requests to end of list
         {
-            ++arg;
-            if (arg != arg_end && arg->at(0) != '-')
+            std::cout << "Entered to -ra processor with command "<< arg->toStdString() << std::endl;
+//            ++arg;
+            std::cout << "Next argument: "<< arg->toStdString() << std::endl;
+            if ((arg+1) != arg_end && (arg+1)->at(0) != '-')
             {
-                while (arg != arg_end && arg->at(0) != '-')
+                do
                 {
-                    pref.requests.append(*arg);
                     ++arg;
-                }
+                    pref.requests.append(*arg);
+                    std::cout << "Added: "<< arg->toStdString() << std::endl;
+                    std::cout << "Next argument: "<< (arg+1)->toStdString() << std::endl;
+                }while ((arg+1) != arg_end && (arg+1)->at(0) != '-');
                 pref.comands |= ComandLineOrders::ADD_REQUEST;
             }
             else
@@ -127,7 +145,9 @@ Prefrence processCommandLine(const EngineCore& engine,int argc,char** argv)
         }
         else if (*arg == "-mr")	//Set response limit
         {
+            std::cout << "Entered to -mr processor with command "<< arg->toStdString() << std::endl;
             ++arg;
+            std::cout << "Next argument: "<< arg->toStdString() << std::endl;
             if (arg != arg_end
             && arg->at(0) != '-'
             && arg->toInt() != 0)
@@ -146,11 +166,15 @@ Prefrence processCommandLine(const EngineCore& engine,int argc,char** argv)
         else if (*arg == "-cg")	//Generate config.json
         {
             pref.comands |= ComandLineOrders::GENERATE_CONFIG;
-            ++arg;            
+            std::cout << "Entered to -cg processor with command "<< arg->toStdString() << std::endl;
+            ++arg;
+            std::cout << "Next argument: "<< arg->toStdString() << std::endl;
         }
         else if (*arg == "-fa")	//Add files for search to the end of the list
         {
+            std::cout << "Entered to -fa processor with command "<< arg->toStdString() << std::endl;
             ++arg;
+            std::cout << "Next argument: "<< arg->toStdString() << std::endl;
             if (arg != arg_end && arg->at(0) != '-')
             {
                 while (arg != arg_end && arg->at(0) != '-')
@@ -171,9 +195,27 @@ Prefrence processCommandLine(const EngineCore& engine,int argc,char** argv)
         else if (*arg == "-mm")
         {
             pref.comands |= ComandLineOrders::MANUAL_MODE;
+            std::cout << "Entered to -mm processor with command "<< arg->toStdString() << std::endl;
+//            ++arg;
+//            std::cout << "Next argument: "<< arg->toStdString() << std::endl;
+        }
+        else if (*arg == "-ui")
+        {
+            std::cout << "Entered to -ui processor with command "<< arg->toStdString() << std::endl;
+//            ++arg;
+//            std::cout << "Next argument: "<< arg->toStdString() << std::endl;
+            pref.comands |= ComandLineOrders::USE_UI;
+        }
+        else if (*arg == " ")
+        {
+            std::cout << "Entered to ' ' processor with command "<< arg->toStdString() << std::endl;
+            ++arg;
+            std::cout << "Next argument: "<< arg->toStdString() << std::endl;
         }
         else
         {
+            std::cout << "Entered to unknown processor with command "<< arg->toStdString() << std::endl;
+//            std::cout << "Next argument: "<< arg->toStdString() << std::endl;
             std::cerr << "Unknown command!\n"
                          "Aplication will be terminated\n";
             pref.comands = ComandLineOrders::ERROR;
@@ -186,36 +228,33 @@ Prefrence processCommandLine(const EngineCore& engine,int argc,char** argv)
 
 int main(int argC, char *argV[])
 {
-    EngineCore engine;
-
-#ifdef GUI
-    QApplication a(argC, argV);
-    MainWindow w;
-#endif // GUI
+    EngineCore* engine = new EngineCore();
 
 #ifdef COMAND_LINE
     if (argC > 1)
     {
-        auto res = processCommandLine(engine, argC,argV);
+        auto res = processCommandLine(argC,argV);
         if (res.comands == ComandLineOrders::ERROR)
             return -1;
         else if (res.comands != ComandLineOrders::NO_ORDERS)
         {
             if (res.comands & ComandLineOrders::CHANGE_ANSWERS_FILE)
-                engine.setAnswersPath(res.answers_path);
+                engine->setAnswersPath(res.answers_path);
 
             if (res.comands & ComandLineOrders::CHANGE_CONFIG_FILE)
-                engine.setConfigPath(res.config_path);
+                engine->setConfigPath(res.config_path);
 
             if (res.comands & ComandLineOrders::CHANGE_REQUESTS_FILE)
-                engine.setRequestsPath(res.request_path);
+                engine->setRequestsPath(res.request_path);
 
             if (res.comands & ComandLineOrders::CHANGE_MAX_RESPONSE)
-                engine.setMaxRequests(res.max_response);
+                engine->setMaxRequests(res.max_response);
 
-            if (res.comands & ComandLineOrders::MANUAL_MODE)
+            if (res.comands & ComandLineOrders::MANUAL_MODE
+                && !(res.comands & ComandLineOrders::NO_CONFIG_MODE)
+                && !(res.comands & ComandLineOrders::NO_REQUESTS_MODE))
             {
-                engine.setMode(EngineMode::MANUAL);
+                engine->setMode(EngineMode::MANUAL);
                 if (res.max_response == 0)
                 {
                     std::cerr << "Incorrect maximum response limit!\n"
@@ -223,7 +262,7 @@ int main(int argC, char *argV[])
                     return -1;
                 }
                 else
-                    engine.setMaxRequests(res.max_response);
+                    engine->setMaxRequests(res.max_response);
 
                 if (res.requests.isEmpty())
                 {
@@ -235,7 +274,7 @@ int main(int argC, char *argV[])
                 {
                     for (auto& request : res.requests)
                     {
-                        engine.addRequest(request);
+                        engine->addRequest(request);
                     }
                 }
 
@@ -249,10 +288,60 @@ int main(int argC, char *argV[])
                 {
                     for (auto& file : res.files)
                     {
-                        engine.addSearchFile(file);
+                        engine->addSearchFile(file);
                     }
                 }
+            } else if ((res.comands & ComandLineOrders::NO_CONFIG_MODE)
+                &&!(res.comands & ComandLineOrders::MANUAL_MODE)
+                &&!(res.comands & ComandLineOrders::NO_REQUESTS_MODE))
+            {
+                if(res.files.isEmpty())
+                {
+                    std::cerr << "Files for search are required!\n"
+                                 "Aplication will be terminated!\n";
+                    return -1;
+                }
+
+                if (res.max_response == 0)
+                {
+                    std::cerr << "Incorrect response limit!\n"
+                                 "Application will be terminated!\n";
+                    return -1;
+                }
+
+                for (auto& file : res.files)
+                {
+                    engine->addSearchFile(file);
+                }
+                engine->setMaxRequests(res.max_response);
+                engine->setMode(EngineMode::NO_CONFIG);
             }
+            else if ((res.comands & ComandLineOrders::NO_REQUESTS_MODE)
+                &&!(res.comands & ComandLineOrders::MANUAL_MODE)
+                &&!(res.comands & ComandLineOrders::NO_CONFIG_MODE))
+            {
+                if (res.requests.isEmpty())
+                {
+                    std::cerr << "Requests are required!\n"
+                                 "Application will be terminated!\n";
+                    return -1;
+                }
+
+                for (auto& request : res.requests)
+                {
+                    engine->addRequest(request);
+                }
+                engine->setMode(EngineMode::NO_REQUESTS);
+            }
+            else if (res.comands & ComandLineOrders::MANUAL_MODE
+                     || res.comands & ComandLineOrders::NO_CONFIG_MODE
+                     || res.comands & ComandLineOrders::NO_REQUESTS_MODE)
+            {
+                std::cerr << "Only one mode is allowed!\n"
+                             "Application will be terminated!\n";
+                return -1;
+            }
+
 
             if (res.comands & ComandLineOrders::GENERATE_CONFIG)
             {
@@ -276,63 +365,7 @@ int main(int argC, char *argV[])
                                  "Application will be terminated!\n";
                     return -1;
                 }
-                engine.generateConfigFile(res.files, res.max_response);
-            }
-
-            if ((res.comands & ComandLineOrders::NO_CONFIG_MODE)
-                &&!(res.comands & ComandLineOrders::MANUAL_MODE)
-                &&!(res.comands & ComandLineOrders::NO_REQUESTS_MODE))
-            {
-                if(res.files.isEmpty())
-                {
-                    std::cerr << "Files for search are required!\n"
-                                 "Aplication will be terminated!\n";
-                    return -1;
-                }
-
-                if (res.max_response == 0)
-                {
-                    std::cerr << "Incorrect response limit!\n"
-                                 "Application will be terminated!\n";
-                    return -1;
-                }
-
-                for (auto& file : res.files)
-                {
-                    engine.addSearchFile(file);
-                }
-                engine.setMaxRequests(res.max_response);
-                engine.setMode(EngineMode::NO_CONFIG);
-            }
-            else
-            {
-                std::cerr << "Only one mode is allowed!\n"
-                             "Application will be terminated!\n";
-                return -1;
-            }
-
-            if ((res.comands & ComandLineOrders::NO_REQUESTS_MODE)
-                &&!(res.comands & ComandLineOrders::MANUAL_MODE)
-                &&!(res.comands & ComandLineOrders::NO_CONFIG_MODE))
-            {
-                if (res.requests.isEmpty())
-                {
-                    std::cerr << "Requests are required!\n"
-                                 "Application will be terminated!\n";
-                    return -1;
-                }
-
-                for (auto& request : res.requests)
-                {
-                    engine.addRequest(request);
-                }
-                engine.setMode(EngineMode::NO_REQUESTS);
-            }
-            else
-            {
-                std::cerr << "Only one mode is allowed!\n"
-                             "Application will be terminated!\n";
-                return -1;
+                engine->generateConfigFile(res.files, res.max_response);
             }
 
             if ((res.comands & ComandLineOrders::ADD_FILES_FOR_SEARCH)
@@ -349,7 +382,7 @@ int main(int argC, char *argV[])
 
                 for (auto& file : res.files)
                 {
-                    engine.addSearchFile(file);
+                    engine->addSearchFile(file);
                 }
             }
 
@@ -367,9 +400,13 @@ int main(int argC, char *argV[])
                 {
                     for (auto& request : res.requests)
                     {
-                        engine.addRequest(request);
+                        engine->addRequest(request);
                     }
                 }
+            }
+            if (res.comands & ComandLineOrders::USE_UI)
+            {
+                engine->setUI();
             }
         }
     }
@@ -382,19 +419,33 @@ int main(int argC, char *argV[])
         std::cout << argV[i] << std::endl;
     }
 #endif
+    if (engine->isUseUI())
+    {
+        QApplication a(argC, argV);
+        MainWindow w(nullptr,engine);
+//    QObject::connect(&engine, &EngineCore::openConfigRequest, &w, &MainWindow::openConfig);
+        QObject::connect(engine, &EngineCore::configPathChanged, &w, &MainWindow::setConfigPath);
+        QObject::connect(engine, &EngineCore::requestsPathChanged, &w, &MainWindow::setRequestsPath);
+        QObject::connect(engine, &EngineCore::answersPathChanged, &w, &MainWindow::setAnswersPath);
+        QObject::connect(engine, &EngineCore::configsLoaded, &w, &MainWindow::loadConfig);
+        QObject::connect(engine, &EngineCore::requestsLoaded, &w, &MainWindow::loadRequests);
+        QObject::connect(engine, &EngineCore::searchResult, &w, &MainWindow::showResult);
+        QObject::connect(engine, &EngineCore::reloadFilePaths, &w, &MainWindow::loadSearchFiles);
+//        QObject::connect(engine, &EngineCore::updateStatus, &w, &MainWindow::checkUI);
+        QObject::connect(&w, &MainWindow::deletedFile, engine, &EngineCore::removeSearchFile);
+        QObject::connect(&w, &MainWindow::deletedRequest, engine, &EngineCore::removeRequest);
+        QObject::connect(&w, &MainWindow::addedRequest, engine, &EngineCore::addRequest);
+        QObject::connect(&w, &MainWindow::addedFile, engine, &EngineCore::addSearchFile);
 
-#ifndef GUI
-    engine.initialize();
-    engine.search();
-#endif
 
-#ifdef GUI
-
-    QApplication a(argC, argV);
-    MainWindow w;
-
-    w.show();
-    w.initializeSearchEngine();
-    return a.exec();
-#endif
+        engine->initialize();
+        w.show();
+        return a.exec();
+    }
+    else
+    {
+        engine->initialize();
+        engine->search();
+        return 0;
+    }
 }

@@ -24,8 +24,9 @@ void InvertedIndex::updateDocumentBase(QList<QString> input_docs)
 //Gets word's count in frequency dictionary
 QList<Entry> InvertedIndex::getWordCount(const QString& word)
 {
-    if (freq_dictionary.empty())
+    if (freq_dictionary.isEmpty())
         createFrequencyDictionary();
+
 	if (freq_dictionary.find(word) == freq_dictionary.end())
     {
         QList<Entry> list;

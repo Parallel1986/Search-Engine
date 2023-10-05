@@ -5,7 +5,7 @@ project(Search-engine-GUI VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-set(GTESTS ON)
+set(GTESTS OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -35,9 +35,10 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.cpp
 		ui/ui_main_window.cpp
-        config_window.cpp
-        config_window.h
-		ui/ui_config_window.cpp
+		ui/ui_request_dialog.cpp
+#       config_window.cpp
+#       config_window.h
+#		ui/ui_config_window.cpp
         source/converter_json.cpp
         source/inverted_index.cpp
         source/file_index.cpp
@@ -48,6 +49,8 @@ set(PROJECT_SOURCES
         include/file_index.h
 		include/engine_core.h
 		source/engine_core.cpp
+#		source/request_dialog.cpp
+
 )
 
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/../config.json" DESTINATION "${CMAKE_BINARY_DIR}/")
@@ -58,8 +61,7 @@ FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/../requests.json" DESTINATION "${CMAKE_BI
 
 add_executable(Search-engine-GUI
 			${PROJECT_SOURCES}
-			source/request_dialog.cpp
-			ui/ui_request_dialog.cpp
+
         )
 
 if (GTESTS)

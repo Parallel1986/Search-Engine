@@ -25,7 +25,7 @@ public:
     * to InvertedIndex so SearchServer can get number of
     * words' instances listed in requests
     */
-	SearchServer(InvertedIndex& idx) : _index(idx) { };
+    SearchServer(InvertedIndex* idx) : _index(idx) { };
 
     /**
     * Method of processing search requests
@@ -42,7 +42,7 @@ public:
      */
     void setMaxResponse(int max_response);
 private:
-    InvertedIndex _index;
+    InvertedIndex* _index;
 	int max_response = 5;
 };
 
