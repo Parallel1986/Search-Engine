@@ -382,61 +382,33 @@ void EngineCore::saveResult()
 //Saves result of the search as text file
 void EngineCore::saveResultAsText()
 {
-    QJsonDocument answers_template;
     QString path = QDir::current().absolutePath() + "/answers.txt";
-    QFile answer_file(path);
+    QString out_line;
 
-    if (answer_file.open(QIODevice::WriteOnly|QIODevice::Text))
-    {
-        QJsonArray answer_array;
-        int counter = 0;
-
-        for (auto it = search_result.begin();
+    int counter = 0;
+    for (auto it = search_result.begin();
              it != search_result.end();
              it++, counter++)
+    {
+        out_line += "Request: " + requests_id->requests[counter] + "\n";
+        if (it->size() == 0)
         {
-            if (it->size() == 0)
+            out_line += "Result: No match\n";
+        }
+        else
+        {
+            for(auto& pair : *it)
             {
-                QJsonObject answer, result;
-                result.insert("result", false);
-                answer.insert(requests_id->requests[counter], result);
-                answer_array.append(answer);
-            }
-            else
-            {
-                QJsonObject answer, res;
-                QJsonArray res_array;
-                for(auto& pair : *it)
-                {
-                    res.insert("document",files_id->file_path[pair.doc_id]);
-                    res.insert("rank",pair.rank);
-                    res_array.append(res);
-                }
-                answer.insert(requests_id->requests[counter],res_array);
-                answer_array.append(answer);
+                out_line += "\t" + QString("Rank = %1 - ").arg(pair.rank, 0, '0', 2);
+                out_line += files_id->file_path[pair.doc_id] + "\n";
             }
         }
-        QJsonObject output;
-        output.insert("answers",answer_array);
-        answers_template.setObject(output);
-        QByteArray out_stream;
-        out_stream = answers_template.toJson(QJsonDocument::Indented);
-        QString unformat_doc = out_stream;
-        unformat_doc.remove('{');
-        unformat_doc.remove('}');
-        unformat_doc.remove('[');
-        unformat_doc.remove(']');
-        unformat_doc.remove(',');
-        for (auto it = 0;
-             it < unformat_doc.size() - 1;
-             ++it)
-        {
-            if (unformat_doc[it] == '\n' && unformat_doc[it+1] == '\n')
-                unformat_doc[it] = ' ';
-        }
-        out_stream.clear();
-        out_stream = unformat_doc.toStdString().c_str();
-        answer_file.write(out_stream);
+    }
+
+    QFile answer_file(path);
+    if (answer_file.open(QIODevice::WriteOnly|QIODevice::Text))
+    {
+        answer_file.write(out_line.toStdString().c_str());
         answer_file.close();
     }
 }
@@ -530,83 +502,3 @@ void EngineCore::setUI()
 {
     useUI = true;
 }
-
-//Excluded
-////Load fields config from the configurations' file
-//void EngineCore::LoadConfigs()
-//{
-//    if (!(engine_status&ConverterStatus::CONFIG_MISSED)             //Проверка статуса
-//        &&!(engine_status&ConverterStatus::CONFIG_FIELD_MISSED))
-//    {
-//        QFile config(config_file_path);
-//        if (config.open(QIODevice::ReadOnly | QIODevice::Text))     //Проверка открытия
-//        {
-//            //Читаем файл конфигурации
-//            QJsonDocument configuration(QJsonDocument::fromJson(QByteArray(config.readAll())));
-//            config.close();                 //Закрываем файл
-//            LoadConfigs(configuration);     //Загружаем настройки
-//        }
-//    }
-//}
-
-////Load fields config from the JSON document
-//void EngineCore::LoadConfigs(QJsonDocument& configuration)
-//{
-//    auto json_config_field = configuration.object()["config"];      //Получаем объект из JSON документа
-//    if (json_config_field.toObject().contains("name"))
-//    {
-//        engine_name = json_config_field.toObject()["name"].toString();  //Записываем имя поискового двигателя
-//        engine_status &= ~ConverterStatus::ENGINE_NAME_MISSED;      //Выставляем статус
-//    }
-//    else
-//        engine_status |= ConverterStatus::ENGINE_NAME_MISSED;       //Выставляем статус
-
-//    if (json_config_field.toObject().contains("version"))           //Проверяем наличие поля "version"
-//    {
-//        engine_version = json_config_field.toObject()["version"].toString();    //Записываем версию поискового двигателя
-//        engine_status &= ~ConverterStatus::ENGINE_VERSION_MISSED;   //Выставляем статус
-//    }
-//    else
-//        engine_status |= ConverterStatus::ENGINE_VERSION_MISSED;    //Выставляем статус
-
-//    if (json_config_field.toObject().contains("max_responses"))
-//    {
-//        max_responses = json_config_field.toObject()["max_responses"].toInt();  //Записываем максимавльное число запросов //Filling number of maximum responses
-//        engine_status &= ~ConverterStatus::MAX_RESPONSES_MISSED;    //Выставляем статус
-//    }
-//    else
-//        engine_status |= ConverterStatus::MAX_RESPONSES_MISSED;     //Выставляем статус
-//}
-
-////Load field files from the
-///configurations' file
-//void EngineCore::LoadSearchFiles()
-//{
-//    if (!(engine_status&ConverterStatus::CONFIG_MISSED)             //Проверяем статус
-//        &&!(engine_status&ConverterStatus::SEARCH_FILES_MISSED))
-//    {
-//        QFile config(config_file_path);
-//        if (config.open(QIODevice::ReadOnly | QIODevice::Text))     //Проверка на открытие
-//        {
-//            //Загружаем JSON документ из файла
-//            QJsonDocument configuration(QJsonDocument::fromJson(QByteArray(config.readAll())));
-//            config.close();                     //Закрываем файл
-//            LoadSearchFiles(configuration);     //Загружаем список фвайлов
-//        }
-//    }
-//}
-
-////Загрузить поля files из JSON документа
-//void EngineCore::LoadSearchFiles(QJsonDocument& configuration)
-//{
-//    auto json_fiels_field = configuration.object()["files"].toArray();
-//    file_paths.clear();                 //Очищаем список путей
-//    if (!json_fiels_field.isEmpty())    //Проверка на наличие записей
-//    {
-//        //Заполняем список
-//        for (auto it = json_fiels_field.begin();it != json_fiels_field.end();it++)
-//            file_paths.append(it->toString());
-//    }
-//    else
-//        engine_status |= ConverterStatus::SEARCH_FILES_MISSED;  //Выставляем статус
-//}

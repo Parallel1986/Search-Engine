@@ -11,7 +11,7 @@
 //Structure of word's entry
 struct Entry
 {
-    int doc_id, count;
+    unsigned int doc_id, count;
     Entry(){}
     Entry(int in_doc_id, int in_count) : doc_id(in_doc_id), count(in_count){}
 

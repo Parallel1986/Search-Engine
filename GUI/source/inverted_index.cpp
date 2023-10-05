@@ -45,11 +45,11 @@ void InvertedIndex::createFrequencyDictionary()
     freq_dictionary.clear();
     size_t doc_id = 0;
 
-    QList<QFuture<void>> index_threads;
-	for (auto& document : docs)
+    QList<QFuture<QMap<QString,Entry>>> index_threads;
+    for (auto& document : docs)
     {
-        index_threads.append(QtConcurrent::run([&document, doc_id,/*dictionaries,*/ this]()
-			{                
+        index_threads.append(QtConcurrent::run([&document, doc_id]()
+            {
                 QMap<QString,Entry> dictionary;
                 //Spliting document to separate words
                 for (auto& word : document.split(QRegExp("\\W+"), Qt::SkipEmptyParts))
@@ -61,24 +61,28 @@ void InvertedIndex::createFrequencyDictionary()
                         dictionary[word] = Entry(doc_id,1);
                     }
                 }
-                //Inserting entries to the dictionary
-                for (auto word = dictionary.begin();
-                    word != dictionary.end()
-                    ; ++word)
-                {
-                    if (freq_dictionary.contains(word.key()))
-                        freq_dictionary[word.key()].append(word.value());
-                    else
-                        freq_dictionary.insert(word.key(),QList{word.value()});
-                }
-
+                return dictionary;
             }));
             ++doc_id;
-	}
+    }
 
-	for (auto& thread : index_threads)
-	{
-		thread.waitForFinished();		
+    for (auto& thread : index_threads)
+    {
+        thread.waitForFinished();
+    }
+    for (auto& thread : index_threads)
+    {
+        auto dictionary = thread.result();
+        //Inserting entries to the dictionary
+        for (auto word = dictionary.begin();
+            word != dictionary.end()
+            ; ++word)
+        {
+            if (freq_dictionary.contains(word.key()))
+                freq_dictionary[word.key()].append(word.value());
+            else
+                freq_dictionary.insert(word.key(),QList{word.value()});
+        }
     }
 }
 

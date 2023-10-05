@@ -234,10 +234,3 @@ private:
 };
 
 #endif // ENGINE_CORE_H
-
-//Excluded
-//    void LoadRequests();                        //Loads requests from the requests' file
-//    void LoadConfigs();                         //Loads configuration from the config.json file
-//    void LoadConfigs(QJsonDocument&);           //Loads configuration from a file from received JSON document
-//    void LoadSearchFiles();                     //Loads pathes of files for index from the config.json file
-//    void LoadSearchFiles(QJsonDocument&);       //Loads pathes of files for index from receivwed JSON document

@@ -258,6 +258,7 @@ void MainWindow::showResult(QList<QList<RelativeIndex>> search_result)
     }
     ui->results_tree_widget->setItemWidget(main_item,0,nullptr);
     ui->save_button->setEnabled(true);
+    ui->save_as_text_button->setEnabled(true);
 }
 
 //Saving result
@@ -275,7 +276,10 @@ void MainWindow::checkUI()
         ui->no_requests_mark_2->hide();
 
     if (status&ConverterStatus::REQUESTS_MISSED)
-        ui->no_requests_path_mark->show();
+        {
+            ui->no_requests_path_mark->show();
+            ui->no_requests_mark_2->show();
+        }
     else
         ui->no_requests_path_mark->hide();
 

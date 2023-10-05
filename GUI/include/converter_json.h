@@ -190,46 +190,4 @@ private:
     QJsonDocument* configuration = nullptr;   //Configurations as JSON document that are loaded from the file
     QJsonDocument* requests = nullptr;        //Requests as JSON document that are loaded from the file
 };
-
-//ConverterJSON* ConverterJSON::instance = nullptr;
 #endif
-//Removed to engine_core.h
-//    /**
-//     * @brief Gets the status of search engine
-//     * @return Returns a byte with engine's status that are described
-//     * in the enum ConverterStatus
-//     */
-//    char GetEngineStatus();
-
-//    /**
-//     * @return Returns true if the engine is initialised
-//     * by the config.json and requests.json
-//     */
-//    bool IsInitialized();
-
-//    /**
-//     * @return Returns true if the engine is initialised
-//     * by the config.json
-//     */
-//    bool IsConfigInitialized();
-
-//    /**
-//     * @return Returns true if the engine is initialised
-//     * by the requests.json
-//     */
-//    bool IsRequestsInitialized();
-
-//    void Initialize();                      //Initialise the engine
-//    void SetMaxRequests(int);               //Sets response limit when it is changed
-//    void LoadSearchFiles();                 //Loads pathes of files for index from the config.json file
-//    void LoadSearchFiles(QJsonDocument&);   //Loads pathes of files for index from receivwed JSON document
-//    void InitializeConfig();                //Loads configuration from the config.json file
-//    void InitializeRequests();              //Loading data from the requests.json file
-//    void InitializeCheck();                 //Checking initialization
-//    QString engine_name;                    //Search engine name
-//    QString engine_version;                 //Search eengine version
-//    int max_responses = 5;                  //Maximum number of responses
-//    QList<QString> requests;                //List of requests
-//    QList<QString> fileList;                //List of files for search
-//    QList<QString> file_paths;              //List of files` paths for search
-//    char engine_status = 0;                 //Search engine state
