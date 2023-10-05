@@ -8,10 +8,17 @@ EngineCore::EngineCore()
     server = new SearchServer(index);
 
 //Connecting signals
-    connect(converter,&ConverterJSON::configPathChanged,this,&EngineCore::configPathUpdated);
-    connect(converter, &ConverterJSON::requestsPathChanged, this, &EngineCore::requestsPathUpdated);
-    connect(converter, &ConverterJSON::answersPathChanged, this, &EngineCore::answersPathUpdated);
+    connect(converter,&ConverterJSON::configPathChanged,
+            this,&EngineCore::configPathUpdated);
 
+    connect(converter, &ConverterJSON::requestsPathChanged,
+            this, &EngineCore::requestsPathUpdated);
+
+    connect(converter, &ConverterJSON::answersPathChanged,
+            this, &EngineCore::answersPathUpdated);
+
+    connect(converter, &ConverterJSON::sendError,
+            this, &EngineCore::processError);
 }
 
 EngineCore::~EngineCore()
@@ -110,7 +117,6 @@ void EngineCore::initializeConfig()
     if (useUI)
     {
         emit configsLoaded(configs);
-//        emit updateStatus(engine_status);
     }
 
 }
@@ -128,7 +134,6 @@ void EngineCore::initializeRequests()
     if (useUI)
     {
         emit requestsLoaded(requests);
-//        emit updateStatus(engine_status);
     }
 }
 
@@ -163,18 +168,17 @@ void EngineCore::initialize()
         emit answersPathChanged(converter->getAnswersPath());
         emit requestsPathChanged(converter->getRequestsPath());
         emit configPathChanged(converter->getConfigsPath());
-//        emit updateStatus(engine_status);
     }
 }
 
-//Add requests
+//Adds request
 void EngineCore::addRequest(QString new_request)
 {
     requests_add.append(new_request);
     emit requestsLoaded(requests+requests_add);
 }
 
-//
+//Removes request
 void EngineCore::removeRequest(QString rm_request)
 {
     for (auto request = requests.begin();
@@ -200,14 +204,14 @@ void EngineCore::removeRequest(QString rm_request)
     return emit requestsLoaded(requests + requests_add);
 }
 
-//Add file for search
+//Adds file for search
 void EngineCore::addSearchFile(QString new_file)
 {
     files_paths_add.append(new_file);
     emit reloadFilePaths(files_paths+files_paths_add);
 }
 
-//Remove file for search from files' list
+//Removes file for search from files' list
 void EngineCore::removeSearchFile(QString rm_file)
 {
     for (auto file = files_paths.begin();
@@ -232,7 +236,7 @@ void EngineCore::removeSearchFile(QString rm_file)
     }
 }
 
-//Create configurations' file config.json and add fields to it
+//Create configurations' file config.json and adds fields to it
 void EngineCore::generateConfigFile(QStringList files, int response_limit)
 {
     ConfigList configurations;
@@ -247,13 +251,13 @@ void EngineCore::generateConfigFile(QStringList files, int response_limit)
     initializeConfig();
 }
 
-//Set engine's mode
+//Sets engine's mode
 void EngineCore::setMode(EngineMode new_mode)
 {
     mode = new_mode;
 }
 
-//Make search
+//Makes search
 void EngineCore::search()
 {    
     QStringList adds;
@@ -277,8 +281,6 @@ void EngineCore::search()
         break;
 
     case EngineMode::NO_CONFIG:
-//        files_content.clear();
-//        Loader::LoadFileContent(files_content, files_paths_add);
         makeFilesIDTable(files_paths_add);
         files_content.clear();
         Loader::LoadFileContent(files_content,adds);
@@ -289,9 +291,6 @@ void EngineCore::search()
         break;
 
     case EngineMode::NO_REQUESTS:
-//        files_content.clear();
-//        Loader::LoadFileContent(files_content,files_paths);
-//        Loader::LoadFileContent(files_content,files_paths_add);
         adds.clear();
         adds = files_paths;
         adds += files_paths_add;
@@ -305,8 +304,6 @@ void EngineCore::search()
         break;
 
     case EngineMode::MANUAL:
-//        files_content.clear();
-//        Loader::LoadFileContent(files_content, files_paths_add);
         files_content.clear();
         Loader::LoadFileContent(files_content,adds);
         index->updateDocumentBase(files_content);
@@ -327,27 +324,19 @@ void EngineCore::search()
         saveResult();
 }
 
+//Returns a list of files for search
 QStringList EngineCore::getFiles()
 {
     return files_paths+files_paths_add;
 }
 
+//Returns a list of requests
 QStringList EngineCore::getRequestsList()
 {
     return requests+requests_add;
 }
 
-void EngineCore::checkConfigPath(char status)
-{
-
-}
-
-void EngineCore::checkRequestsPath(char status)
-{
-
-}
-
-//Proccess result of changing path to configurations' file
+//Proccesses result of changing path to configurations' file
 void EngineCore::configPathUpdated(QString new_path)
 {
     initializeConfig();
@@ -355,7 +344,7 @@ void EngineCore::configPathUpdated(QString new_path)
         emit configPathChanged(new_path);
 }
 
-//Proccess result of changing path to requests' file
+//Proccesses result of changing path to requests' file
 void EngineCore::requestsPathUpdated(QString new_path)
 {
     initializeRequests();
@@ -363,7 +352,7 @@ void EngineCore::requestsPathUpdated(QString new_path)
         emit requestsPathChanged(new_path);
 }
 
-//Proccess result of changing path to answers' file
+//Proccesses result of changing path to answers' file
 void EngineCore::answersPathUpdated(QString new_path)
 {
     if (useUI)
@@ -430,11 +419,6 @@ void EngineCore::makeFilesIDTable(QStringList& files)
          ++file)
     {
         threads.append(QtConcurrent::run([this, id, file](){
-//        FileIDFrame frame;
-//        frame.id = id;
-//        frame.file_path = *file;
-//        frame.err = Loader::checkFilePath(*file);
-//        return frame;
         files_id->id[id] = id;
         files_id->file_path[id] = *file;
         files_id->err[id] = Loader::checkFilePath(*file);
@@ -443,11 +427,6 @@ void EngineCore::makeFilesIDTable(QStringList& files)
     }
     for (auto& thread : threads)
         thread.waitForFinished();
-
-//    for (int it = 0; it < files_paths.size()+files_paths_add.size(); ++it)
-//    {
-//        files_id->id = threads.at(it).results()
-//    }
 }
 
 //Creates table of accordance requests and its IDs
@@ -492,13 +471,42 @@ RequestIDTable* EngineCore::getRequestsIDTable()
     return requests_id;
 }
 
+//Returns true if GUI is used
 bool EngineCore::isUseUI() const
 {
     return useUI;
 }
 
-
+//Sets engine to use GUI
 void EngineCore::setUI()
 {
     useUI = true;
+}
+
+//Processes error
+void EngineCore::processError(EngineError err)
+{
+    if (!useUI)
+    {
+        std::cerr << "Error!" << std::endl;
+        if (err.getExceptionType() == ExceptionType::FileNotExistError
+            || err.getExceptionType() == ExceptionType::OpenFileError
+            || err.getExceptionType() == ExceptionType::OpenDirectoryError)
+            std::cerr << "While trying to open: " <<
+                    err.getExceptionSource().toStdString() << std::endl;
+        else if (err.getExceptionType() == ExceptionType::WriteFileError
+                 || err.getExceptionType() == ExceptionType::WriteDirectoryError)
+            std::cerr << "While trying to write to: " <<
+                    err.getExceptionSource().toStdString() << std::endl;
+        else if (err.getExceptionType() == ExceptionType::NoDataError)
+            std::cerr << "Does not has required data: " <<
+                    err.getExceptionSource().toStdString() << std::endl;
+
+        std::cerr << "Additional info: " <<
+                    err.getAdditionalData().toStdString() << std::endl;
+    }
+    else
+    {
+        emit showError(err);
+    }
 }

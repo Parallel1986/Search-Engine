@@ -5,12 +5,14 @@
 #ifndef ENGINE_CORE_H
 #define ENGINE_CORE_H
 
+#include <iostream>
 #include <QObject>
 #include <QtConcurrent/QtConcurrent>
 
 #include "./converter_json.h"
 #include "./inverted_index.h"
 #include "./file_index.h"
+#include "./exceptions.h"
 
 //Structure for accordance of files' IDs and its paths
 struct FileIDTable
@@ -170,21 +172,21 @@ public:
      */
     bool isUseUI() const;
 
+    /**
+     * @brief Sets engine to use GUI
+     */
     void setUI();
 
 signals:
     void reloadFilePaths(QStringList);          //Is emited when files' paths updated
     void configPathChanged(QString);            //Is emited when path to configurations' file is changed
-///**/void openConfigRequest();                   //Is emited?
     void requestsPathChanged (QString);         //Is emited when path to requests' file is changed
-/**/void answersPathChanged (QString);          //Is emited when path to answers' file is chamged
+    void answersPathChanged (QString);          //Is emited when path to answers' file is chamged
     void searchResult(QList<QList<RelativeIndex>>); //Is emited when search result is ready
     void requestsLoaded(QStringList);           //Is emited when requests are changed
-/**/void configsLoaded(ConfigList);             //Sends configurations
-/**/void configsError(char);                    //Is emited when error in configuration happens
-//    void searchFilesLoaded(QStringList);        //Is emited when files for search are changed
+    void configsLoaded(ConfigList);             //Sends configurations
     void updateStatus(char);                    //Is emited when engine status is changed
-
+    void showError(EngineError);                //Is emited when error message is send to GUI
 public slots:
     void addSearchFile(QString);        //Adds path to file for search in the end of files' list
     void removeSearchFile(QString);     //Removes file for search from files' list
@@ -192,24 +194,20 @@ public slots:
     void addRequest(QString);           //Adds requests to the end of requests' list
     void removeRequest(QString);        //Removes request from the requests' list
     void search();                      //To make search with existing conditions
-/*?*/void checkConfigPath(char);        //Checks correction of configurations' file
-/*?*/void checkRequestsPath(char);      //Checks correction of requests' file
     void setConfigPath(QString);        //Sets path to config.json when it is changed
     void setRequestsPath(QString);      //Sets path to requests.json when it is changed
     void setAnswersPath(QString);       //Sets path to answers.json when it is changed
     void initialize();                  //Initialise the engine
     void setMaxRequests(int);           //Sets response limit when it is changed
     void saveResult();                  //Save search result
-/**/void saveResultAsText();            //Save search result as text file
+    void saveResultAsText();            //Save search result as text file
     void configPathUpdated(QString);    //Process changing of configurations' file path
     void requestsPathUpdated(QString);  //Process changing of requests' file path
     void answersPathUpdated(QString);   //Process changing of answers' file path
-
+    void processError(EngineError);     //Processing error messages
 private:
-    void makeFilesIDTable(QStringList&);            //Creates table of accordance files' paths and its IDs
-    void makeRequestsIDdTable(QStringList&);        //Creates table of accordance requests and its IDs
-/**/void configError();                 //Proccess configurations' error
-/**/void requestsError();               //Proccess requests' error
+    void makeFilesIDTable(QStringList&);        //Creates table of accordance files' paths and its IDs
+    void makeRequestsIDdTable(QStringList&);    //Creates table of accordance requests and its IDs
     void initializeConfig();            //Loads configuration from the config.json file
     void initializeRequests();          //Loading data from the requests.json file
     void initializeCheck();             //Checking initialization
@@ -230,7 +228,7 @@ private:
     QStringList files_paths_add;                //List of additional files' pathes for search
     char engine_status = ConverterStatus::NO_ERRORS;    //Search engine state
     EngineMode mode = EngineMode::STANDARD;     //Mode of engine
-    bool useUI = true;                         //Sets to use GUI
+    bool useUI = true;                          //Sets to use GUI
 };
 
 #endif // ENGINE_CORE_H
