@@ -408,3 +408,34 @@ void MainWindow::generateConfig()
 {
     core->generateConfigFile(files_list_model->stringList(),ui->max_response_spin->value());
 }
+
+void MainWindow::errorShow(EngineError err)
+{
+    QMessageBox* error_message = new QMessageBox();
+    switch (err.getExceptionType()) {
+    case ExceptionType::FileNotExistError:
+        error_message->setText("File " + err.getExceptionSource() + " does not exists");
+        break;
+    case ExceptionType::OpenFileError:
+        error_message->setText("Can not open the file " + err.getExceptionSource());
+    case ExceptionType::ReadFileError:
+        error_message->setText("Can not read the file " + err.getExceptionSource());
+    case ExceptionType::WriteFileError:
+        error_message->setText("Can not write to the file " + err.getExceptionSource());
+    case ExceptionType::WriteDirectoryError:
+        error_message->setText("Can not write to the directory " + err.getExceptionSource());
+    case ExceptionType::OpenDirectoryError:
+        error_message->setText("Can not open the directory " + err.getExceptionSource());
+    case ExceptionType::NoDataError:
+        error_message->setText("Missing data: " + err.getExceptionSource());
+//should not get here
+    default:
+        error_message->setText("Unknown error with " + err.getExceptionSource());
+        break;
+    }
+    error_message->setInformativeText(err.getAdditionalData());
+    error_message->setStandardButtons(QMessageBox::Ok);
+    error_message->setDefaultButton(QMessageBox::Ok);
+    error_message->exec();
+    delete error_message;
+}

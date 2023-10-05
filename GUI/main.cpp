@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "./include/engine_core.h"
-
+#include "include/exceptions.h"
 #include<iostream>
 
 #include <QApplication>
@@ -423,7 +423,6 @@ int main(int argC, char *argV[])
     {
         QApplication a(argC, argV);
         MainWindow w(nullptr,engine);
-//    QObject::connect(&engine, &EngineCore::openConfigRequest, &w, &MainWindow::openConfig);
         QObject::connect(engine, &EngineCore::configPathChanged, &w, &MainWindow::setConfigPath);
         QObject::connect(engine, &EngineCore::requestsPathChanged, &w, &MainWindow::setRequestsPath);
         QObject::connect(engine, &EngineCore::answersPathChanged, &w, &MainWindow::setAnswersPath);
@@ -431,7 +430,7 @@ int main(int argC, char *argV[])
         QObject::connect(engine, &EngineCore::requestsLoaded, &w, &MainWindow::loadRequests);
         QObject::connect(engine, &EngineCore::searchResult, &w, &MainWindow::showResult);
         QObject::connect(engine, &EngineCore::reloadFilePaths, &w, &MainWindow::loadSearchFiles);
-//        QObject::connect(engine, &EngineCore::updateStatus, &w, &MainWindow::checkUI);
+        QObject::connect(engine, &EngineCore::showError, &w, &MainWindow::errorShow);
         QObject::connect(&w, &MainWindow::deletedFile, engine, &EngineCore::removeSearchFile);
         QObject::connect(&w, &MainWindow::deletedRequest, engine, &EngineCore::removeRequest);
         QObject::connect(&w, &MainWindow::addedRequest, engine, &EngineCore::addRequest);

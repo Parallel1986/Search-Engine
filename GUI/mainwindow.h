@@ -11,7 +11,7 @@
 
 //Search engine`s includes
 #include "include/engine_core.h"
-
+#include "include/exceptions.h"
 //Widgets
 #include "include/requestadddialog.h"
 
@@ -72,7 +72,7 @@ public slots:
     void requestsError();           //Open requests' error window
     void generateConfig();          //Generates configurations' file with files' list
     void checkUI();                 //Checkes error marks
-
+    void errorShow(EngineError);    //Shows an error message
 private:
     void reloadFiles();             //is needed?//Reloads files' list
     void readinessCheck();          //Checkes readiness to search

@@ -48,6 +48,7 @@ set(PROJECT_SOURCES
         include/inverted_index.h
         include/file_index.h
 		include/engine_core.h
+		include/exceptions.h
 		source/engine_core.cpp
 #		source/request_dialog.cpp
 
@@ -61,7 +62,6 @@ FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/../requests.json" DESTINATION "${CMAKE_BI
 
 add_executable(Search-engine-GUI
 			${PROJECT_SOURCES}
-
         )
 
 if (GTESTS)
