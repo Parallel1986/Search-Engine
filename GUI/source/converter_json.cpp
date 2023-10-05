@@ -43,10 +43,12 @@ void ConverterJSON::changeConfigPath(QString new_path)
                     config_file_path = new_path;
                     config_loaded = false;
                     emit configPathChanged(config_file_path);
-                    emit configUpdated(configCorrectionCheck());
                 }
                 else
-                    emit fileOpenFailure(new_path);
+                {
+                    emit sendError(EngineError(ExceptionType::ReadFileError,new_path,
+                                    "Error while trying to read a file"));
+                }
             }
             else if (new_target.isDir())
             {
@@ -55,14 +57,15 @@ void ConverterJSON::changeConfigPath(QString new_path)
                     config_file_path = new_path + "/config.json";
                     config_loaded = false;
                     emit configPathChanged(config_file_path);
-                    emit configUpdated(configCorrectionCheck());
                 }
             }
             else
-                emit fileOpenFailure(new_path);
+                emit sendError(EngineError(ExceptionType::OpenDirectoryError,new_path,
+                                "Error while trying to open a directory"));
         }
         else
-            emit fileOpenFailure(new_path);
+            emit sendError(EngineError(ExceptionType::FileNotExistError,new_path,
+                            "File does not exist"));
     }
 }
 
@@ -72,7 +75,7 @@ void ConverterJSON::changeRequestsPath(QString new_path)
     if (requests_file_path != new_path)
     {
         QFileInfo new_target(new_path);
-                if (new_target.exists())
+        if (new_target.exists())
         {
             if (new_target.isFile())
             {
@@ -81,10 +84,10 @@ void ConverterJSON::changeRequestsPath(QString new_path)
                     requests_file_path = new_path;
                     requests_loaded = false;
                     emit requestsPathChanged(requests_file_path);
-                    emit requestsUpdated(requestsCorrectionCheck());
                 }
                 else
-                    emit fileOpenFailure(new_path);
+                    emit sendError(EngineError(ExceptionType::ReadFileError,new_path,
+                                    "Error while trying to read a file"));
             }
             else if (new_target.isDir())
             {
@@ -93,14 +96,15 @@ void ConverterJSON::changeRequestsPath(QString new_path)
                     requests_file_path = new_path + "/requests.json";
                     requests_loaded = false;
                     emit requestsPathChanged(requests_file_path);
-                    emit requestsUpdated(requestsCorrectionCheck());
                 }
             }
             else
-                emit fileOpenFailure(new_path);
+                emit sendError(EngineError(ExceptionType::OpenDirectoryError,new_path,
+                                    "Error while trying to open a directory"));
         }
         else
-            emit fileOpenFailure(new_path);
+            emit sendError(EngineError(ExceptionType::FileNotExistError,new_path,
+                                    "Error while trying to read a file"));
     }
 }
 
@@ -120,18 +124,21 @@ void ConverterJSON::changeAnswersPath(QString new_path)
                     emit answersPathChanged(answers_file_path);
                 }
                 else
-                    emit fileOpenFailure(new_path);
+                    emit sendError(EngineError(ExceptionType::WriteFileError,new_path,
+                                    "Error while trying to write to a file"));
             }
             else if (new_target.isDir())
             {
-                if (new_target.isReadable())
+                if (new_target.isReadable()
+                    &&new_target.isWritable())
                 {
                     answers_file_path = new_path + "/answers.json";
                     void answersPathChanged(QString);
                 }
             }
             else
-                emit fileOpenFailure(new_path);
+                emit sendError(EngineError(ExceptionType::WriteDirectoryError,new_path,
+                                    "Error while trying to write to a directory"));
         }
         else if (new_target.isWritable())
         {
@@ -146,6 +153,9 @@ void ConverterJSON::changeAnswersPath(QString new_path)
                 void answersPathChanged(QString);
             }
         }
+        else
+            emit sendError(EngineError(ExceptionType::WriteDirectoryError,new_path,
+                            "Error while trying to write to a directory"));
     }
 }
 
@@ -237,7 +247,11 @@ void ConverterJSON::putAnswers(QList<QList<RelativeIndex>> answers)
         out_stream = answers_template.toJson(QJsonDocument::Indented);
         answer_file.write(out_stream);
         answer_file.close();
+        emit answersSaved();
     }
+    else
+        emit sendError(EngineError(ExceptionType::WriteFileError,answers_file_path,
+                        "Error while trying to write answers"));
 }
 
 //Save cofniguration to a configurations' file
@@ -254,7 +268,8 @@ void ConverterJSON::putConfig(const ConfigList settings, QString conf_file)
         else if ((target.exists()&&!target.isFile())
                 ||!target.isFile())
             {
-                emit fileOpenFailure(conf_file);
+                emit sendError(EngineError(ExceptionType::WriteFileError,conf_file,
+                                "Error while trying to write to a file"));
                 return;
             }
         emit configPathChanged(conf_file);
@@ -287,10 +302,11 @@ void ConverterJSON::putConfig(const ConfigList settings, QString conf_file)
 
         config_loaded = true;
         config_file_path = conf_file;
-        emit configUpdated(ConverterStatus::NO_ERRORS);
+//        emit configUpdated(ConverterStatus::NO_ERRORS);
     }
     else
-        emit fileOpenFailure(conf_file);
+        emit sendError(EngineError(ExceptionType::WriteDirectoryError,conf_file,
+                        "Error while trying to write to a file"));
 }
 
 //Save requests to a requests' file
@@ -313,11 +329,11 @@ void ConverterJSON::putRequests(const QList<QString> in_requests)
         QByteArray out_stream(requests->toJson(QJsonDocument::Indented));
         requests_file.write(out_stream);
         requests_file.close();
-        emit requestsUpdated(ConverterStatus::NO_ERRORS);
         requests_loaded = true;
     }
     else
-        emit fileOpenFailure(requests_file_path);
+        emit sendError(EngineError(ExceptionType::WriteDirectoryError,requests_file_path,
+                        "Error while trying to write to a file"));
 }
 
 //Get search engine's name
@@ -362,14 +378,8 @@ QStringList ConverterJSON::getFilesPaths()
         return QList<QString>();
 }
 
-//Get path to requests file
-QString ConverterJSON::getRequestsPath()
-{
-    return requests_file_path;
-}
-
 //Make request number as a string
-QString ConverterJSON::makeRequestNumber(std::size_t number)
+QString ConverterJSON::makeRequestNumber(std::size_t number) const
 {
     QString num;
     num.setNum(number);
@@ -383,7 +393,7 @@ QString ConverterJSON::makeRequestNumber(std::size_t number)
 }
 
 //Check the configurations' file for errors
-char ConverterJSON::configCorrectionCheck()
+char ConverterJSON::configCorrectionCheck() const
 {
     char result = ConverterStatus::NO_ERRORS;
     QFile config(config_file_path);
@@ -429,7 +439,7 @@ char ConverterJSON::configCorrectionCheck()
 }
 
 //Check the requests' file for errors
-char ConverterJSON::requestsCorrectionCheck()
+char ConverterJSON::requestsCorrectionCheck() const
 {
     char result = ConverterStatus::NO_ERRORS;
     QFile requests_file(requests_file_path);
@@ -468,7 +478,8 @@ bool ConverterJSON::loadConfigs()
         }
         else
         {
-            emit fileOpenFailure(config_file_path);
+            emit sendError(EngineError(ExceptionType::WriteDirectoryError,config_file_path,
+                            "Error while trying to open a file"));
             config_loaded = false;
             return false;
         }
@@ -493,7 +504,8 @@ bool ConverterJSON::loadRequests()
         }
         else
         {
-            emit fileOpenFailure(requests_file_path);
+            emit sendError(EngineError(ExceptionType::WriteDirectoryError,requests_file_path,
+                            "Error while trying to open a file"));
             requests_loaded = false;
             return false;
         }
