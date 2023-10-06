@@ -199,6 +199,14 @@ Prefrence processCommandLine(int argc,char** argv)
 //            ++arg;
 //            std::cout << "Next argument: "<< arg->toStdString() << std::endl;
         }
+		else if (*arg == "-nc")
+		{
+			pref.comands |= ComandLineOrders::NO_CONFIG_MODE;
+		}
+		else if (*arg == "-nr")
+		{
+			pref.comands |= ComandLineOrders::NO_REQUESTS_MODE;
+		}
         else if (*arg == "-ui")
         {
             std::cout << "Entered to -ui processor with command "<< arg->toStdString() << std::endl;
