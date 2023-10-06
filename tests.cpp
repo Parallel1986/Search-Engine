@@ -1,11 +1,39 @@
 #include <gtest/gtest.h>
-#include "include/converter_json.h"
+//#include "include/converter_json.h"
 #include "include/inverted_index.h"
 #include "include/file_index.h"
+#include <QRegularExpression>
+
 using namespace std;
 
-#define INVERTED_INDEX_READY
-#define SEARCH_SERVER_READY
+//#define INVERTED_INDEX_READY
+//#define SEARCH_SERVER_READY
+#define QT_SINGLE_THREAD
+
+#ifdef QT_SINGLE_THREAD
+TEST(TestQtThreadFunction, UniqeWords) {
+    const QString doc = "london is the capital of great britain";
+    const QMap<QString,int> words_expected {{"london",1},{"is",1},{"the",1},{"capita",1},
+        {"of",1},{"great",1},{"britain",1}};
+
+    QMap<QString,int> words_list;
+
+    auto expr = QRegExp("\\W+");
+    for (auto& word : doc.split(expr, Qt::SkipEmptyParts))
+    {
+        if (words_list.contains(word))
+        words_list[word]+=1;
+        else
+        {
+            words_list[word] = 1;
+        }
+    }
+
+    ASSERT_EQ(words_list, words_expected);
+
+}
+#endif
+
 
 #ifdef INVERTED_INDEX_READY
 void TestInvertedIndexFunctionality(

@@ -1,38 +1,48 @@
-#pragma once
+#ifndef INVERTED_INDEX_H
+#define INVERTED_INDEX_H
 #include <vector>
 #include <map>
 #include <string>
 #include <mutex>
+#include <QList>
+#include <QMap>
+#include <QObject>
 
+//Structure of word's entry
 struct Entry
 {
-    size_t doc_id, count;
+    unsigned int doc_id, count;
+    Entry(){}
+    Entry(int in_doc_id, int in_count) : doc_id(in_doc_id), count(in_count){}
 
-    // Данный оператор необходим для проведения тестовых сценариев
+    // Required for unit tests
     bool operator ==(const Entry& other) const {
         return (doc_id == other.doc_id &&
                 count == other.count);
     }
 };
 
-class InvertedIndex {
+class InvertedIndex
+{
+
 public:
     InvertedIndex() = default;
-/*
-* Обновить или заполнить базу документов, по которой будем совершать
-поиск
-* @param texts_input содержимое документов
+/**
+* Updates documents' base for search
+* @param texts_input documents' content
 */
-    void UpdateDocumentBase(std::vector<std::string> input_docs);
-/*
-* Метод определяет количество вхождений слова word в загруженной базе
-документов
-* @param word слово, частоту вхождений которого необходимо определить
-* @return возвращает подготовленный список с частотой слов
-*/
-    std::vector<Entry> GetWordCount(const std::string& word);
+    void updateDocumentBase(QList<QString> input_docs);
+
+/**
+ * Method gets count of word's entries in the loaded base of documents
+ * @param word word that count of entries needs to get
+ * @return returns list of word.s entries
+ */
+    QList<Entry> getWordCount(const QString& word);
+
 private:
-    void CreateFrequencyDictionary();
-    std::vector<std::string> docs;                              // список содержимого документов
-    std::map<std::string, std::vector<Entry>> freq_dictionary;  // частотный словарь
+    void createFrequencyDictionary();               //Creqtes frequency dictionary
+    QList<QString> docs;                            //Contains list of documens' content
+    QMap<QString, QList<Entry>> freq_dictionary;    //Frequency dictionary
 };
+#endif

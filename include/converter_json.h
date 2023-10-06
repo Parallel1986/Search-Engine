@@ -1,74 +1,189 @@
-#pragma once
+//***************************************************************************//
+//  This file contains converter for JSON files and allow to read settings   //
+//  and files for index and requests for serach from config.json and         //
+//  requests.json. Also, it is made to save search results to answers.json.  //
+//  Class based on Singleton pattern, so you can create only one instance of //
+//  it. To create instance or get access to it use static method             //
+//  GetInstance()                                                            //
+//***************************************************************************//
+#ifndef CONVERTER_JSON_HEADER
+#define CONVERTER_JSON_HEADER
 
 #include <string>
 #include <vector>
 #include <map>
+#include "../include/file_index.h"
+#include "../include/exceptions.h"
+#include <QObject>
+#include <QList>
+#include <QDir>
 
-enum CHANGES
-{
-    PATH_TO_CONFIG = 1,
-    PATH_TO_REQUESTS =2,
-    PATH_TO_ANSWERS = 4,
-    RESPONSES = 8,
-    REQUESTS_ADDED = 16,
-    FILES_TO_SEARCH_ADDED = 32,
-    NEW_CONFIG = 64
+#define DEFAULT_CONFIGS "config.json"
+#define DEFAULT_REQUESTS "requests.json"
+#define DEFAULT_ANSWERS "answers.json"
+
+enum {
+    MIN_RESPONSE    = 5
 };
 
-struct Preference
+enum FileErrors
 {
-    unsigned char changes = 0;
-    std::string config_path, requests_path, answers_path;
-    int max_response = -1;
-    std::vector<std::string> file_list_adds, requests_adds;
+    NO_ERR,
+    READ_ERR,
+    ACSESS_ERR,
+    NOT_A_FILE,
+    NOT_EXIST,
+    WRITE_ERR
 };
 
-class ConverterJSON {
+//List of configurations
+struct ConfigList
+{    
+    QString enegine_name,           //Engine's name
+            engine_ver;             //Engine's version
+    int max_responses;              //Limit of responses for request
+    QList<QString> files;           //List of file's content
+};
+
+//Status of the converter - 0 is no errors
+enum ConverterStatus
+{
+    CONFIG_MISSED           = 1,    //Missing configurations' file
+    CONFIG_FIELD_MISSED     = 2,    //Missing field "config" in configurations' file
+    SEARCH_FILES_MISSED     = 4,    //Missing field "files" in configurations' file
+    ENGINE_NAME_MISSED      = 8,    //Missing engine's name in configurations' file
+    ENGINE_VERSION_MISSED   = 16,   //Missing engine's version in configurations' file
+    MAX_RESPONSES_MISSED    = 32,   //Missing maximum response's count in configurations' file
+    REQUESTS_MISSED         = 64,   //Missing requests' file
+    REQUESTS_EMPTY          = 128,  //Missing requests in requests' file
+    NO_CONFIG_ERRORS        = 63,   //No errors of the configurations' file
+    NO_REQUESTS_ERRORS      = 192,  //No errors of the requests' file
+    NO_ERRORS               = 0     //No errors
+};
+
+//Used to reset part of engine status
+//enum ConverterStatusReset
+//{
+//    RESET_CONFIG_STATUS     = 192,  //To reset all configurations' statuses
+//    RESET_REQUESTS_STATUS   = 63,   //To reset all requests' statuses
+//    RESET_SEARCH_FILES      = 251,  //To reset status of files for serach
+//    RESET_ALL               = 0     //To reset all statuses
+//};
+
+namespace Loader
+{
+    void LoadFileContent(QStringList& result,const QStringList& source);  //Loads content of files from *source* to *result*
+    FileErrors checkFilePath(QString&);        //Checks correction of the path
+}
+
+
+class ConverterJSON : public QObject
+{
+    Q_OBJECT
 public:
-    //Получить ссылку на экземпляр
-    static ConverterJSON& GetInstance();
+//    static ConverterJSON& getInstance();
+    ConverterJSON() = default;
     ~ConverterJSON();
+
     /**
-	* Метод получения содержимого файлов
-	* @return Возвращает список с содержимым файлов перечисленных
-	* в config.json
+    * @brief Gets a file's content
+    * @return Returns a list with file's content
+    * that is listed in config.json file
+    */
+    QStringList getTextDocuments();
+
+	/**
+    * @brief Method reads the field "max_responses" to get a limit
+    * of the answers' number for each request
+    * @return Returns a number of the response limit
 	*/
-    std::vector<std::string> GetTextDocuments();
+    int getResponsesLimit();
 
-    /**
-	* Метод считывает поле max_responses для определения предельного
-	* количества ответов на один запрос
-	* @return
-	*/	
-    int GetResponsesLimit();
-
-    /**
-	* Метод получения запросов из файла requests.json
-	* @return возвращает список запросов из файла requests.json
+	/**
+    * @brief Method of gets requests from the requests.json file
+    * @return Returns a list of requests from the requests.json file
 	*/
-    std::vector<std::string> GetRequests();
+    QStringList getRequests();
 
-    //Положить в файл answers.json результаты поисковых запросов
-    void PutAnswers(std::vector<std::vector<std::pair<int, float>>>& answers);
+	/**
+    * @brief Puts to the answers.json file the result of search requests
+	*/
+    void putAnswers(QList<QList<RelativeIndex>> answers);
 
-    //Инициализация конвертера файлом конфигурации config.json
-    void Initialize();
+    /**
+    * @brief Puts settings to the config.json file
+    */
+    void putConfig(const ConfigList,QString);
 
-    //Изменить настройки
-    void SetPreferences(Preference& pref);
+    /**
+     * @brief Saves requests to the requests.json
+     */
+    void putRequests(const QList<QString>);
+
+    /**
+     * @brief Gets the name of the search engine
+     * @return Returns name of the search engine from the config.json
+     */
+    QString getEngineName();
+
+    /**
+     * @brief Gets the version of the search engine
+     * @return Returns version of the search engine from the config.json
+     */
+    QString getEngineVersion();
+
+    /**
+     * @brief Gets the list of files' content
+     * @return Returns list of files' content from files
+     * that are included in the config.json
+     */
+    QStringList getFilesPaths();
+
+    /**
+     * @brief Gets path to requests.json file
+     * @return Returns the path of the requests.json file
+     */
+    QString getRequestsPath() const;
+
+    /**
+     * @brief Checks configurations' file for errors
+     * @return char in format of ConvewrterStatus
+     */
+    char configCorrectionCheck() const;
+
+    /**
+     * @brief Checking requests' file for errors
+     * @return char in format of ConvewrterStatus
+     */
+    char requestsCorrectionCheck() const;
+
+
+    QString getConfigsPath() const;
+    QString getAnswersPath() const;
+
+public slots:
+
+    void changeConfigPath(QString);     //Changes path to config.json
+    void changeRequestsPath(QString);   //Changes path to requests.json
+    void changeAnswersPath(QString);    //Changes path to answers.json
+
+signals:
+    void configPathChanged(QString);    //Is emited when path to configurations' file is changed successfully
+    void requestsPathChanged(QString);  //Is emited when requests' file is loaded successfully
+    void answersPathChanged(QString);   //Is emited when answers' path changed successfully
+/**/void answersSaved();                //Is emited when answers is successfully saved
+
+    void sendError(EngineError);        //Is emited when error is acquired
 private:
-    static ConverterJSON* instance;
-    void GenerateConfig(Preference& pref);
-    ConverterJSON() = default;                  //Убираем конструктор, тобы нельзя было инстанциировать класс
-    std::string GetRequestNumber(int number);   //Получает строку с номером запроса
-    void operator=(ConverterJSON&);             //Убираем оператор присваивания
-    std::string engine_name;                    //Имя поискового двигателя
-    std::string engine_version;                 //Версия поискового двигателя
-    int max_responses = 5;                      //Максимальное количество ответов на запрос
-    std::vector<std::string> requests;          //Список поисковых запросов
-    std::vector<std::string> file_list;         //Список содержимого файлов, в которых производится поиск
-    bool initialized = false;                   //Указывает на инициализацию конвертера
-    std::string config_path = "config.json";    //Путь до config.json
-    std::string requests_path= "requests.json"; //Путь до requests.json
-    std::string answers_path= "answers.json";   //Путь до answers.json
+    QString makeRequestNumber(std::size_t) const;   //Generates string of a request for writing to answers.json
+    bool loadConfigs();           //Loads configuration from the configurations' file
+    bool loadRequests();          //Loads requests from  requests' file
+    QString config_file_path = DEFAULT_CONFIGS;    //Configuration file`s path
+    QString requests_file_path = DEFAULT_REQUESTS; //Requests file`s path
+    QString answers_file_path = DEFAULT_ANSWERS;   //Answers file`s path
+    bool config_loaded = false;               //True if configurations loaded already
+    bool requests_loaded = false;             //True if requests loaded already
+    QJsonDocument* configuration = nullptr;   //Configurations as JSON document that are loaded from the file
+    QJsonDocument* requests = nullptr;        //Requests as JSON document that are loaded from the file
 };
+#endif

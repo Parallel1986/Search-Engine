@@ -1,34 +1,49 @@
-#pragma once
+//***************************************************************************//
+//  This file contains search server class that creates search results by    //
+// using frequency dictionaries and comparing requsts with it                //
+//***************************************************************************//
+
+#ifndef FILE_INDEX_H
+#define FILE_INDEX_H
 #include "inverted_index.h"
 
+//Structure of relative index
 struct RelativeIndex {
-	size_t doc_id;
-	float rank;
+    int doc_id;             //Doncument's ID
+    float rank;             //Rank of search result
+
+    //required for unit tests
 	bool operator ==(const RelativeIndex& other) const {
 		return (doc_id == other.doc_id && rank == other.rank);
 	}
 };
+
 class SearchServer {
 public:
 	/**
-	* @param idx в конструктор класса передаётся ссылка на класс
-	InvertedIndex,
-	* чтобы SearchServer мог узнать частоту слов встречаемых в
-	запросе
+    * @param idx To constructor of class is received link
+    * to InvertedIndex so SearchServer can get number of
+    * words' instances listed in requests
+    */
+    SearchServer(InvertedIndex* idx) : _index(idx) { };
+
+    /**
+    * Method of processing search requests
+    * @param queries_input search requests from requests' file
+    * @return returns sorted list of relevant answers
+    * for given requests
 	*/
-	SearchServer(InvertedIndex& idx) : _index(idx) { };
-	/**
-	* Метод обработки поисковых запросов
-	* @param queries_input поисковые запросы взятые из файла
-	requests.json
-	* @return возвращает отсортированный список релевантных ответов для
-	заданных запросов
-	*/
-	std::vector<std::vector<RelativeIndex>> search(const
-		std::vector<std::string>& queries_input);
-	void setMaxResponse(int max_response);
+    QList<QList<RelativeIndex>> search(const
+        QList<QString>& queries_input);
+
+    /**
+     * @brief sets maximal requests' count
+     * @param max_response
+     */
+    void setMaxResponse(int max_response);
 private:
-	InvertedIndex _index;
+    InvertedIndex* _index;
 	int max_response = 5;
 };
 
+#endif
