@@ -50,6 +50,8 @@ cmake -B <solution-directory> -G 'Visual Studio <version>'
 - 15 2017
 After the solution will be created, you should build executable file by using Your Visual studio
 
+Also, may be required to deploy Qt files using windeployqt
+
 # Avilable modes of search
 Search engine supports four modes of search:
 ## Standard.
