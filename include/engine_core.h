@@ -228,7 +228,7 @@ private:
     QStringList files_paths_add;                //List of additional files' pathes for search
     char engine_status = ConverterStatus::NO_ERRORS;    //Search engine state
     EngineMode mode = EngineMode::STANDARD;     //Mode of engine
-    bool useUI = true;                          //Sets to use GUI
+    bool useUI = false;                         //Sets to use GUI
 };
 
 #endif // ENGINE_CORE_H
