@@ -1,12 +1,55 @@
 # Search-Engine
 This readme is work in progress
-Seearch engine for finding words or phrases in set of documents
+Search engine for finding words or phrases in set of documents
+
+# Requirements
+Search engine requires:
+- C++ 17 standard compiler
+- CMake not less than 3.5 version
+- Qt 5.15 version (Widgets, Core)
 
 # Installation
-To install search engine clone git repository by command:
+Firs of all, to install search engine you need to clone git repository by command:
 ```
 git -clone https://github.com/Parallel1986/Search-Engine
 ```
+### Unix users
+Execute this commands:
+```
+cmake -B <build-directory> -G 'Unix Makefiles'
+cd <build-directory>
+make
+```
+<build-directory> is a path to build's directory
+### MinGW users
+```
+Execute this commands:
+cmake -B <build-directory> -G 'MinGW Makefiles'
+cd <build-directory>
+mingw32-make
+```
+<build-directory> is a path to build's directory
+### Ninja users
+Execute this commands:
+```
+cmake -B <build-directory> -G 'Ninja'
+cd <build-directory>
+ninja
+```
+<build-directory> is a path to build's directory
+### Windows users
+If You use MSVC compiler then You should generate solution file for MS Visual studio by next command:
+```
+cmake -B <solution-directory> -G 'Visual Studio <version>'
+```
+```<solution-directory>``` is path where solution will be build
+
+```<version>``` is version of your compiler. It could be:
+- 17 2022
+- 16 2019
+- 15 2017
+After the solution will be created, you should build executable file by using Your Visual studio
+
 # Avilable modes of search
 Search engine supports four modes of search:
 ## Standard.
