@@ -20,7 +20,7 @@ cmake -B <build-directory> -G 'Unix Makefiles'
 cd <build-directory>
 make
 ```
-<build-directory> is a path to build's directory
+```<build-directory>``` is a path to build's directory
 ### MinGW users
 ```
 Execute this commands:
@@ -28,7 +28,7 @@ cmake -B <build-directory> -G 'MinGW Makefiles'
 cd <build-directory>
 mingw32-make
 ```
-<build-directory> is a path to build's directory
+```<build-directory>``` is a path to build's directory
 ### Ninja users
 Execute this commands:
 ```
@@ -36,7 +36,7 @@ cmake -B <build-directory> -G 'Ninja'
 cd <build-directory>
 ninja
 ```
-<build-directory> is a path to build's directory
+```<build-directory>``` is a path to build's directory
 ### Windows users
 If You use MSVC compiler then You should generate solution file for MS Visual studio by next command:
 ```
