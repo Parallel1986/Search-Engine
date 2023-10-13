@@ -319,7 +319,7 @@ void EngineCore::search()
     }
 
     if (useUI)
-        emit searchResult(search_result);
+        emit searchResult(search_result, files_id, requests_id);
     else
         saveResult();
 }
@@ -406,11 +406,12 @@ void EngineCore::saveResultAsText()
 void EngineCore::makeFilesIDTable(QStringList& files)
 {
     if (files_id != nullptr)
-    {
-        files_id->clear();
-        files_id = nullptr;
-    }
-    files_id = new FileIDTable(files_paths.size()+files_paths_add.size());
+        {
+            files_id->clear();
+            files_id->reInitialise(files_paths.size()+files_paths_add.size());
+        }
+    else
+        files_id = new FileIDTable(files_paths.size()+files_paths_add.size());
 
     int id = 0;
     QList<QFuture<void>> threads;
@@ -434,11 +435,11 @@ void EngineCore::makeRequestsIDdTable(QStringList&)
 {
     if (requests_id != nullptr)
     {
-        requests_id->clear();
-        requests_id = nullptr;
+        requests_id ->clear();
+        requests_id ->reInitialise(requests.size()+requests_add.size());
     }
-    int total_size = requests.size()+requests_add.size();
-    requests_id = new RequestIDTable(total_size);
+    else
+        requests_id = new RequestIDTable(requests.size()+requests_add.size());
 
     int id = 0;
     for (auto request = requests.begin();

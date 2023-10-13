@@ -232,7 +232,7 @@ void MainWindow::search()
     core->search();
 }
 
-void MainWindow::showResult(QList<QList<RelativeIndex>> search_result)
+void MainWindow::showResult(QList<QList<RelativeIndex>> search_result,const FileIDTable* file_id_table, const RequestIDTable* requests_id_table)
 {
     int rec_id = 0;
     ui->results_tree_widget->clear();
@@ -241,17 +241,30 @@ void MainWindow::showResult(QList<QList<RelativeIndex>> search_result)
     for (auto& result : search_result)
     {
         QTreeWidgetItem* item = new QTreeWidgetItem(main_item);
-        item->setText(0,QString("request " + QString::number(rec_id)));
+        item->setText(0,QString("request: " + requests_id_table->requests[rec_id]));
         QTreeWidgetItem* is_result = new QTreeWidgetItem(item);
-        is_result->setText(0,result.empty()? "result: false":"result: true");
+
+        is_result->setText(0,result.empty()? "result: false"
+                                           : "result: true");
         if (!result.empty())
         {
             for (auto& line : result)
             {
                 QTreeWidgetItem* record = new QTreeWidgetItem(is_result);
-                record->setSizeHint(0,QSize(40,10));
+                record->setSizeHint(0,QSize(150,15));
+                QString error;
+                if (file_id_table->err[line.doc_id] == FileErrors::NOT_A_FILE)
+                {
+                    error = "Not a file! Error";
+                }
+                else if (file_id_table->err[line.doc_id] == FileErrors::ACSESS_ERR)
+                    error = "File access error!";
+                else if (file_id_table->err[line.doc_id] == FileErrors::NOT_EXIST)
+                    error = "File not exist!";
+                else if (file_id_table->err[line.doc_id] == FileErrors::READ_ERR)
+                    error = "Error while reading a file!";
 
-                record->setText(0,"doc_id: "+QString::number(line.doc_id) +", rank: " + QString::number(line.rank));
+                record->setText(0,((file_id_table->err[line.doc_id] == FileErrors::NO_ERR)? "rank: " + QString::number(line.rank):error) + "\t document: "+ file_id_table->file_path[line.doc_id]);
             }
         }
         ++rec_id;

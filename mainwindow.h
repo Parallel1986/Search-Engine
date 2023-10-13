@@ -64,7 +64,7 @@ public slots:
     void configSave();              //Save button in configurations' section
     void addFile();                 //Add button in requests' section is pressed
     void deleteFile();              //Delete button in files' section is pressed
-    void showResult(QList<QList<RelativeIndex>>);   //Fill results of search
+    void showResult(QList<QList<RelativeIndex>>,const FileIDTable*, const RequestIDTable*);   //Fill results of search
     void loadConfig(ConfigList);    //Fill filelds of configurations
     void loadRequests(QStringList); //Fill requests' field
     void loadSearchFiles(QStringList);  //Fill files for search

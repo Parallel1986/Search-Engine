@@ -22,15 +22,12 @@ struct FileIDTable
     file_path(new QString[count]), err(new FileErrors[count]){}
     ~FileIDTable()
     {
-        if (id != nullptr)
-            delete[] id;
-        if (err != nullptr)
-            delete[] err;
+        clear();
     }
-    int size = 0;           //Size of files' array
-    int* id = nullptr;      //Array of file's ID
-    QString *file_path = nullptr;  //Array of file's path
-    FileErrors* err = nullptr;;              //Array of erros acquired if file could not be opened
+    int size = 0;                   //Size of files' array
+    int* id = nullptr;              //Array of file's ID
+    QString *file_path = nullptr;   //Array of file's path
+    FileErrors* err = nullptr;;     //Array of erros acquired if file could not be opened
 
     void clear()            //Clears the structure
     {
@@ -50,11 +47,19 @@ struct FileIDTable
             err = nullptr;
         }
     }
+    void reInitialise(int count)
+    {
+        size = count;
+        id = new int[count];
+        file_path = new QString[count];
+        err = new FileErrors[count];
+    }
 private:
     FileIDTable(){};
     FileIDTable(const FileIDTable&){};
 };
 
+/*??? Is used ???*/
 struct FileIDFrame
 {
     int id;
@@ -68,14 +73,11 @@ struct RequestIDTable
     RequestIDTable(int count) : size(count), id(new int[count]), requests(new QString[count]){}
     ~RequestIDTable()
     {
-        if (id != nullptr)
-            delete[] id;
-        if (requests != nullptr)
-            delete[] requests;
+        clear();
     }
     int size = 0;           //size of requests' array
     int* id = nullptr;      //Array of requests' IDs
-    QString* requests;    //Array of requests
+    QString* requests;      //Array of requests
 
     void clear()            //Clears the structure
     {
@@ -85,9 +87,14 @@ struct RequestIDTable
             id = nullptr;
         }
         if (requests != nullptr)
-        {
             delete[] requests;
-        }
+    }
+
+    void reInitialise(int count)
+    {
+        size = count;
+        id = new int[count];
+        requests = new QString[count];
     }
 private:
     RequestIDTable(){};
@@ -182,7 +189,7 @@ signals:
     void configPathChanged(QString);            //Is emited when path to configurations' file is changed
     void requestsPathChanged (QString);         //Is emited when path to requests' file is changed
     void answersPathChanged (QString);          //Is emited when path to answers' file is chamged
-    void searchResult(QList<QList<RelativeIndex>>); //Is emited when search result is ready
+    void searchResult(QList<QList<RelativeIndex>>, const FileIDTable*,const RequestIDTable*); //Is emited when search result is ready
     void requestsLoaded(QStringList);           //Is emited when requests are changed
     void configsLoaded(ConfigList);             //Sends configurations
     void updateStatus(char);                    //Is emited when engine status is changed

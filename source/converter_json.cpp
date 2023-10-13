@@ -553,7 +553,7 @@ FileErrors Loader::checkFilePath(QString& file_path)
     QFileInfo file(file_path);
     if (!file.isFile())
         return FileErrors::NOT_A_FILE;
-    if (file.isReadable())
+    if (!file.isReadable())
         return FileErrors::READ_ERR;
     if (!file.isWritable())
         return FileErrors::WRITE_ERR;

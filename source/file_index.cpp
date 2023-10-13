@@ -24,21 +24,21 @@ QList<QList<RelativeIndex>> SearchServer::search(const QList<QString>& queries_i
 	for (auto& request_line : queries_input)
     {
         //Spliting requests to separate words
-        QSet<QString> words_list;
+        QSet<QString> set_of_words;
         QRegExp words("\\W+");
         auto word_list = request_line.split(words, Qt::SkipEmptyParts);
         for (auto request = word_list.begin()
             ; request != word_list.end()
             ; request++)
         {
-            words_list.insert(*request);
+            set_of_words.insert(*request);
         }
 
-        QList<RelativeIndex> request_result;
+        QList<RelativeIndex> result_of_request;
         QMultiMap<int, QString> sorted_words;
 
-        auto iterator = words_list.begin();
-        auto iterator_end = words_list.end();
+        auto iterator = set_of_words.begin();
+        auto iterator_end = set_of_words.end();
 
         //Counting count of word's instances
         while (iterator != iterator_end)
@@ -65,19 +65,19 @@ QList<QList<RelativeIndex>> SearchServer::search(const QList<QString>& queries_i
         {            
 			auto it = sorted_words.begin();
             auto it_end = sorted_words.end();
-            QMap<int/*doc_id*/, int/*relevance*/> doc_absolute_relevance;
+            QMap<int/*doc_id*/, int/*relevance*/> document_absolute_relevance;
             QList<Entry> helper(_index->getWordCount(it.value()));
             //Counting absolute relevance
-            while (doc_absolute_relevance.size() < max_response && it != it_end)
+            while (document_absolute_relevance.size() < max_response && it != it_end)
 			{
 				for (auto& entry : helper)
 				{
-                    if (doc_absolute_relevance.contains(entry.doc_id))
-                        doc_absolute_relevance[entry.doc_id] += entry.count;
-					else if (doc_absolute_relevance.size() < max_response)
-                        doc_absolute_relevance.insert( entry.doc_id, entry.count);
+                    if (document_absolute_relevance.contains(entry.doc_id))
+                        document_absolute_relevance[entry.doc_id] += entry.count;
+                    else if (document_absolute_relevance.size() < max_response)
+                        document_absolute_relevance.insert( entry.doc_id, entry.count);
 				}
-				if (doc_absolute_relevance.size() < max_response)
+                if (document_absolute_relevance.size() < max_response)
 				{
                     ++it;
 					if (it != it_end)
@@ -94,15 +94,15 @@ QList<QList<RelativeIndex>> SearchServer::search(const QList<QString>& queries_i
                 helper = _index->getWordCount(it.value());
 				for (auto& entry : helper)
 				{
-                    if (doc_absolute_relevance.contains(entry.doc_id))
-                        doc_absolute_relevance[entry.doc_id] += entry.count;
+                    if (document_absolute_relevance.contains(entry.doc_id))
+                        document_absolute_relevance[entry.doc_id] += entry.count;
 				}
 				it++;
             }
 
             //Counting maximal absolute relevance
             int max_count = 0;
-            for (auto& count:doc_absolute_relevance)
+            for (auto& count:document_absolute_relevance)
             {
                 if (max_count < count)
                     max_count = count;
@@ -110,7 +110,9 @@ QList<QList<RelativeIndex>> SearchServer::search(const QList<QString>& queries_i
 
             //Counting relative relevance
             std::multimap<float, size_t, std::greater<float>> relevance_map;
-            for (auto document = doc_absolute_relevance.begin(); document != doc_absolute_relevance.end(); document++)
+            for (auto document = document_absolute_relevance.begin();
+                 document != document_absolute_relevance.end();
+                 document++)
 			{
                 relevance_map.insert({ ((float)((float)document.value() / (float)max_count)), document.key() });
             }
@@ -118,13 +120,13 @@ QList<QList<RelativeIndex>> SearchServer::search(const QList<QString>& queries_i
             //Filling relevance list
 			for (auto& rel : relevance_map)
 			{
-				RelativeIndex ri;
-				ri.rank = rel.first;
-				ri.doc_id = rel.second;
-                request_result.append(ri);
-			}            
-            result.append(request_result);
-		}		
+                RelativeIndex relative_index;
+                relative_index.rank = rel.first;
+                relative_index.doc_id = rel.second;
+                result_of_request.append(relative_index);
+            }
+            result.append(result_of_request);
+        }
 	}
 	return result;
 }

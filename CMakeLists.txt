@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(Search-engine-GUI VERSION 0.1 LANGUAGES CXX)
+project(Search-engine VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -52,20 +52,19 @@ FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/./answers.json" DESTINATION "${CMAKE_BINA
 FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/./requests.json" DESTINATION "${CMAKE_BINARY_DIR}/")
 
 
-
-add_executable(Search-engine-GUI
+add_executable(Search-engine
 			${PROJECT_SOURCES}
         )
 
 if (GTESTS)
-	target_link_libraries(Search-engine-GUI
+	target_link_libraries(Search-engine
 		PRIVATE
 		Qt5::Widgets
 		PUBLIC
 		GTest::gtest_main
 	)
 else()
-	target_link_libraries(Search-engine-GUI
+	target_link_libraries(Search-engine
 		PRIVATE
 		Qt5::Widgets
 	)
