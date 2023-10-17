@@ -89,5 +89,8 @@ Command line supports next type of commands:
 
 # GUI
 Search engine also has graphical user interface. It allows user to interact with engine settings and requests before commiting search.
+
+![GUI](https://github.com/Parallel1986/Search-Engine/blob/GUI-Envelope_mode/Readme_files/2023-10-17_16-38-33.png)
+
 Via GUI user can change configurations' file, requests' file, answers' file, set response limit and manually add files for search or requests.
 Also it will present search results and allows to save it as standard Json file or as a text file.
