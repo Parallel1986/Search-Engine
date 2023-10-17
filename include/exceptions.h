@@ -16,10 +16,12 @@ enum ExceptionType{
     NoDataError
 };
 
-struct EngineError
+struct FileError : public QException
 {
 public:
-    EngineError(ExceptionType exc, QString source, QString info):
+    void raise() const override { throw *this; }
+    FileError *clone() const override { return new FileError(*this); }
+    FileError(ExceptionType exc, QString source, QString info):
     ex(exc),source(source),additional_data(info){}
     ExceptionType getExceptionType() const {return ex;}
     QString getExceptionSource() const {return source;}
@@ -29,6 +31,5 @@ private:
     QString source;
     QString additional_data;
 };
-
 
 #endif // EXCEPTIONS_H

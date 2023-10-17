@@ -22,15 +22,6 @@ struct FileIDTable
     file_path(new QString[count]), err(new FileErrors[count]){}
     ~FileIDTable()
     {
-        clear();
-    }
-    int size = 0;                   //Size of files' array
-    int* id = nullptr;              //Array of file's ID
-    QString *file_path = nullptr;   //Array of file's path
-    FileErrors* err = nullptr;;     //Array of erros acquired if file could not be opened
-
-    void clear()            //Clears the structure
-    {
         if (id != nullptr)
         {
             delete[] id;
@@ -47,24 +38,14 @@ struct FileIDTable
             err = nullptr;
         }
     }
-    void reInitialise(int count)
-    {
-        size = count;
-        id = new int[count];
-        file_path = new QString[count];
-        err = new FileErrors[count];
-    }
+
+    int size = 0;                   //Size of files' array
+    int* id = nullptr;              //Array of file's ID
+    QString *file_path = nullptr;   //Array of file's path
+    FileErrors* err = nullptr;;     //Array of erros acquired if file could not be opened
 private:
     FileIDTable(){};
     FileIDTable(const FileIDTable&){};
-};
-
-/*??? Is used ???*/
-struct FileIDFrame
-{
-    int id;
-    QString file_path;
-    FileErrors err;
 };
 
 //Structure for accordance of requests and its IDs
@@ -72,14 +53,6 @@ struct RequestIDTable
 {
     RequestIDTable(int count) : size(count), id(new int[count]), requests(new QString[count]){}
     ~RequestIDTable()
-    {
-        clear();
-    }
-    int size = 0;           //size of requests' array
-    int* id = nullptr;      //Array of requests' IDs
-    QString* requests;      //Array of requests
-
-    void clear()            //Clears the structure
     {
         if (id != nullptr)
         {
@@ -90,12 +63,10 @@ struct RequestIDTable
             delete[] requests;
     }
 
-    void reInitialise(int count)
-    {
-        size = count;
-        id = new int[count];
-        requests = new QString[count];
-    }
+    int size = 0;           //size of requests' array
+    int* id = nullptr;      //Array of requests' IDs
+    QString* requests;      //Array of requests
+
 private:
     RequestIDTable(){};
     RequestIDTable(const RequestIDTable&);
@@ -147,7 +118,7 @@ public:
     /**
      * @brief Create configurations' file with given settings
      */
-    void generateConfigFile(QStringList, int);
+    void generateConfigFile(QStringList&, int);
 
     /**
      * @brief Gets list of requests
@@ -193,7 +164,7 @@ signals:
     void requestsLoaded(QStringList);           //Is emited when requests are changed
     void configsLoaded(ConfigList);             //Sends configurations
     void updateStatus(char);                    //Is emited when engine status is changed
-    void showError(EngineError);                //Is emited when error message is send to GUI
+    void showError(FileError);                  //Is emited when error message is send to GUI
 public slots:
     void addSearchFile(QString);        //Adds path to file for search in the end of files' list
     void removeSearchFile(QString);     //Removes file for search from files' list
@@ -211,7 +182,7 @@ public slots:
     void configPathUpdated(QString);    //Process changing of configurations' file path
     void requestsPathUpdated(QString);  //Process changing of requests' file path
     void answersPathUpdated(QString);   //Process changing of answers' file path
-    void processError(EngineError);     //Processing error messages
+    void processError(FileError);     //Processing error messages
 private:
     void makeFilesIDTable(QStringList&);        //Creates table of accordance files' paths and its IDs
     void makeRequestsIDdTable(QStringList&);    //Creates table of accordance requests and its IDs

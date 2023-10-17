@@ -237,7 +237,7 @@ void EngineCore::removeSearchFile(QString rm_file)
 }
 
 //Create configurations' file config.json and adds fields to it
-void EngineCore::generateConfigFile(QStringList files, int response_limit)
+void EngineCore::generateConfigFile(QStringList& files, int response_limit)
 {
     ConfigList configurations;
     configurations.enegine_name = "Autogen Name";
@@ -406,12 +406,9 @@ void EngineCore::saveResultAsText()
 void EngineCore::makeFilesIDTable(QStringList& files)
 {
     if (files_id != nullptr)
-        {
-            files_id->clear();
-            files_id->reInitialise(files_paths.size()+files_paths_add.size());
-        }
-    else
-        files_id = new FileIDTable(files_paths.size()+files_paths_add.size());
+            delete files_id;
+
+    files_id = new FileIDTable(files_paths.size()+files_paths_add.size());
 
     int id = 0;
     QList<QFuture<void>> threads;
@@ -434,12 +431,9 @@ void EngineCore::makeFilesIDTable(QStringList& files)
 void EngineCore::makeRequestsIDdTable(QStringList&)
 {
     if (requests_id != nullptr)
-    {
-        requests_id ->clear();
-        requests_id ->reInitialise(requests.size()+requests_add.size());
-    }
-    else
-        requests_id = new RequestIDTable(requests.size()+requests_add.size());
+        delete requests_id;
+
+    requests_id = new RequestIDTable(requests.size()+requests_add.size());
 
     int id = 0;
     for (auto request = requests.begin();
@@ -485,7 +479,7 @@ void EngineCore::setUI()
 }
 
 //Processes error
-void EngineCore::processError(EngineError err)
+void EngineCore::processError(FileError err)
 {
     if (!useUI)
     {

@@ -422,7 +422,7 @@ void MainWindow::generateConfig()
     core->generateConfigFile(files_list_model->stringList(),ui->max_response_spin->value());
 }
 
-void MainWindow::errorShow(EngineError err)
+void MainWindow::errorShow(FileError err)
 {
     QMessageBox* error_message = new QMessageBox();
     switch (err.getExceptionType()) {

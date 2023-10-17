@@ -72,7 +72,7 @@ public slots:
     void requestsError();           //Open requests' error window
     void generateConfig();          //Generates configurations' file with files' list
     void checkUI();                 //Checkes error marks
-    void errorShow(EngineError);    //Shows an error message
+    void errorShow(FileError);      //Shows an error message
 private:
     void reloadFiles();             //is needed?//Reloads files' list
     void readinessCheck();          //Checkes readiness to search

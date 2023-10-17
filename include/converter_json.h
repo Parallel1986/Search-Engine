@@ -173,7 +173,7 @@ signals:
     void answersPathChanged(QString);   //Is emited when answers' path changed successfully
 /**/void answersSaved();                //Is emited when answers is successfully saved
 
-    void sendError(EngineError);        //Is emited when error is acquired
+    void sendError(FileError);          //Is emited when error is acquired
 private:
     QString makeRequestNumber(std::size_t) const;   //Generates string of a request for writing to answers.json
     bool loadConfigs();           //Loads configuration from the configurations' file
