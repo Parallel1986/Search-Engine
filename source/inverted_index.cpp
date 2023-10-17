@@ -9,6 +9,24 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+QStringList IndexParser::splitTextToWords(QString text)
+{
+    return text.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
+}
+
+QMap<QString,Entry> IndexParser::fillEntryDictionary(const QString& text_of_document, int doc_id)
+    {
+        QMap<QString,Entry> dictionary;
+        QStringList words_in_text = IndexParser::splitTextToWords(text_of_document);
+        for (auto& word : words_in_text)
+        {
+            if (dictionary.contains(word))
+                dictionary[word].count +=1;
+            else
+                dictionary[word] = Entry(doc_id,1);
+        }
+        return dictionary;
+    }
 
 //Updates documens' base
 void InvertedIndex::updateDocumentBase(QList<QString> input_docs)
@@ -46,23 +64,10 @@ void InvertedIndex::createFrequencyDictionary()
     size_t doc_id = 0;
 
     QList<QFuture<QMap<QString,Entry>>> index_threads;
+
     for (auto& document : docs)
     {
-        index_threads.append(QtConcurrent::run([&document, doc_id]()
-            {
-                QMap<QString,Entry> dictionary;
-                //Spliting document to separate words
-                for (auto& word : document.split(QRegExp("\\W+"), Qt::SkipEmptyParts))
-                {
-                    if (dictionary.contains(word))
-                        dictionary[word].count +=1;
-                    else
-                    {
-                        dictionary[word] = Entry(doc_id,1);
-                    }
-                }
-                return dictionary;
-            }));
+        index_threads.append(QtConcurrent::run(IndexParser::fillEntryDictionary,document, doc_id));
             ++doc_id;
     }
 

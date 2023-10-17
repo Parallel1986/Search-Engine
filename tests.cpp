@@ -1,25 +1,31 @@
 #include <gtest/gtest.h>
-//#include "include/converter_json.h"
 #include "include/inverted_index.h"
 #include "include/file_index.h"
 #include <QRegularExpression>
 
 using namespace std;
 
-//#define INVERTED_INDEX_READY
-//#define SEARCH_SERVER_READY
+#define INVERTED_INDEX_READY
+#define SEARCH_SERVER_READY
 #define QT_SINGLE_THREAD
 
 #ifdef QT_SINGLE_THREAD
-TEST(TestQtThreadFunction, UniqeWords) {
+TEST(TestQtTextSplitMethod, UniqeWords) {
     const QString doc = "london is the capital of great britain";
-    const QMap<QString,int> words_expected {{"london",1},{"is",1},{"the",1},{"capita",1},
-        {"of",1},{"great",1},{"britain",1}};
+    QMap<QString,int> words_expected;
+    words_expected.insert("london",1);
+    words_expected.insert("is",1);
+    words_expected.insert("the",1);
+    words_expected.insert("capital",1);
+    words_expected.insert("of",1);
+    words_expected.insert("great",1);
+    words_expected.insert("britain",1);
 
     QMap<QString,int> words_list;
 
-    auto expr = QRegExp("\\W+");
-    for (auto& word : doc.split(expr, Qt::SkipEmptyParts))
+    QStringList words_from_text = IndexParser::splitTextToWords(doc);
+
+    for (auto& word : words_from_text)
     {
         if (words_list.contains(word))
         words_list[word]+=1;
@@ -29,35 +35,75 @@ TEST(TestQtThreadFunction, UniqeWords) {
         }
     }
 
-    ASSERT_EQ(words_list, words_expected);
+    auto it_is = words_list.begin();
+    auto it_expected = words_expected.begin();
+    for (;
+         it_is != words_list.end() && it_expected != words_expected.end();
+         ++it_is, ++it_expected)
+    {
+        EXPECT_EQ(it_is.key(), it_expected.key()) << "Expected key: " << it_expected.key().toStdString()
+                                                  << "\nGiven key: " << it_is.key().toStdString();
+        EXPECT_EQ(it_is.value(), it_expected.value()) << "Expected value: " << it_expected.value()
+                                                      << "\nGiven value: " << it_is.value();
+    }
+}
 
+TEST(TestQtTextSplitMethod, RepeatedWords){
+    const QString doc = "milk milk milk milk water water water";
+    QMap<QString,int> words_list;
+
+    QMap<QString,int> words_expected;
+    words_expected.insert("milk",4);
+    words_expected.insert("water",3);
+
+    QStringList words_from_text = IndexParser::splitTextToWords(doc);
+    for (auto& word : words_from_text)
+    {
+        if (words_list.contains(word))
+        words_list[word]+=1;
+        else
+        {
+            words_list[word] = 1;
+        }
+    }
+
+    auto it_is = words_list.begin();
+    auto it_expected = words_expected.begin();
+    for (;it_is != words_list.end() && it_expected != words_expected.end();
+         ++it_is, ++it_expected)
+    {
+        EXPECT_EQ(it_is.key(), it_expected.key()) << "Expected key: " << it_expected.key().toStdString()
+                                                  << "\nGiven key: " << it_is.key().toStdString();
+        EXPECT_EQ(it_is.value(), it_expected.value()) << "Expected value: " << it_expected.value()
+                                                      << "\nGiven value: " << it_is.value();
+    }
 }
 #endif
 
 
 #ifdef INVERTED_INDEX_READY
 void TestInvertedIndexFunctionality(
-    const vector<string>& docs,
-    const vector<string>& requests,
-    const std::vector<vector<Entry>>& expected
+    const QList<QString>& docs,
+    const QList<QString>& requests,
+    const QList<QList<Entry>>& expected
 ) {
-    std::vector<std::vector<Entry>> result;
+    QList<QList<Entry>> result;
     InvertedIndex idx;
-    idx.UpdateDocumentBase(docs);
+    idx.updateDocumentBase(docs);
     for (auto& request : requests) {
-        std::vector<Entry> word_count = idx.GetWordCount(request);
-        result.push_back(word_count);
+        QList<Entry> word_count = idx.getWordCount(request);
+        result.append(word_count);
     }
-    ASSERT_EQ(result, expected);
+    EXPECT_EQ(result, expected);
 }
 
 TEST(TestCaseInvertedIndex, TestBasic) {
-    const vector<string> docs = {
+    const QList<QString> docs = {
     "london is the capital of great britain",
     "big ben is the nickname for the Great bell of the striking clock"
     };
-    const vector<string> requests = { "london", "the" };
-    const vector<vector<Entry>> expected = {
+    const QList<QString> requests = { "london", "the" };
+    const QList<QList<Entry>> expected = {
     {
     {0, 1}
     }, {
@@ -66,15 +112,16 @@ TEST(TestCaseInvertedIndex, TestBasic) {
     };
     TestInvertedIndexFunctionality(docs, requests, expected);
 }
+
 TEST(TestCaseInvertedIndex, TestBasic2) {
-    const vector<string> docs = {
+    const QList<QString> docs = {
     "milk milk milk milk water water water",
     "milk water water",
     "milk milk milk milk milk water water water water water",
     "americano cappuchino"
     };
-    const vector<string> requests = { "milk", "water", "cappuchino" };
-    const vector<vector<Entry>> expected = {
+    const QList<QString> requests = { "milk", "water", "cappuchino" };
+    const QList<QList<Entry>> expected = {
     {
     {0, 4}, {1, 1}, {2, 5}
     }, {
@@ -85,13 +132,14 @@ TEST(TestCaseInvertedIndex, TestBasic2) {
     };
     TestInvertedIndexFunctionality(docs, requests, expected);
 }
+
 TEST(TestCaseInvertedIndex, TestInvertedIndexMissingWord) {
-    const vector<string> docs = {
+    const QList<QString> docs = {
     "a b c d e f g h i j k l",
     "statement"
     };
-    const vector<string> requests = { "m", "statement" };
-    const vector<vector<Entry>> expected = {
+    const QList<QString> requests = { "m", "statement" };
+    const QList<QList<Entry>> expected = {
     {
     }, {
     {1, 1}
@@ -104,15 +152,15 @@ TEST(TestCaseInvertedIndex, TestInvertedIndexMissingWord) {
 #ifdef SEARCH_SERVER_READY
 TEST(TestCaseSearchServer, TestSimple) 
 {
-    const vector<string> docs = 
+    const QList<QString> docs =
     {
         "milk milk milk milk water water water",
         "milk water water",
         "milk milk milk milk milk water water water water water",
         "americano cappuccino"
     };
-    const vector<string> request = { "milk water", "sugar" };
-    const std::vector<vector<RelativeIndex>> expected = 
+    const QList<QString> request = { "milk water", "sugar" };
+    const QList<QList<RelativeIndex>> expected =
     {
         {
             {2, 1.0f},
@@ -121,15 +169,17 @@ TEST(TestCaseSearchServer, TestSimple)
         },
         {}
     };
-    InvertedIndex idx;
-    idx.UpdateDocumentBase(docs);
+    InvertedIndex* idx = new InvertedIndex();
+    idx->updateDocumentBase(docs);
     SearchServer srv(idx);
-    std::vector<vector<RelativeIndex>> result = srv.search(request);
-    ASSERT_EQ(result, expected);
+    QList<QList<RelativeIndex>> result = srv.search(request);
+    EXPECT_EQ(result, expected);
+    delete idx;
 }
+
 TEST(TestCaseSearchServer, TestTop5) 
 {
-    const vector<string> docs = 
+    const QList<QString> docs =
     {
         "london is the capital of great britain",
         "paris is the capital of france",
@@ -154,8 +204,8 @@ TEST(TestCaseSearchServer, TestTop5)
         "tallinn is the capital of estonia",
         "warsaw is the capital of poland",
     };
-    const vector<string> request = { "moscow is the capital of russia" };
-    const std::vector<vector<RelativeIndex>> expected = 
+    const QList<QString> request = { "moscow is the capital of russia" };
+    const QList<QList<RelativeIndex>> expected =
     {
         {
             {7, 1},
@@ -165,10 +215,11 @@ TEST(TestCaseSearchServer, TestTop5)
             {2, 0.666666687}
         }
     };
-    InvertedIndex idx;
-    idx.UpdateDocumentBase(docs);
+    InvertedIndex* idx = new InvertedIndex();
+    idx->updateDocumentBase(docs);
     SearchServer srv(idx);
-    std::vector<vector<RelativeIndex>> result = srv.search(request);
-    ASSERT_EQ(result, expected);
+    QList<QList<RelativeIndex>> result = srv.search(request);
+    EXPECT_EQ(result, expected);
+    delete idx;
 }
 #endif // SEARCH_SERVER_READY

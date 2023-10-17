@@ -22,6 +22,11 @@ struct Entry
     }
 };
 
+namespace IndexParser {
+    QStringList splitTextToWords(QString);
+    QMap<QString,Entry> fillEntryDictionary(const QString& text_of_document, int doc_id);
+}
+
 class InvertedIndex
 {
 
