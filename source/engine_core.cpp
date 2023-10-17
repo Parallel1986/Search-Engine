@@ -96,7 +96,7 @@ void EngineCore::initializeConfig()
     engine_name = converter->getEngineName();
     configs.enegine_name = engine_name;
     engine_version = converter->getEngineVersion();
-    configs.engine_ver = engine_version;
+    configs.engine_version = engine_version;
     files_paths.clear();
     max_responses = MIN_RESPONSE;
     if (!(engine_status & ConverterStatus::CONFIG_MISSED)
@@ -237,17 +237,17 @@ void EngineCore::removeSearchFile(QString rm_file)
 }
 
 //Create configurations' file config.json and adds fields to it
-void EngineCore::generateConfigFile(QStringList& files, int response_limit)
+void EngineCore::generateConfigFile(QStringList files, int response_limit)
 {
     ConfigList configurations;
     configurations.enegine_name = "Autogen Name";
-    configurations.engine_ver = "Autogen V0.1.0";
+    configurations.engine_version = "Autogen V0.1.0";
     configurations.max_responses = response_limit;
     for (auto& file : files)
     {
         configurations.files.append(file);
     }
-    converter->putConfig(configurations, "config.json");
+    converter->putSettingsToConfig(configurations, "config.json");
     initializeConfig();
 }
 

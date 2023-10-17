@@ -112,7 +112,7 @@ void MainWindow::setRequestsPath(QString new_path)
 void MainWindow::loadConfig(ConfigList configs)
 {
     ui->engine_name_edit->setText(configs.enegine_name);
-    ui->engine_version_edit->setText(configs.engine_ver);
+    ui->engine_version_edit->setText(configs.engine_version);
     ui->max_response_spin->setValue(configs.max_responses);
     files_list_model->setStringList(configs.files);
     ui->file_view->setModel(files_list_model);
@@ -363,7 +363,7 @@ void MainWindow::configSave()
 {
     ConfigList conf;
     conf.enegine_name = ui->engine_name_edit->text();
-    conf.engine_ver = ui->engine_version_edit->text();
+    conf.engine_version = ui->engine_version_edit->text();
     conf.max_responses = ui->max_response_spin->value();
     conf.files = files_list_model->stringList();
     emit savedConfig(conf);

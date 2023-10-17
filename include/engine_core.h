@@ -118,7 +118,7 @@ public:
     /**
      * @brief Create configurations' file with given settings
      */
-    void generateConfigFile(QStringList&, int);
+    void generateConfigFile(QStringList, int);
 
     /**
      * @brief Gets list of requests
