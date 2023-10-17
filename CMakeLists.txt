@@ -47,11 +47,6 @@ set(PROJECT_SOURCES
 		source/engine_core.cpp
 )
 
-FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/./config.json" DESTINATION "${CMAKE_BINARY_DIR}/")
-FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/./answers.json" DESTINATION "${CMAKE_BINARY_DIR}/")
-FILE(COPY "${CMAKE_CURRENT_SOURCE_DIR}/./requests.json" DESTINATION "${CMAKE_BINARY_DIR}/")
-
-
 add_executable(Search-engine
 			${PROJECT_SOURCES}
         )
