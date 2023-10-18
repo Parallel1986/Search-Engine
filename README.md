@@ -13,6 +13,8 @@ Results of search will be saved in answers.json file in net format: feild answer
 
 ![answers.json](https://github.com/Parallel1986/Search-Engine/blob/main/Readme_files/2023-10-18_15-28-46.png)
 
+Search engine is designed using Qt Framework and uses multithreading for indexing files and loading its content. Graphical UI also made by using Qt Framework and allows to build and launch application on Linux or Windows.
+
 # Requirements
 Search engine requires:
 - C++ 17 standard compiler
