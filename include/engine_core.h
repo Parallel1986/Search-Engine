@@ -1,5 +1,5 @@
 //***************************************************************************//
-//  This file contains the main core of search engine. It links together all //
+// This file contains the main core of search engine. It links together all  //
 // other modules of the engine and contains engine's configurations.         //
 //***************************************************************************//
 #ifndef ENGINE_CORE_H

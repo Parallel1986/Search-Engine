@@ -2,9 +2,6 @@
 //  This file contains converter for JSON files and allow to read settings   //
 //  and files for index and requests for serach from config.json and         //
 //  requests.json. Also, it is made to save search results to answers.json.  //
-//  Class based on Singleton pattern, so you can create only one instance of //
-//  it. To create instance or get access to it use static method             //
-//  GetInstance()                                                            //
 //***************************************************************************//
 #ifndef CONVERTER_JSON_HEADER
 #define CONVERTER_JSON_HEADER

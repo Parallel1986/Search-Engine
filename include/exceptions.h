@@ -1,5 +1,5 @@
 //***************************************************************************//
-//  This file contains declarations of the different exception classes, that //
+// This file contains declarations of the different exception classes, that  //
 // are used to determine different error events                              //
 //***************************************************************************//
 #ifndef EXCEPTIONS_H

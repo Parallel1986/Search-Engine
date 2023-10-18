@@ -1,3 +1,7 @@
+//***************************************************************************//
+//  This file contains RequestAddDialog class that creates dialog window for //
+// adding new requests                                                       //
+//***************************************************************************//
 #ifndef REQUESTADDDIALOG_H
 #define REQUESTADDDIALOG_H
 

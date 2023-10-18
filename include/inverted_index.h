@@ -1,3 +1,8 @@
+//***************************************************************************//
+// This file contains InvertedIndex class that creates document index by     //
+// counting each uniqe word and creates frequency dictionary to get access   //
+// to words count in each received document                                  //
+//***************************************************************************//
 #ifndef INVERTED_INDEX_H
 #define INVERTED_INDEX_H
 #include <vector>

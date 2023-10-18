@@ -1,3 +1,8 @@
+//***************************************************************************//
+//  This file contains MainWindow class that designed to present graphical   //
+// user interface and allows to change prefrenses and add files for search   //
+// and add requests, even if configuration or request fileas are missing     //
+//***************************************************************************//
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
