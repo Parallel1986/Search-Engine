@@ -12,3 +12,5 @@
 /GUI/.vs/GUI/FileContentIndex
 /GUI/.vs
 /GUI/out/build/x64-Debug
+windeployqt.exe
+CurentModel.mdj

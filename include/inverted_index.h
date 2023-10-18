@@ -1,38 +1,50 @@
-#pragma once
+//***************************************************************************//
+// This file contains InvertedIndex class that creates document index by     //
+// counting each uniqe word and creates frequency dictionary to get access   //
+// to words count in each received document                                  //
+//***************************************************************************//
+#ifndef INVERTED_INDEX_H
+#define INVERTED_INDEX_H
 #include <vector>
 #include <map>
 #include <string>
 #include <mutex>
+#include <QList>
+#include <QMap>
+#include <QObject>
 
+//Structure of word's entry
 struct Entry
 {
-    size_t doc_id, count;
+    int doc_id, count;
+    Entry(){}
+    Entry(int in_doc_id, int in_count) : doc_id(in_doc_id), count(in_count){}
 
-    // Данный оператор необходим для проведения тестовых сценариев
+    // Required for unit tests
     bool operator ==(const Entry& other) const {
         return (doc_id == other.doc_id &&
                 count == other.count);
     }
 };
 
-class InvertedIndex {
+namespace IndexParser {
+    QStringList splitTextToWords(QString);
+    QMap<QString,Entry> fillEntryDictionary(const QString& text_of_document, int doc_id);
+}
+
+class InvertedIndex
+{
+
 public:
     InvertedIndex() = default;
-/*
-* Обновить или заполнить базу документов, по которой будем совершать
-поиск
-* @param texts_input содержимое документов
-*/
-    void UpdateDocumentBase(std::vector<std::string> input_docs);
-/*
-* Метод определяет количество вхождений слова word в загруженной базе
-документов
-* @param word слово, частоту вхождений которого необходимо определить
-* @return возвращает подготовленный список с частотой слов
-*/
-    std::vector<Entry> GetWordCount(const std::string& word);
+
+    void updateDocumentBase(QList<QString> input_docs);
+
+    QList<Entry> getWordCount(const QString& word);
+
 private:
-    void CreateFrequencyDictionary();
-    std::vector<std::string> docs;                              // список содержимого документов
-    std::map<std::string, std::vector<Entry>> freq_dictionary;  // частотный словарь
+    void createFrequencyDictionary();
+    QStringList docs;
+    QMap<QString, QList<Entry>> freq_dictionary;
 };
+#endif
