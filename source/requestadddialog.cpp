@@ -7,7 +7,6 @@ RequestAddDialog::RequestAddDialog(QWidget* parent)
     dialog->setupUi(this);
 }
 
-
 RequestAddDialog::~RequestAddDialog()
 {
     delete dialog;

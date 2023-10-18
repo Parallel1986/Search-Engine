@@ -60,7 +60,6 @@ bool EngineCore::isInitialized() const
 
 bool EngineCore::isConfigInitialized() const
 {
-    engine_status &= ConverterStatus::NO_CONFIG_ERRORS;
     return (!(engine_status&ConverterStatus::CONFIG_FIELD_MISSED)
         &&!(engine_status&ConverterStatus::CONFIG_MISSED)
         &&!(engine_status&ConverterStatus::SEARCH_FILES_MISSED));
@@ -68,7 +67,6 @@ bool EngineCore::isConfigInitialized() const
 
 bool EngineCore::isRequestsInitialized() const
 {
-    engine_status &= ConverterStatus::NO_REQUESTS_ERRORS;
     return (!(engine_status&ConverterStatus::REQUESTS_MISSED)
         &&!(engine_status&ConverterStatus::REQUESTS_EMPTY));
 }
@@ -82,7 +80,8 @@ void EngineCore::setMaxRequests(int new_max)
 void EngineCore::initializeConfig()
 {
     ConfigList configs;
-    engine_status = converter->configCorrectionCheck();
+    engine_status &= ConverterStatus::RESET_CONFIG_ERRORS;
+    engine_status |= converter->configCorrectionCheck();
     configs.enegine_name = converter->getEngineName();
     configs.engine_version = converter->getEngineVersion();
     files_paths.clear();
@@ -110,7 +109,8 @@ void EngineCore::initializeConfig()
 
 void EngineCore::initializeRequests()
 {
-    engine_status = converter->requestsCorrectionCheck();
+    engine_status &= ConverterStatus::RESET_REQUEST_ERRORS;
+    engine_status |= converter->requestsCorrectionCheck();
     if (!(engine_status & ConverterStatus::REQUESTS_MISSED)
         &&!(engine_status & ConverterStatus::REQUESTS_EMPTY))
         requests = converter->getRequests();
@@ -334,7 +334,7 @@ void EngineCore::answersPathUpdated(QString new_path)
 void EngineCore::saveResult()
 {
     if (!search_result.isEmpty())
-        converter->putAnswers(search_result);
+        converter->putAnswersToJSON(search_result);
 }
 
 void EngineCore::saveResultAsText()

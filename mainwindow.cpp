@@ -8,28 +8,27 @@ MainWindow::MainWindow(QWidget *parent, EngineCore* search_engine)
     , ui(new Ui::MainWindow)
     , core(search_engine)
 {
-    ui->setupUi(this);                              //Setting up users interface
-    ui->save_button->setEnabled(false);             //Turning off save button
-    r_dialog = new RequestAddDialog(this);          //Creating add request dialog
-    request_list_model = new QStringListModel;      //Creating model for results view
-    files_list_model = new QStringListModel;        //Creating model for files view
+    ui->setupUi(this);
+    ui->save_button->setEnabled(false);
+    r_dialog = new RequestAddDialog(this);
+    request_list_model = new QStringListModel;
+    files_list_model = new QStringListModel;
     connect(r_dialog,&RequestAddDialog::newRequest, this, &MainWindow::modifyRequests);
-    checkUI();                                      //Checking states of UI warnings
-    ui->results_tree_widget->setColumnCount(1);     //Setting number of columns in result's model
+    checkUIMarks();
+    ui->results_tree_widget->setColumnCount(1);
 }
 
 MainWindow::~MainWindow()
 {
     if (request_list_model != nullptr)
-        delete request_list_model;  //Deleting requests model
+        delete request_list_model;
     if (ui != nullptr)
-        delete ui;                  //Deleting users interface
+        delete ui;
     if (r_dialog != nullptr)
-        delete r_dialog;            //Deleting add requests dialog
+        delete r_dialog;
 }
 
-//Open configurations' file
-void MainWindow::openConfig()
+void MainWindow::openConfigPathDlg()
 {
     QFileDialog* dlg = new QFileDialog();
     dlg->setNameFilter(tr("JSON file (*.json)"));
@@ -41,11 +40,10 @@ void MainWindow::openConfig()
     }
     dlg->close();
     delete dlg;
-    checkUI();
+    checkUIMarks();
 }
 
-//Open requests' file
-void MainWindow::openRequests()
+void MainWindow::openRequestsPathDlg()
 {
     QFileDialog* dlg = new QFileDialog(this);
     dlg->setNameFilter(tr("JSON file (*.json)"));
@@ -53,13 +51,12 @@ void MainWindow::openRequests()
     {
         auto requests_file = dlg->selectedFiles();
         core->setRequestsPath(requests_file[0]);
-        checkUI();
+        checkUIMarks();
     }
     delete dlg;
 }
 
-//Choose file for answers
-void MainWindow::openAnswers()
+void MainWindow::openAnswersPathDlg()
 {
     QFileDialog* dlg = new QFileDialog(this);
     dlg->setNameFilter(tr("JSON file (*.json)"));
@@ -71,45 +68,37 @@ void MainWindow::openAnswers()
     delete dlg;
 }
 
-//Add request button is pressed
-void MainWindow::addRequests()
+void MainWindow::addRequest()
 {
     r_dialog->show();
 }
 
-//Delete request button is pressed
-void MainWindow::deleteRequests()
+void MainWindow::deleteRequest()
 {
     QItemSelectionModel* selection = ui->requests_line_list->selectionModel();
     if (!selection->selectedIndexes().empty())
     {
         QModelIndexList index = selection->selectedIndexes();
-//        int row = index[0].row();
-//        request_list_model->removeRows(row,1,QModelIndex());
-//        ui->requests_line_list->setModel(request_list_model);
-        emit deletedRequest(index[0].data().toString());
+        emit requestIsDeleted(index[0].data().toString());
     }
 }
 
-//Changing requests
 void MainWindow::modifyRequests(QString new_request)
 {
-    emit addedRequest(new_request);
+    emit requestIsAdded(new_request);
 }
 
-//Set configurations' path
 void MainWindow::setConfigPath(QString new_path)
 {
     ui->config_path_edit->setText(new_path);
 }
 
-//Setting text to requests' path field
 void MainWindow::setRequestsPath(QString new_path)
 {
     ui->requests_path_edit->setText(new_path);
 }
 
-void MainWindow::loadConfig(ConfigList configs)
+void MainWindow::fillConfigFields(ConfigList configs)
 {
     ui->engine_name_edit->setText(configs.enegine_name);
     ui->engine_version_edit->setText(configs.engine_version);
@@ -126,12 +115,11 @@ void MainWindow::loadConfig(ConfigList configs)
         ui->no_files_mark->hide();
         config_ready = true;
     }
-    checkUI();
+    checkUIMarks();
     readinessCheck();
 }
 
-//Loading requests
-void MainWindow::loadRequests(QStringList requests)
+void MainWindow::fillRequestsFields(QStringList requests)
 {    
     request_list_model->setStringList(requests);
     ui->requests_line_list->setModel(request_list_model);
@@ -145,24 +133,21 @@ void MainWindow::loadRequests(QStringList requests)
         ui->no_requests_mark_2->show();
         requests_ready = false;
     }
-    checkUI();
+    checkUIMarks();
     readinessCheck();
 }
 
-//Setting text to answers' path field
 void MainWindow::setAnswersPath(QString new_path)
 {
     ui->answers_path_edit->setText(new_path);
 }
 
-//Checking readiness
 void MainWindow::readinessCheck()
 {
     ui->search_button->setEnabled(requests_ready&&config_ready);
 }
 
-//Calling error window of configurations
-void MainWindow::configError(char engine_status)
+void MainWindow::configErrorDlg(char engine_status)
 {    
     switch (engine_status)
     {
@@ -191,7 +176,7 @@ void MainWindow::configError(char engine_status)
             }
             case QMessageBox::Open:
             {                
-                openConfig();
+                openConfigPathDlg();
                 break;
             }
             //Should not get here
@@ -219,14 +204,13 @@ void MainWindow::configError(char engine_status)
     }
 }
 
-void MainWindow::loadSearchFiles(QStringList files)
+void MainWindow::fillSearchFilesFields(QStringList files)
 {
     files_list_model->setStringList(QStringList());
     files_list_model->setStringList(files);
     ui->file_view->setModel(files_list_model);
 }
 
-//Make search
 void MainWindow::search()
 {
     core->search();
@@ -274,13 +258,12 @@ void MainWindow::showResult(QList<QList<RelativeIndex>> search_result,const File
     ui->save_as_text_button->setEnabled(true);
 }
 
-//Saving result
 void MainWindow::saveResult()
 {
     core->saveResult();
 }
 
-void MainWindow::checkUI()
+void MainWindow::checkUIMarks()
 {
     char status = core->getEngineStatus();
     if (status&ConverterStatus::REQUESTS_EMPTY)
@@ -308,10 +291,9 @@ void MainWindow::checkUI()
         ui->no_files_mark->hide();
 }
 
-//Calling requests error
-void MainWindow::requestsError()
+void MainWindow::requestsErrorDlg()
 {
-    checkUI();
+    checkUIMarks();
     QMessageBox* error_message = new QMessageBox();
     error_message->setText(core->getEngineStatus()&ConverterStatus::REQUESTS_MISSED?"requesets.json is missing!"
                                                             :"requests.json is corrupted!");
@@ -327,7 +309,7 @@ void MainWindow::changeMode(int new_mode)
     switch (new_mode) {
     case EngineMode_MW::STAND:
         core->setMode(EngineMode::STANDARD);
-        checkUI();
+        checkUIMarks();
         ui->config_path_button->setEnabled(true);
         ui->requests_path_button->setEnabled(true);
         ui->generate_config_button->setEnabled(true);
@@ -341,14 +323,14 @@ void MainWindow::changeMode(int new_mode)
         ui->requests_path_button->setEnabled(false);
     case EngineMode_MW::NO_CONF:
         core->setMode(EngineMode::NO_CONFIG);
-        checkUI();
+        checkUIMarks();
         ui->requests_path_button->setEnabled(true);
         ui->no_config_mark->hide();
         ui->generate_config_button->setEnabled(false);
         ui->config_path_button->setEnabled(false);
     case EngineMode_MW::NO_REQ:
         core->setMode(EngineMode::NO_REQUESTS);
-        checkUI();
+        checkUIMarks();
         ui->config_path_button->setEnabled(true);
         ui->generate_config_button->setEnabled(true);
         ui->no_requests_path_mark->setEnabled(false);
@@ -358,19 +340,18 @@ void MainWindow::changeMode(int new_mode)
     }
 }
 
-//Save configuration
-void MainWindow::configSave()
-{
-    ConfigList conf;
-    conf.enegine_name = ui->engine_name_edit->text();
-    conf.engine_version = ui->engine_version_edit->text();
-    conf.max_responses = ui->max_response_spin->value();
-    conf.files = files_list_model->stringList();
-    emit savedConfig(conf);
+void MainWindow::saveConfig()
+{    
+    emit configIsSaved(ConfigList (
+    {
+        ui->engine_name_edit->text(),
+        ui->engine_version_edit->text(),
+        ui->max_response_spin->value(),
+        files_list_model->stringList()
+    }));
 }
 
-//Add file for search
-void MainWindow::addFile()
+void MainWindow::addFileDlg()
 {
     QFileDialog* dlg = new QFileDialog();
     dlg->setNameFilter(tr("TXT file (*.txt)"));
@@ -380,7 +361,7 @@ void MainWindow::addFile()
         auto new_file = dlg->selectedFiles();
         for (auto file = new_file.begin(); file != new_file.end();++file)
         {
-            emit addedFile(*file);
+            emit fileIsAdded(*file);
             auto row = files_list_model->rowCount();
             files_list_model->insertRows(row,1,QModelIndex());
             files_list_model->setData(files_list_model->index(row),*file,Qt::EditRole);
@@ -390,39 +371,32 @@ void MainWindow::addFile()
     delete dlg;
 }
 
-//Delete selected file for search
 void MainWindow::deleteFile()
 {
     QItemSelectionModel* selection = ui->file_view->selectionModel();
     if (!selection->selectedIndexes().empty())
     {
         QModelIndexList index = selection->selectedIndexes();
-        emit deletedFile(index[0].data().toString());
-//        int row = index[0].row();
-//        files_list_model->removeRows(row,1,QModelIndex());
-//        ui->file_view->setModel(files_list_model);
+        emit fileIsDeleted(index[0].data().toString());
     }
 }
 
-//Reloads files' list
 void MainWindow::reloadFiles()
 {
     files_list_model->setStringList(core->getFiles());
 }
 
-//
 void MainWindow::saveResultAsText()
 {
     core->saveResultAsText();
 }
-
 
 void MainWindow::generateConfig()
 {
     core->generateConfigFile(files_list_model->stringList(),ui->max_response_spin->value());
 }
 
-void MainWindow::errorShow(FileError err)
+void MainWindow::showError(FileError err)
 {
     QMessageBox* error_message = new QMessageBox();
     switch (err.getExceptionType()) {

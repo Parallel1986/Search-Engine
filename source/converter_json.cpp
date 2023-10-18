@@ -94,7 +94,7 @@ void ConverterJSON::changeAnswersPath(QString new_path)
     }
 }
 
-bool ConverterJSON::isPathToFile(QString path)
+bool ConverterJSON::isPathToFile(QString path) const
 {
     QFileInfo target(path);
 
@@ -104,7 +104,7 @@ bool ConverterJSON::isPathToFile(QString path)
     return false;
 }
 
-bool ConverterJSON::isPathToDirectory(QString path)
+bool ConverterJSON::isPathToDirectory(QString path) const
 {
     QFileInfo target(path);
 
@@ -158,7 +158,7 @@ QStringList ConverterJSON::getRequests()
     return QList<QString>();
 }
 
-void ConverterJSON::putAnswers(QList<QList<RelativeIndex>> answers)
+void ConverterJSON::putAnswersToJSON(QList<QList<RelativeIndex>> answers)
 {
     QJsonDocument answers_template;
     QFile answer_file(answers_file_path);

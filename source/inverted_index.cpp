@@ -28,7 +28,6 @@ QMap<QString,Entry> IndexParser::fillEntryDictionary(const QString& text_of_docu
         return dictionary;
     }
 
-//Updates documens' base
 void InvertedIndex::updateDocumentBase(QList<QString> input_docs)
 {
     docs.clear();
@@ -39,17 +38,13 @@ void InvertedIndex::updateDocumentBase(QList<QString> input_docs)
     createFrequencyDictionary();
 }
 
-//Gets word's count in frequency dictionary
 QList<Entry> InvertedIndex::getWordCount(const QString& word)
 {
     if (freq_dictionary.isEmpty())
         createFrequencyDictionary();
 
 	if (freq_dictionary.find(word) == freq_dictionary.end())
-    {
-        QList<Entry> list;
-		return list;
-	}
+        return QList<Entry>();
 	else
     {
         QList<Entry> list = freq_dictionary.value(word);
@@ -57,11 +52,10 @@ QList<Entry> InvertedIndex::getWordCount(const QString& word)
 	}
 }
 
-//Creates frequency dictionary
 void InvertedIndex::createFrequencyDictionary()
 {
     freq_dictionary.clear();
-    size_t doc_id = 0;
+    int doc_id = 0;
 
     QList<QFuture<QMap<QString,Entry>>> index_threads;
 
@@ -72,13 +66,12 @@ void InvertedIndex::createFrequencyDictionary()
     }
 
     for (auto& thread : index_threads)
-    {
         thread.waitForFinished();
-    }
+
     for (auto& thread : index_threads)
     {
         auto dictionary = thread.result();
-        //Inserting entries to the dictionary
+
         for (auto word = dictionary.begin();
             word != dictionary.end()
             ; ++word)
@@ -90,6 +83,4 @@ void InvertedIndex::createFrequencyDictionary()
         }
     }
 }
-
-
 #endif

@@ -55,7 +55,9 @@ enum ConverterStatus
     REQUESTS_MISSED         = 64,
     REQUESTS_EMPTY          = 128,
     NO_CONFIG_ERRORS        = 63,
+    RESET_CONFIG_ERRORS     = 192,
     NO_REQUESTS_ERRORS      = 192,
+    RESET_REQUEST_ERRORS    = 63,
     NO_ERRORS               = 0
 };
 
@@ -72,7 +74,7 @@ public:
     ConverterJSON() = default;
     ~ConverterJSON();
 
-    void putAnswers(QList<QList<RelativeIndex>> answers);
+    void putAnswersToJSON(QList<QList<RelativeIndex>> answers);
     void putSettingsToConfig(const ConfigList,QString);
     void putRequestsToJSON(const QList<QString>);
 
@@ -104,8 +106,8 @@ private:
     QString makeRequestStringNumber(std::size_t) const;
     bool loadConfigs();
     bool loadRequests();
-    bool isPathToFile(QString path);
-    bool isPathToDirectory(QString path);
+    bool isPathToFile(QString path) const;
+    bool isPathToDirectory(QString path) const;
 
     QString config_file_path = DEFAULT_CONFIGS;
     QString requests_file_path = DEFAULT_REQUESTS;
