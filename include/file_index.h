@@ -1,5 +1,5 @@
 //***************************************************************************//
-//  This file contains search server class that creates search results by    //
+// This file contains search server class that creates search results by     //
 // using frequency dictionaries and comparing requsts with it                //
 //***************************************************************************//
 
