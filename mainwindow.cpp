@@ -241,7 +241,7 @@ void MainWindow::showResult(QList<QList<RelativeIndex>> search_result,const File
     for (auto& result : search_result)
     {
         QTreeWidgetItem* item = new QTreeWidgetItem(main_item);
-        item->setText(0,QString("request: " + requests_id_table->requests[rec_id]));
+        item->setText(0,QString("request: " + requests_id_table->frame[rec_id].request));
         QTreeWidgetItem* is_result = new QTreeWidgetItem(item);
 
         is_result->setText(0,result.empty()? "result: false"
@@ -253,18 +253,18 @@ void MainWindow::showResult(QList<QList<RelativeIndex>> search_result,const File
                 QTreeWidgetItem* record = new QTreeWidgetItem(is_result);
                 record->setSizeHint(0,QSize(150,15));
                 QString error;
-                if (file_id_table->err[line.doc_id] == FileErrors::NOT_A_FILE)
+                if (file_id_table->frame[line.doc_id].err == FileErrors::NOT_A_FILE)
                 {
                     error = "Not a file! Error";
                 }
-                else if (file_id_table->err[line.doc_id] == FileErrors::ACSESS_ERR)
+                else if (file_id_table->frame[line.doc_id].err == FileErrors::ACSESS_ERR)
                     error = "File access error!";
-                else if (file_id_table->err[line.doc_id] == FileErrors::NOT_EXIST)
+                else if (file_id_table->frame[line.doc_id].err == FileErrors::NOT_EXIST)
                     error = "File not exist!";
-                else if (file_id_table->err[line.doc_id] == FileErrors::READ_ERR)
+                else if (file_id_table->frame[line.doc_id].err == FileErrors::READ_ERR)
                     error = "Error while reading a file!";
 
-                record->setText(0,((file_id_table->err[line.doc_id] == FileErrors::NO_ERR)? "rank: " + QString::number(line.rank):error) + "\t document: "+ file_id_table->file_path[line.doc_id]);
+                record->setText(0,((file_id_table->frame[line.doc_id].err == FileErrors::NO_ERR)? "rank: " + QString::number(line.rank):error) + "\t document: "+ file_id_table->frame[line.doc_id].file_path);
             }
         }
         ++rec_id;

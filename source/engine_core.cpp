@@ -2,12 +2,10 @@
 
 EngineCore::EngineCore()
 {
-//Creating engine's objects
     converter = new ConverterJSON;
     index = new InvertedIndex();
     server = new SearchServer(index);
 
-//Connecting signals
     connect(converter,&ConverterJSON::configPathChanged,
             this,&EngineCore::configPathUpdated);
 
@@ -40,32 +38,27 @@ EngineCore::~EngineCore()
     }
 }
 
-//Set new configurations' file
 void EngineCore::setConfigPath(QString new_path)
 {
     converter->changeConfigPath(new_path);
 }
 
-//Set new requests' file
 void EngineCore::setRequestsPath(QString new_path)
 {
     converter->changeRequestsPath(new_path);
 }
 
-//Sewt new answers' file
 void EngineCore::setAnswersPath(QString new_path)
 {
     converter->changeAnswersPath(new_path);
 }
 
-//Check of initialization
-bool EngineCore::isInitialized()
+bool EngineCore::isInitialized() const
 {
     return isConfigInitialized() && isRequestsInitialized();
 }
 
-//Check if configurations are initialized
-bool EngineCore::isConfigInitialized()
+bool EngineCore::isConfigInitialized() const
 {
     engine_status &= ConverterStatus::NO_CONFIG_ERRORS;
     return (!(engine_status&ConverterStatus::CONFIG_FIELD_MISSED)
@@ -73,30 +66,25 @@ bool EngineCore::isConfigInitialized()
         &&!(engine_status&ConverterStatus::SEARCH_FILES_MISSED));
 }
 
-//Check if requests are initialized
-bool EngineCore::isRequestsInitialized()
+bool EngineCore::isRequestsInitialized() const
 {
     engine_status &= ConverterStatus::NO_REQUESTS_ERRORS;
     return (!(engine_status&ConverterStatus::REQUESTS_MISSED)
         &&!(engine_status&ConverterStatus::REQUESTS_EMPTY));
 }
 
-//Set maximal limit of responses
 void EngineCore::setMaxRequests(int new_max)
 {
     if (max_responses != new_max)
         max_responses = new_max;
 }
 
-//Initialize configurations from the configurations' file
 void EngineCore::initializeConfig()
 {
     ConfigList configs;
     engine_status = converter->configCorrectionCheck();
-    engine_name = converter->getEngineName();
-    configs.enegine_name = engine_name;
-    engine_version = converter->getEngineVersion();
-    configs.engine_version = engine_version;
+    configs.enegine_name = converter->getEngineName();
+    configs.engine_version = converter->getEngineVersion();
     files_paths.clear();
     max_responses = MIN_RESPONSE;
     if (!(engine_status & ConverterStatus::CONFIG_MISSED)
@@ -114,14 +102,12 @@ void EngineCore::initializeConfig()
     }
     configs.files = files_paths;
     configs.max_responses = max_responses;
-    if (useUI)
+    if (isUseUI())
     {
         emit configsLoaded(configs);
     }
-
 }
 
-//Initializing requests from the requests' file
 void EngineCore::initializeRequests()
 {
     engine_status = converter->requestsCorrectionCheck();
@@ -131,20 +117,18 @@ void EngineCore::initializeRequests()
     else
         requests.clear();
 
-    if (useUI)
+    if (isUseUI())
     {
         emit requestsLoaded(requests);
     }
 }
 
-//Get engine status
-char EngineCore::getEngineStatus()
+char EngineCore::getEngineStatus() const
 {
     return (converter->configCorrectionCheck()
-          |converter->requestsCorrectionCheck());
+           |converter->requestsCorrectionCheck());
 }
 
-//Initialize search engine
 void EngineCore::initialize()
 {
     switch (mode) {
@@ -163,7 +147,7 @@ void EngineCore::initialize()
     default:
         break;
     }
-    if (useUI)
+    if (isUseUI())
     {
         emit answersPathChanged(converter->getAnswersPath());
         emit requestsPathChanged(converter->getRequestsPath());
@@ -171,14 +155,12 @@ void EngineCore::initialize()
     }
 }
 
-//Adds request
 void EngineCore::addRequest(QString new_request)
 {
     requests_add.append(new_request);
     emit requestsLoaded(requests+requests_add);
 }
 
-//Removes request
 void EngineCore::removeRequest(QString rm_request)
 {
     for (auto request = requests.begin();
@@ -204,14 +186,12 @@ void EngineCore::removeRequest(QString rm_request)
     return emit requestsLoaded(requests + requests_add);
 }
 
-//Adds file for search
 void EngineCore::addSearchFile(QString new_file)
 {
     files_paths_add.append(new_file);
     emit reloadFilePaths(files_paths+files_paths_add);
 }
 
-//Removes file for search from files' list
 void EngineCore::removeSearchFile(QString rm_file)
 {
     for (auto file = files_paths.begin();
@@ -236,7 +216,6 @@ void EngineCore::removeSearchFile(QString rm_file)
     }
 }
 
-//Create configurations' file config.json and adds fields to it
 void EngineCore::generateConfigFile(QStringList files, int response_limit)
 {
     ConfigList configurations;
@@ -251,13 +230,11 @@ void EngineCore::generateConfigFile(QStringList files, int response_limit)
     initializeConfig();
 }
 
-//Sets engine's mode
 void EngineCore::setMode(EngineMode new_mode)
 {
     mode = new_mode;
 }
 
-//Makes search
 void EngineCore::search()
 {    
     QStringList adds;
@@ -318,57 +295,48 @@ void EngineCore::search()
         break;
     }
 
-    if (useUI)
+    if (isUseUI())
         emit searchResult(search_result, files_id, requests_id);
     else
         saveResult();
 }
 
-//Returns a list of files for search
-QStringList EngineCore::getFiles()
+QStringList EngineCore::getFiles() const
 {
     return files_paths+files_paths_add;
 }
 
-//Returns a list of requests
-QStringList EngineCore::getRequestsList()
+QStringList EngineCore::getRequestsList() const
 {
     return requests+requests_add;
 }
 
-//Proccesses result of changing path to configurations' file
 void EngineCore::configPathUpdated(QString new_path)
 {
     initializeConfig();
-    if (useUI)
+    if (isUseUI())
         emit configPathChanged(new_path);
 }
 
-//Proccesses result of changing path to requests' file
 void EngineCore::requestsPathUpdated(QString new_path)
 {
     initializeRequests();
-    if (useUI)
+    if (isUseUI())
         emit requestsPathChanged(new_path);
 }
 
-//Proccesses result of changing path to answers' file
 void EngineCore::answersPathUpdated(QString new_path)
 {
-    if (useUI)
+    if (isUseUI())
         emit answersPathChanged(new_path);
 }
 
-//Saves results of the search
 void EngineCore::saveResult()
 {
     if (!search_result.isEmpty())
-    {
         converter->putAnswers(search_result);
-    }
 }
 
-//Saves result of the search as text file
 void EngineCore::saveResultAsText()
 {
     QString path = QDir::current().absolutePath() + "/answers.txt";
@@ -379,17 +347,15 @@ void EngineCore::saveResultAsText()
              it != search_result.end();
              it++, counter++)
     {
-        out_line += "Request: " + requests_id->requests[counter] + "\n";
+        out_line += "Request: " + requests_id->frame->request[counter] + "\n";
         if (it->size() == 0)
-        {
             out_line += "Result: No match\n";
-        }
         else
         {
             for(auto& pair : *it)
             {
-                out_line += "\t" + QString("Rank = %1 - ").arg(pair.rank, 0, '0', 2);
-                out_line += files_id->file_path[pair.doc_id] + "\n";
+                out_line += "\t" + QString("Rank = %1 - ").arg(pair.rank, 0, '0', 2)
+                          + files_id->frame->file_path[pair.doc_id] + "\n";
             }
         }
     }
@@ -415,11 +381,11 @@ void EngineCore::makeFilesIDTable(QStringList& files)
     for (auto file = files.begin();
          file != files.end();
          ++file)
-    {
+    {    
         threads.append(QtConcurrent::run([this, id, file](){
-        files_id->id[id] = id;
-        files_id->file_path[id] = *file;
-        files_id->err[id] = Loader::checkFilePath(*file);
+        files_id->frame[id].id = id;
+        files_id->frame[id].file_path = (*file);
+        files_id->frame[id].err = Loader::checkFilePath(*file);
         }));
         ++id;
     }
@@ -440,48 +406,43 @@ void EngineCore::makeRequestsIDdTable(QStringList&)
          request != requests.end();
          ++request)
     {
-        requests_id->id[id] = id;
-        requests_id->requests[id] = *request;
+        requests_id->frame[id].id = id;
+        requests_id->frame[id].request = *request;
         ++id;
     }
     for (auto request = requests_add.begin();
          request != requests_add.end();
          ++request)
     {
-        requests_id->id[id] = id;
-        requests_id->requests[id] = *request;
+        requests_id->frame[id].id = id;
+        requests_id->frame[id].request = *request;
         ++id;
     }
 }
 
-//Returns table of accordance files' paths and its IDs
-FileIDTable* EngineCore::getFilesIDTable()
+const FileIDTable* EngineCore::getFilesIDTable() const
 {
     return files_id;
 }
 
-//Returns table of accordance requests and its IDs
-RequestIDTable* EngineCore::getRequestsIDTable()
+const RequestIDTable* EngineCore::getRequestsIDTable() const
 {
     return requests_id;
 }
 
-//Returns true if GUI is used
 bool EngineCore::isUseUI() const
 {
     return useUI;
 }
 
-//Sets engine to use GUI
 void EngineCore::setUI()
 {
     useUI = true;
 }
 
-//Processes error
 void EngineCore::processError(FileError err)
 {
-    if (!useUI)
+    if (!isUseUI())
     {
         std::cerr << "Error!" << std::endl;
         if (err.getExceptionType() == ExceptionType::FileNotExistError
