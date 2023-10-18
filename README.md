@@ -107,11 +107,11 @@ First section presents paths to configuration, requests and answers files. Also,
 
 ![Paths section](https://github.com/Parallel1986/Search-Engine/blob/main/Readme_files/2023-10-17_16-38-31.png)
 
-"Generate" button allows to generate minimal configuration file with empty list of files for search. Response limit will be set to current(default value is 5) and engine`s name will be "Autogen Name" as version "Autogen V0.1.0".
+"Generate" button allows to generate minimal configuration file with empty list of files for search. Response limit will be set to current(default value is 5) and engine's name will be "Autogen Name" as version "Autogen V0.1.0".
 
 ![Generate config button](https://github.com/Parallel1986/Search-Engine/blob/main/Readme_files/2023-10-17_16-38-30.png)
 
-Next section is configuration. It shows loaded from configuration file settings, such as engine`s name, version, response limit. Also it has a mode selector that allows to change engine`s mode. Save button allows You to save current settings to the configuration file(by default config.json) includinf current files` list.
+Next section is configuration. It shows loaded from configuration file settings, such as engine's name, version, response limit. Also it has a mode selector that allows to change engine`s mode. Save button allows You to save current settings to the configuration file(by default config.json) includinf current files' list.
 
 ![Settings section](https://github.com/Parallel1986/Search-Engine/blob/main/Readme_files/2023-10-17_16-38-32.png)
 
@@ -119,7 +119,7 @@ File section presents list of files for search that are loaded from configuratio
 
 ![File section](https://github.com/Parallel1986/Search-Engine/blob/main/Readme_files/2023-10-17_16-38-34.png)
 
-Request section, like the file section, contains list of requests that are loaded from requests` file (by default requests.json). You can add new ones or delete existing by using "Add..." and "Delete" buttons respectively.
+Request section, like the file section, contains list of requests that are loaded from requests' file (by default requests.json). You can add new ones or delete existing by using "Add..." and "Delete" buttons respectively.
 
 ![Requests section](https://github.com/Parallel1986/Search-Engine/blob/main/Readme_files/2023-10-17_16-38-35.png)
 
