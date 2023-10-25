@@ -7,7 +7,7 @@
 
 #include <QObject>
 #include <QDialog>
-#include "../ui/ui_request_dialog.cpp"
+#include "ui_request_dialog.cpp"
 
 class RequestAddDialog : public QDialog
 {

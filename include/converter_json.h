@@ -7,8 +7,8 @@
 #define CONVERTER_JSON_HEADER
 
 #include <map>
-#include "../include/file_index.h"
-#include "../include/exceptions.h"
+#include "file_index.h"
+#include "exceptions.h"
 #include <QObject>
 #include <QList>
 #include <QDir>

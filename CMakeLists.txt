@@ -27,11 +27,13 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 endif()
 
+include_directories("include/")
+include_directories("ui/")
 
 set(PROJECT_SOURCES
 		main.cpp
-        mainwindow.h
-        mainwindow.cpp
+		include/mainwindow.h
+		source/mainwindow.cpp
 		ui/ui_main_window.cpp
 		ui/ui_request_dialog.cpp
         source/converter_json.cpp
@@ -45,10 +47,12 @@ set(PROJECT_SOURCES
 		include/engine_core.h
 		include/exceptions.h
 		source/engine_core.cpp
+		include/comand_line_processor.h
+		source/comand_line_processor.cpp
 )
 
 add_executable(Search-engine
-			${PROJECT_SOURCES}
+			${PROJECT_SOURCES}			
         )
 
 if (GTESTS)

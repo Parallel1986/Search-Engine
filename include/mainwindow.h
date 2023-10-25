@@ -11,9 +11,9 @@
 #include <QMessageBox>
 #include <QStringListModel>
 
-#include "include/engine_core.h"
-#include "include/exceptions.h"
-#include "include/requestadddialog.h"
+#include "engine_core.h"
+#include "exceptions.h"
+#include "requestadddialog.h"
 
 //Modes in main window
 enum EngineMode_MW

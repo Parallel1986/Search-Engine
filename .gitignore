@@ -14,4 +14,4 @@
 /GUI/out/build/x64-Debug
 windeployqt.exe
 CurentModel.mdj
-/Qt_ui
+Qt_ui

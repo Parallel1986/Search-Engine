@@ -5,8 +5,10 @@
 #ifndef EXCEPTIONS_H
 #define EXCEPTIONS_H
 #include "QException"
+#include <exception>
 
-enum ExceptionType{
+enum FileErrorType{
+    NotAFile,
     OpenFileError,
     WriteFileError,
     ReadFileError,
@@ -16,20 +18,65 @@ enum ExceptionType{
     NoDataError
 };
 
-struct FileError : public QException
+class FileError : public QException
 {
 public:
-    void raise() const override { throw *this; }
-    FileError *clone() const override { return new FileError(*this); }
-    FileError(ExceptionType exc, QString source, QString info):
+    void raise() const override
+    {
+        throw *this;
+    }
+    FileError *clone() const override
+    {
+        return new FileError(*this);
+    }
+    FileError(FileErrorType exc, QString source, QString info):
     ex(exc),source(source),additional_data(info){}
-    ExceptionType getExceptionType() const {return ex;}
-    QString getExceptionSource() const {return source;}
-    QString getAdditionalData() const {return additional_data;}
+    FileErrorType getExceptionType() const
+    {
+        return ex;
+    }
+    QString getExceptionSource() const
+    {
+        return source;
+    }
+    QString getAdditionalData() const
+    {
+        return additional_data;
+    }
 private:
-    ExceptionType ex;
+    FileErrorType ex;
     QString source;
     QString additional_data;
+};
+
+enum CommandLineErrorType
+{
+    INVALID_ARGUMENT,
+    UNKNOWN_ARGUMENT,
+    MISSING_ARGUMENT
+};
+
+class CommandLineError : public std::exception
+{
+    public:
+    CommandLineError(CommandLineErrorType type, QString argument, QString additional_info)
+    : type(type), argument(argument), additional_info(additional_info){}
+    QString getArgument()
+    {
+        return argument;
+    }
+    QString getAdditionalInfo()
+    {
+        return additional_info;
+    }
+    CommandLineErrorType getType()
+    {
+        return type;
+    }
+    private:
+    CommandLineErrorType type;
+    QString argument;
+    QString additional_info;
 };
 
 #endif // EXCEPTIONS_H

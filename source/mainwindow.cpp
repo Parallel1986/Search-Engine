@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "./ui/ui_main_window.cpp"
+#include "ui_main_window.cpp"
 #include <QFileDialog>
 
 
@@ -400,20 +400,26 @@ void MainWindow::showError(FileError err)
 {
     QMessageBox* error_message = new QMessageBox();
     switch (err.getExceptionType()) {
-    case ExceptionType::FileNotExistError:
+    case FileErrorType::NotAFile:
+    case FileErrorType::FileNotExistError:
         error_message->setText("File " + err.getExceptionSource() + " does not exists");
         break;
-    case ExceptionType::OpenFileError:
+    case FileErrorType::OpenFileError:
         error_message->setText("Can not open the file " + err.getExceptionSource());
-    case ExceptionType::ReadFileError:
+        break;
+    case FileErrorType::ReadFileError:
         error_message->setText("Can not read the file " + err.getExceptionSource());
-    case ExceptionType::WriteFileError:
+        break;
+    case FileErrorType::WriteFileError:
         error_message->setText("Can not write to the file " + err.getExceptionSource());
-    case ExceptionType::WriteDirectoryError:
+        break;
+    case FileErrorType::WriteDirectoryError:
         error_message->setText("Can not write to the directory " + err.getExceptionSource());
-    case ExceptionType::OpenDirectoryError:
+        break;
+    case FileErrorType::OpenDirectoryError:
         error_message->setText("Can not open the directory " + err.getExceptionSource());
-    case ExceptionType::NoDataError:
+        break;
+    case FileErrorType::NoDataError:
         error_message->setText("Missing data: " + err.getExceptionSource());
 //should not get here
     default:

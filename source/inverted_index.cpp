@@ -5,7 +5,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 
-#include "../include/inverted_index.h"
+#include "inverted_index.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>

@@ -9,10 +9,10 @@
 #include <QObject>
 #include <QtConcurrent/QtConcurrent>
 
-#include "./converter_json.h"
-#include "./inverted_index.h"
-#include "./file_index.h"
-#include "./exceptions.h"
+#include "converter_json.h"
+#include "inverted_index.h"
+#include "file_index.h"
+#include "exceptions.h"
 
 //Structures for accordance of files' IDs and its paths
 struct FileIDFrame
@@ -110,7 +110,6 @@ public slots:
     void setMode(EngineMode);
     void addRequest(QString);
     void removeRequest(QString);
-    void search();
     void setConfigPath(QString);
     void setRequestsPath(QString);
     void setAnswersPath(QString);
@@ -122,6 +121,7 @@ public slots:
     void requestsPathUpdated(QString);
     void answersPathUpdated(QString);
     void processError(FileError);
+    void search();
 
 private:
     void makeFilesIDTable(QStringList&);
@@ -133,12 +133,12 @@ private:
     ConverterJSON* converter = nullptr;
     InvertedIndex* index = nullptr;
     SearchServer* server = nullptr;
+    FileIDTable* files_id = nullptr;
+    RequestIDTable* requests_id = nullptr;
     QList<QList<RelativeIndex>> search_result;
     QString engine_name = "Search Engine";
     QString engine_version = "0.2.1";
     int max_responses = MIN_RESPONSE;
-    FileIDTable* files_id = nullptr;
-    RequestIDTable* requests_id = nullptr;
     QStringList requests;
     QStringList requests_add;
     QStringList files_content;

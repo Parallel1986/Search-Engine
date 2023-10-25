@@ -1,6 +1,6 @@
 #ifndef FILE_INDEX
 #define FILE_INDEX
-#include "../include/file_index.h"
+#include "file_index.h"
 #include <set>
 #include <sstream>
 #include <functional>
@@ -103,7 +103,7 @@ QList<QList<RelativeIndex>> SearchServer::search(const QList<QString>& queries_i
                     max_count = count;
             }
 
-            std::multimap<float, unsigned int, std::greater<float>> sorted_relevance_map;
+            std::multimap<float, int, std::greater<float>> sorted_relevance_map;
             for (auto document = document_absolute_relevance.begin();
                       document != document_absolute_relevance.end();
                       document++)
@@ -111,7 +111,10 @@ QList<QList<RelativeIndex>> SearchServer::search(const QList<QString>& queries_i
 
             for (auto& rel : sorted_relevance_map)
 			{
-                result_of_request.append({rel.second,rel.first});
+                RelativeIndex index;
+                index.doc_id = rel.second;
+                index.rank = rel.first;
+                result_of_request.append(index);
             }
             result.append(result_of_request);
         }

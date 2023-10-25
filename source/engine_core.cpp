@@ -1,4 +1,4 @@
-#include "../include/engine_core.h"
+#include "engine_core.h"
 
 EngineCore::EngineCore()
 {
@@ -22,20 +22,19 @@ EngineCore::EngineCore()
 EngineCore::~EngineCore()
 {
     if (converter)
-    {
         delete converter;
-        converter = nullptr;
-    }
+
     if (index)
-    {
         delete index;
-        index = nullptr;
-    }
+
     if (server)
-    {
         delete server;
-        server = nullptr;
-    }
+
+    if (files_id)
+        delete files_id;
+
+    if (requests_id)
+        delete requests_id;
 }
 
 void EngineCore::setConfigPath(QString new_path)
@@ -82,45 +81,86 @@ void EngineCore::initializeConfig()
     ConfigList configs;
     engine_status &= ConverterStatus::RESET_CONFIG_ERRORS;
     engine_status |= converter->configCorrectionCheck();
-    configs.enegine_name = converter->getEngineName();
-    configs.engine_version = converter->getEngineVersion();
-    files_paths.clear();
-    max_responses = MIN_RESPONSE;
+    configs.max_responses = MIN_RESPONSE;
     if (!(engine_status & ConverterStatus::CONFIG_MISSED)
         && !(engine_status & ConverterStatus::CONFIG_FIELD_MISSED))
-        {
+    {
         if (!(engine_status&ConverterStatus::MAX_RESPONSES_MISSED))
-            {
-                max_responses = converter->getResponsesLimit();
-                configs.max_responses = max_responses;
-            }
-        if (!(engine_status&ConverterStatus::SEARCH_FILES_MISSED))
         {
+            max_responses = converter->getResponsesLimit();
+            configs.max_responses = max_responses;
+        }
+        else
+        {
+            FileError error (FileErrorType::NoDataError,
+                             converter->getConfigsPath(),
+                             "Maximal response is missing");
+            processError(error);
+        }
+
+        if (!(engine_status&ConverterStatus::SEARCH_FILES_MISSED))
             files_paths = converter->getFilesPaths();
+        else
+        {
+            FileError error (FileErrorType::NoDataError,
+                             converter->getConfigsPath(),
+                             "Files for search are missing");
+            processError(error);
         }
     }
-    configs.files = files_paths;
-    configs.max_responses = max_responses;
-    if (isUseUI())
+    else if (engine_status & ConverterStatus::CONFIG_FIELD_MISSED)
     {
-        emit configsLoaded(configs);
+        FileError error (FileErrorType::NoDataError,
+                         converter->getConfigsPath(),
+                         "Field \"config\" is missing");
+        processError(error);
     }
+    else
+        {
+        FileError error (FileErrorType::FileNotExistError,
+                         converter->getConfigsPath(),
+                         "Configuration file is missing");
+        processError(error);
+    }
+    configs.enegine_name = converter->getEngineName();
+    configs.engine_version = converter->getEngineVersion();
+
+    files_paths.clear();
+    configs.files = files_paths;
+
+    configs.max_responses = max_responses;
+
+    if (isUseUI())
+        emit configsLoaded(configs);
 }
 
 void EngineCore::initializeRequests()
 {
     engine_status &= ConverterStatus::RESET_REQUEST_ERRORS;
     engine_status |= converter->requestsCorrectionCheck();
+
     if (!(engine_status & ConverterStatus::REQUESTS_MISSED)
         &&!(engine_status & ConverterStatus::REQUESTS_EMPTY))
         requests = converter->getRequests();
+    else if (engine_status & ConverterStatus::REQUESTS_EMPTY)
+    {
+        FileError error (FileErrorType::NoDataError,
+                         converter->getRequestsPath(),
+                         "Field \"requests\" is missing");
+        processError(error);
+    }
     else
+    {
+        FileError error (FileErrorType::FileNotExistError,
+                         converter->getRequestsPath(),
+                         "Requests file is missing");
+
         requests.clear();
+        processError(error);
+    }
 
     if (isUseUI())
-    {
         emit requestsLoaded(requests);
-    }
 }
 
 char EngineCore::getEngineStatus() const
@@ -298,7 +338,10 @@ void EngineCore::search()
     if (isUseUI())
         emit searchResult(search_result, files_id, requests_id);
     else
+    {
         saveResult();
+        std::cout << "Search done!";
+    }
 }
 
 QStringList EngineCore::getFiles() const
@@ -445,21 +488,26 @@ void EngineCore::processError(FileError err)
     if (!isUseUI())
     {
         std::cerr << "Error!" << std::endl;
-        if (err.getExceptionType() == ExceptionType::FileNotExistError
-            || err.getExceptionType() == ExceptionType::OpenFileError
-            || err.getExceptionType() == ExceptionType::OpenDirectoryError)
+        if (err.getExceptionType() == FileErrorType::FileNotExistError
+            || err.getExceptionType() == FileErrorType::NotAFile
+            || err.getExceptionType() == FileErrorType::OpenFileError
+            || err.getExceptionType() == FileErrorType::OpenDirectoryError)
             std::cerr << "While trying to open: " <<
                     err.getExceptionSource().toStdString() << std::endl;
-        else if (err.getExceptionType() == ExceptionType::WriteFileError
-                 || err.getExceptionType() == ExceptionType::WriteDirectoryError)
+
+        else if (err.getExceptionType() == FileErrorType::WriteFileError
+                 || err.getExceptionType() == FileErrorType::WriteDirectoryError)
             std::cerr << "While trying to write to: " <<
                     err.getExceptionSource().toStdString() << std::endl;
-        else if (err.getExceptionType() == ExceptionType::NoDataError)
+
+        else if (err.getExceptionType() == FileErrorType::NoDataError)
             std::cerr << "Does not has required data: " <<
                     err.getExceptionSource().toStdString() << std::endl;
 
         std::cerr << "Additional info: " <<
                     err.getAdditionalData().toStdString() << std::endl;
+
+        throw std::runtime_error("Critical error!");
     }
     else
     {

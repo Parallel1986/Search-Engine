@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "include/inverted_index.h"
-#include "include/file_index.h"
+#include "inverted_index.h"
+#include "file_index.h"
 #include <QRegularExpression>
 
 using namespace std;
@@ -208,11 +208,11 @@ TEST(TestCaseSearchServer, TestTop5)
     const QList<QList<RelativeIndex>> expected =
     {
         {
-            {7, 1},
-            {14, 1},
-            {0, 0.666666687},
-            {1, 0.666666687},
-            {2, 0.666666687}
+            {7, (float)1},
+            {14, (float)1},
+            {0, (float)0.666666687},
+            {1, (float)0.666666687},
+            {2, (float)0.666666687}
         }
     };
     InvertedIndex* idx = new InvertedIndex();
