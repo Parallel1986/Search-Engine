@@ -446,10 +446,10 @@ public:
         MainWindow->setCentralWidget(centralwidget);
 
         retranslateUi(MainWindow);
-        QObject::connect(requests_path_button, SIGNAL(clicked()), MainWindow, SLOT(openRequests()));
-        QObject::connect(answers_path_button, SIGNAL(clicked()), MainWindow, SLOT(openAnswers()));
-        QObject::connect(requests_add_button, SIGNAL(clicked()), MainWindow, SLOT(addRequests()));
-        QObject::connect(requests_delete_button, SIGNAL(clicked()), MainWindow, SLOT(deleteRequests()));
+        QObject::connect(requests_path_button, SIGNAL(clicked()), MainWindow, SLOT(openRequestsPathDlg()));
+        QObject::connect(answers_path_button, SIGNAL(clicked()), MainWindow, SLOT(openAnswersPathDlg()));
+        QObject::connect(requests_add_button, SIGNAL(clicked()), MainWindow, SLOT(addRequest()));
+        QObject::connect(requests_delete_button, SIGNAL(clicked()), MainWindow, SLOT(deleteRequest()));
         QObject::connect(config_path_edit, SIGNAL(textChanged(QString)), MainWindow, SLOT(setConfigPath(QString)));
         QObject::connect(requests_path_edit, SIGNAL(textChanged(QString)), MainWindow, SLOT(setRequestsPath(QString)));
         QObject::connect(answers_path_edit, SIGNAL(textChanged(QString)), MainWindow, SLOT(setAnswersPath(QString)));
@@ -457,10 +457,10 @@ public:
         QObject::connect(save_button, SIGNAL(clicked()), MainWindow, SLOT(saveResult()));
         QObject::connect(mode_select, SIGNAL(currentIndexChanged(int)), MainWindow, SLOT(changeMode(int)));
         QObject::connect(delete_file_button, SIGNAL(clicked()), MainWindow, SLOT(deleteFile()));
-        QObject::connect(add_file_button, SIGNAL(clicked()), MainWindow, SLOT(addFile()));
-        QObject::connect(config_save_button, SIGNAL(clicked()), MainWindow, SLOT(configSave()));
+        QObject::connect(add_file_button, SIGNAL(clicked()), MainWindow, SLOT(addFileDlg()));
+        QObject::connect(config_save_button, SIGNAL(clicked()), MainWindow, SLOT(saveConfig()));
         QObject::connect(generate_config_button, SIGNAL(clicked()), MainWindow, SLOT(generateConfig()));
-        QObject::connect(config_path_button, SIGNAL(clicked()), MainWindow, SLOT(openConfig()));
+        QObject::connect(config_path_button, SIGNAL(clicked()), MainWindow, SLOT(openConfigPathDlg()));
         QObject::connect(save_as_text_button, SIGNAL(clicked()), MainWindow, SLOT(saveResultAsText()));
 
         mode_select->setCurrentIndex(0);

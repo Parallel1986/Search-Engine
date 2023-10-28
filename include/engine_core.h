@@ -19,12 +19,12 @@ struct FileIDFrame
 {
     int id;
     QString file_path;
-    FileErrors err;
+    FileErrorType err;
 };
 
 struct FileIDTable
 {
-    friend FileErrors Loader::checkFilePath(QString&);
+    friend FileErrorType Loader::checkFilePath(const QString&);
     FileIDTable(int count) : size(count), frame(new FileIDFrame[count]){}
     ~FileIDTable()
     {
@@ -103,6 +103,7 @@ signals:
     void configsLoaded(ConfigList);
     void updateStatus(char);
     void showError(FileError);
+    void showErrorList(QList<FileError>);
 
 public slots:
     void addSearchFile(QString);
@@ -113,7 +114,6 @@ public slots:
     void setConfigPath(QString);
     void setRequestsPath(QString);
     void setAnswersPath(QString);
-    void initialize();
     void setMaxRequests(int);
     void saveResult();
     void saveResultAsText();
@@ -122,6 +122,8 @@ public slots:
     void answersPathUpdated(QString);
     void processError(FileError);
     void search();
+    void initialize();
+    void sendErrorFilesMessage();
 
 private:
     void makeFilesIDTable(QStringList&);
@@ -129,6 +131,9 @@ private:
     void initializeConfig();
     void initializeRequests();
     void initializeCheck();
+    void removeErrorFiles(QStringList& files);
+    void stopSearchIfNoFiles(QStringList& file_list);
+    void makeSearch(QStringList& files, QStringList& requests);
 
     ConverterJSON* converter = nullptr;
     InvertedIndex* index = nullptr;

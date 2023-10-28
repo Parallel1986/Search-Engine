@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent, EngineCore* search_engine)
     request_list_model = new QStringListModel;
     files_list_model = new QStringListModel;
     connect(r_dialog,&RequestAddDialog::newRequest, this, &MainWindow::modifyRequests);
-    checkUIMarks();
+    checkUIMarks(core->getEngineStatus());
     ui->results_tree_widget->setColumnCount(1);
 }
 
@@ -40,7 +40,7 @@ void MainWindow::openConfigPathDlg()
     }
     dlg->close();
     delete dlg;
-    checkUIMarks();
+    checkUIMarks(core->getEngineStatus());
 }
 
 void MainWindow::openRequestsPathDlg()
@@ -51,7 +51,7 @@ void MainWindow::openRequestsPathDlg()
     {
         auto requests_file = dlg->selectedFiles();
         core->setRequestsPath(requests_file[0]);
-        checkUIMarks();
+        checkUIMarks(core->getEngineStatus());
     }
     delete dlg;
 }
@@ -115,7 +115,8 @@ void MainWindow::fillConfigFields(ConfigList configs)
         ui->no_files_mark->hide();
         config_ready = true;
     }
-    checkUIMarks();
+    char status = core->getEngineStatus();
+    checkUIMarks(status);
     readinessCheck();
 }
 
@@ -133,7 +134,7 @@ void MainWindow::fillRequestsFields(QStringList requests)
         ui->no_requests_mark_2->show();
         requests_ready = false;
     }
-    checkUIMarks();
+    checkUIMarks(core->getEngineStatus());
     readinessCheck();
 }
 
@@ -216,7 +217,9 @@ void MainWindow::search()
     core->search();
 }
 
-void MainWindow::showResult(QList<QList<RelativeIndex>> search_result,const FileIDTable* file_id_table, const RequestIDTable* requests_id_table)
+void MainWindow::showResult(QList<QList<RelativeIndex>> search_result,
+                            const FileIDTable* file_id_table,
+                            const RequestIDTable* requests_id_table)
 {
     int rec_id = 0;
     ui->results_tree_widget->clear();
@@ -237,18 +240,16 @@ void MainWindow::showResult(QList<QList<RelativeIndex>> search_result,const File
                 QTreeWidgetItem* record = new QTreeWidgetItem(is_result);
                 record->setSizeHint(0,QSize(150,15));
                 QString error;
-                if (file_id_table->frame[line.doc_id].err == FileErrors::NOT_A_FILE)
+                if (file_id_table->frame[line.doc_id].err == FileErrorType::NotAFile)
                 {
                     error = "Not a file! Error";
                 }
-                else if (file_id_table->frame[line.doc_id].err == FileErrors::ACSESS_ERR)
-                    error = "File access error!";
-                else if (file_id_table->frame[line.doc_id].err == FileErrors::NOT_EXIST)
+                else if (file_id_table->frame[line.doc_id].err == FileErrorType::FileNotExistError)
                     error = "File not exist!";
-                else if (file_id_table->frame[line.doc_id].err == FileErrors::READ_ERR)
+                else if (file_id_table->frame[line.doc_id].err == FileErrorType::ReadFileError)
                     error = "Error while reading a file!";
 
-                record->setText(0,((file_id_table->frame[line.doc_id].err == FileErrors::NO_ERR)? "rank: " + QString::number(line.rank):error) + "\t document: "+ file_id_table->frame[line.doc_id].file_path);
+                record->setText(0,((file_id_table->frame[line.doc_id].err == FileErrorType::NotError)? "rank: " + QString::number(line.rank):error) + "\t document: "+ file_id_table->frame[line.doc_id].file_path);
             }
         }
         ++rec_id;
@@ -256,46 +257,67 @@ void MainWindow::showResult(QList<QList<RelativeIndex>> search_result,const File
     ui->results_tree_widget->setItemWidget(main_item,0,nullptr);
     ui->save_button->setEnabled(true);
     ui->save_as_text_button->setEnabled(true);
+
+    QMessageBox* done = new QMessageBox();
+    done->setText("Search completed!");
+    done->setStandardButtons(QMessageBox::Ok);
+    done->setDefaultButton(QMessageBox::Ok);
+    done->exec();
+    delete done;
 }
 
 void MainWindow::saveResult()
 {
     core->saveResult();
+        QMessageBox* done = new QMessageBox();
+    done->setText("Successfully saved!");
+    done->setInformativeText("Result is saved at: " + ui->answers_path_edit->text());
+    done->setStandardButtons(QMessageBox::Ok);
+    done->setDefaultButton(QMessageBox::Ok);
+    done->exec();
+    delete done;
 }
 
-void MainWindow::checkUIMarks()
+void MainWindow::checkUIMarks(char engine_status)
 {
-    char status = core->getEngineStatus();
-    if (status&ConverterStatus::REQUESTS_EMPTY)
+    if (engine_status&ConverterStatus::REQUESTS_EMPTY)
+    {
+        ui->no_requests_path_mark->show();
         ui->no_requests_mark_2->show();
+    }
+    else if (engine_status&ConverterStatus::REQUESTS_MISSED)
+    {
+        ui->no_requests_path_mark->show();
+        ui->no_requests_mark_2->show();
+    }
     else
+    {
         ui->no_requests_mark_2->hide();
-
-    if (status&ConverterStatus::REQUESTS_MISSED)
-        {
-            ui->no_requests_path_mark->show();
-            ui->no_requests_mark_2->show();
-        }
-    else
         ui->no_requests_path_mark->hide();
+    }
 
-    if (status&ConverterStatus::CONFIG_MISSED
-        ||status&ConverterStatus::CONFIG_FIELD_MISSED)
-        ui->no_config_mark->show();
-    else
-        ui->no_config_mark->hide();
-
-    if (status&ConverterStatus::SEARCH_FILES_MISSED)
+    if (engine_status&ConverterStatus::CONFIG_MISSED
+        ||engine_status&ConverterStatus::CONFIG_FIELD_MISSED)
+    {
         ui->no_files_mark->show();
+        ui->no_config_mark->show();
+    }
+    else if (engine_status&ConverterStatus::SEARCH_FILES_MISSED)
+    {
+        ui->no_files_mark->show();
+    }
     else
+    {
+        ui->no_config_mark->hide();
         ui->no_files_mark->hide();
+    }
 }
 
-void MainWindow::requestsErrorDlg()
+void MainWindow::requestsErrorDlg(char engine_status)
 {
-    checkUIMarks();
+    checkUIMarks(engine_status);
     QMessageBox* error_message = new QMessageBox();
-    error_message->setText(core->getEngineStatus()&ConverterStatus::REQUESTS_MISSED?"requesets.json is missing!"
+    error_message->setText(engine_status&ConverterStatus::REQUESTS_MISSED?"requesets.json is missing!"
                                                             :"requests.json is corrupted!");
     error_message->setInformativeText("Please add at least one request");
     error_message->setStandardButtons(QMessageBox::Ok);
@@ -309,7 +331,7 @@ void MainWindow::changeMode(int new_mode)
     switch (new_mode) {
     case EngineMode_MW::STAND:
         core->setMode(EngineMode::STANDARD);
-        checkUIMarks();
+        checkUIMarks(core->getEngineStatus());
         ui->config_path_button->setEnabled(true);
         ui->requests_path_button->setEnabled(true);
         ui->generate_config_button->setEnabled(true);
@@ -323,14 +345,14 @@ void MainWindow::changeMode(int new_mode)
         ui->requests_path_button->setEnabled(false);
     case EngineMode_MW::NO_CONF:
         core->setMode(EngineMode::NO_CONFIG);
-        checkUIMarks();
+        checkUIMarks(core->getEngineStatus());
         ui->requests_path_button->setEnabled(true);
         ui->no_config_mark->hide();
         ui->generate_config_button->setEnabled(false);
         ui->config_path_button->setEnabled(false);
     case EngineMode_MW::NO_REQ:
         core->setMode(EngineMode::NO_REQUESTS);
-        checkUIMarks();
+        checkUIMarks(core->getEngineStatus());
         ui->config_path_button->setEnabled(true);
         ui->generate_config_button->setEnabled(true);
         ui->no_requests_path_mark->setEnabled(false);
@@ -389,6 +411,15 @@ void MainWindow::reloadFiles()
 void MainWindow::saveResultAsText()
 {
     core->saveResultAsText();
+        QMessageBox* done = new QMessageBox();
+    done->setText("Search completed!");
+    QString file_path = ui->answers_path_edit->text();
+    file_path.chop(4);
+    done->setInformativeText("Result is saved as text at: " + file_path + "txt");
+    done->setStandardButtons(QMessageBox::Ok);
+    done->setDefaultButton(QMessageBox::Ok);
+    done->exec();
+    delete done;
 }
 
 void MainWindow::generateConfig()
@@ -399,36 +430,27 @@ void MainWindow::generateConfig()
 void MainWindow::showError(FileError err)
 {
     QMessageBox* error_message = new QMessageBox();
-    switch (err.getExceptionType()) {
-    case FileErrorType::NotAFile:
-    case FileErrorType::FileNotExistError:
-        error_message->setText("File " + err.getExceptionSource() + " does not exists");
-        break;
-    case FileErrorType::OpenFileError:
-        error_message->setText("Can not open the file " + err.getExceptionSource());
-        break;
-    case FileErrorType::ReadFileError:
-        error_message->setText("Can not read the file " + err.getExceptionSource());
-        break;
-    case FileErrorType::WriteFileError:
-        error_message->setText("Can not write to the file " + err.getExceptionSource());
-        break;
-    case FileErrorType::WriteDirectoryError:
-        error_message->setText("Can not write to the directory " + err.getExceptionSource());
-        break;
-    case FileErrorType::OpenDirectoryError:
-        error_message->setText("Can not open the directory " + err.getExceptionSource());
-        break;
-    case FileErrorType::NoDataError:
-        error_message->setText("Missing data: " + err.getExceptionSource());
-//should not get here
-    default:
-        error_message->setText("Unknown error with " + err.getExceptionSource());
-        break;
-    }
+    error_message->setText(Error::writeErrorType(err.getExceptionType(), err.getExceptionSource()));
     error_message->setInformativeText(err.getAdditionalData());
     error_message->setStandardButtons(QMessageBox::Ok);
     error_message->setDefaultButton(QMessageBox::Ok);
     error_message->exec();
     delete error_message;
+}
+
+void MainWindow::showErrorList(QList<FileError> error_list)
+{
+    QMessageBox* error_message = new QMessageBox();
+    error_message->setText("Some errors had been aquired!");
+    QString info;
+    for (auto& error:error_list)
+    {
+        info += Error::writeErrorType(error.getExceptionType(),error.getExceptionSource()) + "\n";
+    }
+    error_message->setInformativeText(info);
+    error_message->setStandardButtons(QMessageBox::Ok);
+    error_message->setDefaultButton(QMessageBox::Ok);
+    error_message->exec();
+    delete error_message;
+
 }

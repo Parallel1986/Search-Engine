@@ -81,11 +81,12 @@ public slots:
     void fillSearchFilesFields(QStringList);
 
     void configErrorDlg(char);
-    void requestsErrorDlg();
+    void requestsErrorDlg(char);
 
     void generateConfig();
-    void checkUIMarks();
+    void checkUIMarks(char);
     void showError(FileError);
+    void showErrorList(QList<FileError>);
 
 private:
     void reloadFiles();

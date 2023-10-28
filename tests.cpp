@@ -3,6 +3,7 @@
 #include "file_index.h"
 #include <QRegularExpression>
 
+
 using namespace std;
 
 #define INVERTED_INDEX_READY

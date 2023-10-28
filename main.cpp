@@ -19,6 +19,8 @@ void connectGUIInterface(EngineCore* engine, MainWindow& window)
         QObject::connect(engine, &EngineCore::searchResult, &window, &MainWindow::showResult);
         QObject::connect(engine, &EngineCore::reloadFilePaths, &window, &MainWindow::fillSearchFilesFields);
         QObject::connect(engine, &EngineCore::showError, &window, &MainWindow::showError);
+        QObject::connect(engine, &EngineCore::showErrorList, &window,&MainWindow::showErrorList);
+        QObject::connect(engine, &EngineCore::updateStatus, &window,&MainWindow::checkUIMarks);
 
         QObject::connect(&window, &MainWindow::fileIsDeleted, engine, &EngineCore::removeSearchFile);
         QObject::connect(&window, &MainWindow::requestIsDeleted, engine, &EngineCore::removeRequest);
@@ -83,17 +85,17 @@ int main(int argC, char *argV[])
 
         connectGUIInterface(engine, w);
 
+        w.show();
+
         try
         {
             engine->initialize();
         } catch (std::exception& error)
         {
-            std::cerr << error.what();
+            std::cerr << error.what()<< std::endl;
             return -1;
         }
 
-
-        w.show();
         return a.exec();
     }
     else
@@ -101,12 +103,12 @@ int main(int argC, char *argV[])
         try
         {
             engine->initialize();
+            engine->search();
         } catch (std::exception& error)
         {
             std::cerr << error.what();
             return -1;
-        }
-        engine->search();
+        }        
         return 0;
     }
 }

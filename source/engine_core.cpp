@@ -82,6 +82,7 @@ void EngineCore::initializeConfig()
     engine_status &= ConverterStatus::RESET_CONFIG_ERRORS;
     engine_status |= converter->configCorrectionCheck();
     configs.max_responses = MIN_RESPONSE;
+    files_paths.clear();
     if (!(engine_status & ConverterStatus::CONFIG_MISSED)
         && !(engine_status & ConverterStatus::CONFIG_FIELD_MISSED))
     {
@@ -96,6 +97,7 @@ void EngineCore::initializeConfig()
                              converter->getConfigsPath(),
                              "Maximal response is missing");
             processError(error);
+            emit updateStatus(engine_status);
         }
 
         if (!(engine_status&ConverterStatus::SEARCH_FILES_MISSED))
@@ -106,6 +108,7 @@ void EngineCore::initializeConfig()
                              converter->getConfigsPath(),
                              "Files for search are missing");
             processError(error);
+            emit updateStatus(engine_status);
         }
     }
     else if (engine_status & ConverterStatus::CONFIG_FIELD_MISSED)
@@ -114,6 +117,7 @@ void EngineCore::initializeConfig()
                          converter->getConfigsPath(),
                          "Field \"config\" is missing");
         processError(error);
+        emit updateStatus(engine_status);
     }
     else
         {
@@ -121,17 +125,20 @@ void EngineCore::initializeConfig()
                          converter->getConfigsPath(),
                          "Configuration file is missing");
         processError(error);
+        emit updateStatus(engine_status);
     }
     configs.enegine_name = converter->getEngineName();
     configs.engine_version = converter->getEngineVersion();
 
-    files_paths.clear();
     configs.files = files_paths;
 
     configs.max_responses = max_responses;
 
     if (isUseUI())
+    {
+        emit updateStatus(engine_status);
         emit configsLoaded(configs);
+    }
 }
 
 void EngineCore::initializeRequests()
@@ -148,6 +155,7 @@ void EngineCore::initializeRequests()
                          converter->getRequestsPath(),
                          "Field \"requests\" is missing");
         processError(error);
+        emit updateStatus(engine_status);
     }
     else
     {
@@ -157,10 +165,14 @@ void EngineCore::initializeRequests()
 
         requests.clear();
         processError(error);
+        emit updateStatus(engine_status);
     }
 
     if (isUseUI())
+    {
         emit requestsLoaded(requests);
+        emit updateStatus(engine_status);
+    }
 }
 
 char EngineCore::getEngineStatus() const
@@ -171,7 +183,8 @@ char EngineCore::getEngineStatus() const
 
 void EngineCore::initialize()
 {
-    switch (mode) {
+    switch (mode)
+    {
     case EngineMode::STANDARD:
     case EngineMode::AUTOCONFIG:
         initializeConfig();
@@ -187,11 +200,13 @@ void EngineCore::initialize()
     default:
         break;
     }
+
     if (isUseUI())
     {
         emit answersPathChanged(converter->getAnswersPath());
         emit requestsPathChanged(converter->getRequestsPath());
         emit configPathChanged(converter->getConfigsPath());
+        emit updateStatus(getEngineStatus());
     }
 }
 
@@ -276,58 +291,33 @@ void EngineCore::setMode(EngineMode new_mode)
 }
 
 void EngineCore::search()
-{    
-    QStringList adds;
+{
+    QStringList reqs;   //requests
+    QStringList files;  //list of files
     switch (mode)
     {
     case EngineMode::AUTOCONFIG:
     case EngineMode::STANDARD:
-        adds.clear();
-        adds = files_paths;
-        adds += files_paths_add;
-        files_content.clear();
-        Loader::LoadFileContent(files_content,adds);
-        makeFilesIDTable(adds);
-        index->updateDocumentBase(files_content);
-        server->setMaxResponse(max_responses);
-        adds.clear();
-        adds = requests;
-        adds += requests_add;
-        makeRequestsIDdTable(adds);
-        search_result = (server->search(adds));
-        break;
 
+        files = files_paths;
+        files += files_paths_add;
+        reqs = requests;
+        reqs += requests_add;
+        break;
     case EngineMode::NO_CONFIG:
-        makeFilesIDTable(files_paths_add);
-        files_content.clear();
-        Loader::LoadFileContent(files_content,adds);
-        index->updateDocumentBase(files_content);
-        server->setMaxResponse(max_responses);
-        makeRequestsIDdTable(requests_add);
-        search_result = (server->search(requests_add));
+        files = files_paths_add;
+        reqs = requests;
+        reqs += requests_add;
         break;
-
     case EngineMode::NO_REQUESTS:
-        adds.clear();
-        adds = files_paths;
-        adds += files_paths_add;
-        files_content.clear();
-        Loader::LoadFileContent(files_content,adds);
-        makeFilesIDTable(adds);
-        index->updateDocumentBase(files_content);
-        server->setMaxResponse(max_responses);
-        makeRequestsIDdTable(requests_add);
-        search_result = (server->search(requests_add));
+        files = files_paths;
+        files += files_paths_add;
+        reqs = requests_add;
         break;
 
     case EngineMode::MANUAL:
-        files_content.clear();
-        Loader::LoadFileContent(files_content,adds);
-        index->updateDocumentBase(files_content);
-        makeFilesIDTable(files_paths_add);
-        server->setMaxResponse(max_responses);
-        makeRequestsIDdTable(requests_add);
-        search_result = (server->search(requests_add));
+        files = files_paths_add;
+        reqs = requests_add;
         break;
 
     //Should not get here
@@ -335,13 +325,31 @@ void EngineCore::search()
         break;
     }
 
+    makeSearch(files,reqs);
+
     if (isUseUI())
         emit searchResult(search_result, files_id, requests_id);
     else
     {
         saveResult();
-        std::cout << "Search done!";
+        std::cout << "Search done!" << std::endl;
     }
+}
+
+void EngineCore::makeSearch(QStringList& files, QStringList& requests)
+{
+    makeFilesIDTable(files);
+    sendErrorFilesMessage();
+    removeErrorFiles(files);
+    stopSearchIfNoFiles(files);
+
+    files_content.clear();
+    files_content = Loader::LoadFileContent(files);
+    index->updateDocumentBase(files_content);
+    server->setMaxResponse(max_responses);
+
+    makeRequestsIDdTable(requests);
+    search_result = (server->search(requests));
 }
 
 QStringList EngineCore::getFiles() const
@@ -390,7 +398,7 @@ void EngineCore::saveResultAsText()
              it != search_result.end();
              it++, counter++)
     {
-        out_line += "Request: " + requests_id->frame->request[counter] + "\n";
+        out_line += "Request: " + requests_id->frame[counter].request + "\n";
         if (it->size() == 0)
             out_line += "Result: No match\n";
         else
@@ -398,7 +406,7 @@ void EngineCore::saveResultAsText()
             for(auto& pair : *it)
             {
                 out_line += "\t" + QString("Rank = %1 - ").arg(pair.rank, 0, '0', 2)
-                          + files_id->frame->file_path[pair.doc_id] + "\n";
+                          + files_id->frame[pair.doc_id].file_path + "\n";
             }
         }
     }
@@ -417,23 +425,21 @@ void EngineCore::makeFilesIDTable(QStringList& files)
     if (files_id != nullptr)
             delete files_id;
 
-    files_id = new FileIDTable(files_paths.size()+files_paths_add.size());
+    files_id = new FileIDTable(files.size());
 
     int id = 0;
-    QList<QFuture<void>> threads;
-    for (auto file = files.begin();
-         file != files.end();
-         ++file)
+//    QList<QFuture<void>> threads;
+    for (auto& file : files)
     {    
-        threads.append(QtConcurrent::run([this, id, file](){
+//        threads.append(QtConcurrent::run([this, id, file](){
         files_id->frame[id].id = id;
-        files_id->frame[id].file_path = (*file);
-        files_id->frame[id].err = Loader::checkFilePath(*file);
-        }));
+        files_id->frame[id].file_path = (file);
+        files_id->frame[id].err = Loader::checkFilePath(file);
+//        }));
         ++id;
     }
-    for (auto& thread : threads)
-        thread.waitForFinished();
+//    for (auto& thread : threads)
+//        thread.waitForFinished();
 }
 
 //Creates table of accordance requests and its IDs
@@ -507,10 +513,77 @@ void EngineCore::processError(FileError err)
         std::cerr << "Additional info: " <<
                     err.getAdditionalData().toStdString() << std::endl;
 
-        throw std::runtime_error("Critical error!");
+        throw std::runtime_error("Critical error!\n");
     }
     else
     {
         emit showError(err);
+    }
+}
+
+void EngineCore::removeErrorFiles(QStringList& files)
+{
+    for (int frame_no = 0;frame_no < files_id->size;++frame_no)
+    {
+        if (!(files_id->frame[frame_no].err == FileErrorType::NotError))
+        {
+            files[frame_no].clear();
+        }
+    }
+}
+
+void EngineCore::sendErrorFilesMessage()
+{
+    if (useUI)
+    {
+        QList<FileError> error_list;
+        for (int file_no = 0; file_no < files_id->size;++file_no)
+        {
+            if (files_id->frame[file_no].err != FileErrorType::NotError)
+            {
+                FileError error (files_id->frame[file_no].err,
+                                  files_id->frame[file_no].file_path,
+                                  "Error while trying to read file");
+                error_list.append(error);
+            }
+        }
+
+        if (error_list.empty())
+            return;
+        else if (error_list.size() == 1)
+            emit showError(error_list.at(0));
+        else
+            emit showErrorList(error_list);
+    }
+    else
+    {
+        for (int file_no = 0; file_no < files_id->size;++file_no)
+        {
+            if (files_id->frame[file_no].err != FileErrorType::NotError)
+            {
+                QString message = Error::writeErrorType(files_id->frame[file_no].err,
+                                                        files_id->frame[file_no].file_path);
+                std::cerr << message.toStdString() << std::endl;
+            }
+        }
+    }
+}
+
+void EngineCore::stopSearchIfNoFiles(QStringList& file_list)
+{
+    bool not_empty = false;
+    for (auto& file: file_list)
+    {
+        if (!file.isEmpty())
+        {
+            not_empty = true;
+            break;
+        }
+    }
+    if (!not_empty)
+    {
+        processError(FileError(FileErrorType::NoDataError,
+                               "Files for search.",
+                               "Doesn't have at least one valid file. Search is stoped."));
     }
 }

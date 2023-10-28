@@ -115,8 +115,7 @@ QStringList ConverterJSON::getTextOfDocuments()
     if (config_is_loaded
         || (!config_is_loaded && loadConfigs()))
     {
-        QStringList documents_text;
-        Loader::LoadFileContent(documents_text,getFilesPaths());
+        QStringList documents_text = Loader::LoadFileContent(getFilesPaths());
         return documents_text;
     }
     return QList<QString>();
@@ -196,8 +195,9 @@ void ConverterJSON::putAnswersToJSON(QList<QList<RelativeIndex>> answers)
         answer_file.close();
     }
     else
-        emit sendError(FileError(FileErrorType::WriteFileError,answers_file_path,
-                        "Error while trying to write answers"));
+        emit sendError(FileError(FileErrorType::WriteFileError,
+                                 answers_file_path,
+                                 "Error while trying to write answers"));
 }
 
 void ConverterJSON::putSettingsToConfig(const ConfigList settings, QString conf_file)
@@ -213,8 +213,9 @@ void ConverterJSON::putSettingsToConfig(const ConfigList settings, QString conf_
         else if ((target.exists()&&!target.isFile())
                 ||!target.isFile())
             {
-            emit sendError(FileError(FileErrorType::WriteFileError,conf_file,
-                                "Error while trying to write to a file"));
+                emit sendError(FileError(FileErrorType::WriteFileError,
+                                         conf_file,
+                                         "Error while trying to write to a file"));
                 return;
             }
         emit configPathChanged(conf_file);
@@ -249,8 +250,9 @@ void ConverterJSON::putSettingsToConfig(const ConfigList settings, QString conf_
         config_file_path = conf_file;
     }
     else
-        emit sendError(FileError(FileErrorType::WriteDirectoryError,conf_file,
-                        "Error while trying to write to a file"));
+        emit sendError(FileError(FileErrorType::WriteDirectoryError,
+                                 conf_file,
+                                 "Error while trying to write to a file"));
 }
 
 void ConverterJSON::putRequestsToJSON(const QList<QString> in_requests)
@@ -275,8 +277,9 @@ void ConverterJSON::putRequestsToJSON(const QList<QString> in_requests)
         requests_is_loaded = true;
     }
     else
-        emit sendError(FileError(FileErrorType::WriteDirectoryError,requests_file_path,
-                        "Error while trying to write to a file"));
+        emit sendError(FileError(FileErrorType::WriteDirectoryError,
+                                 requests_file_path,
+                                 "Error while trying to write to a file"));
 }
 
 QString ConverterJSON::getEngineName()
@@ -309,13 +312,17 @@ QStringList ConverterJSON::getFilesPaths()
         || (!config_is_loaded && loadConfigs()))
     {
         auto json_fiels_field = configuration->object()["files"].toArray();
-        QList<QString> file_paths;
+        QStringList file_paths;
+
         for (auto it = json_fiels_field.begin();it != json_fiels_field.end();it++)
-            file_paths.append(it->toString());
+        {
+            auto string = it->toString();
+            file_paths.append(string);
+        }
         return file_paths;
     }
     else
-        return QList<QString>();
+        return QStringList();
 }
 
 QString ConverterJSON::makeRequestStringNumber(std::size_t number) const
@@ -414,8 +421,9 @@ bool ConverterJSON::loadConfigs()
         }
         else
         {
-            emit sendError(FileError(FileErrorType::WriteDirectoryError,config_file_path,
-                            "Error while trying to open a file"));
+            emit sendError(FileError(FileErrorType::WriteDirectoryError,
+                                     config_file_path,
+                                     "Error while trying to open a file"));
             config_is_loaded = false;
             return false;
         }
@@ -439,8 +447,9 @@ bool ConverterJSON::loadRequests()
         }
         else
         {
-            emit sendError(FileError(FileErrorType::WriteDirectoryError,requests_file_path,
-                            "Error while trying to open a file"));
+            emit sendError(FileError(FileErrorType::WriteDirectoryError,
+                                     requests_file_path,
+                                     "Error while trying to open a file"));
             requests_is_loaded = false;
             return false;
         }
@@ -450,15 +459,17 @@ bool ConverterJSON::loadRequests()
     return true;
 }
 
-void Loader::LoadFileContent(QStringList& result, const QStringList& source)
+QStringList Loader::LoadFileContent(const QStringList& source)
 {
+    QStringList result;
     QList<QFuture<QString>> open_file_threads;
     for (auto& file : source)
     {
         open_file_threads.append(QtConcurrent::run([file, result]()
         {
             QFile document_file(file);
-            if (document_file.open(QIODevice::ReadOnly | QIODevice::Text))
+            if (!file.isEmpty()
+                && document_file.open(QIODevice::ReadOnly | QIODevice::Text))
             {
                 QString content = document_file.readAll();
                 document_file.close();
@@ -466,31 +477,41 @@ void Loader::LoadFileContent(QStringList& result, const QStringList& source)
                 return content;
             }
             else
-            {
                 return QString();
-            }
         }));
     }
+
     for (auto& thread : open_file_threads)
-    {
         thread.waitForFinished();
-    }
+
     for (auto& thread : open_file_threads)
-    {
         result.append(thread.result());
-    }
+
+    return result;
 }
 
-FileErrors Loader::checkFilePath(QString& file_path)
+FileErrorType Loader::checkFilePath(const QString& file_path)
 {
     QFileInfo file(file_path);
-    if (!file.isFile())
-        return FileErrors::NOT_A_FILE;
-    if (!file.isReadable())
-        return FileErrors::READ_ERR;
-    if (!file.isWritable())
-        return FileErrors::WRITE_ERR;
-    return FileErrors::NO_ERR;
+    if (!file.exists())
+        return FileErrorType::FileNotExistError;
+    else if (file.isFile())
+    {
+        if (!file.isReadable())
+            return FileErrorType::ReadFileError;
+        if (!file.isWritable())
+            return FileErrorType::WriteFileError;
+    }
+    else if (file.isDir())
+    {
+        if (!file.isReadable())
+            return FileErrorType::OpenDirectoryError;
+        if (!file.isWritable())
+            return FileErrorType::WriteDirectoryError;
+        else
+            return FileErrorType::Direcotry;
+    }
+    return FileErrorType::NotError;
 }
 
 QString ConverterJSON::getConfigsPath() const

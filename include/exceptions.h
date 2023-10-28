@@ -8,16 +8,21 @@
 #include <exception>
 
 enum FileErrorType{
+    NotError,
     NotAFile,
+    Direcotry,
     OpenFileError,
     WriteFileError,
     ReadFileError,
     OpenDirectoryError,
     WriteDirectoryError,
     FileNotExistError,
-    NoDataError
+    NoDataError,
 };
+namespace Error {
+    QString writeErrorType(FileErrorType error,const QString& source);
 
+}
 class FileError : public QException
 {
 public:
@@ -78,5 +83,6 @@ class CommandLineError : public std::exception
     QString argument;
     QString additional_info;
 };
+
 
 #endif // EXCEPTIONS_H

@@ -21,16 +21,6 @@ enum {
     MIN_RESPONSE    = 5
 };
 
-enum FileErrors
-{
-    NO_ERR,
-    READ_ERR,
-    ACSESS_ERR,
-    NOT_A_FILE,
-    NOT_EXIST,
-    WRITE_ERR
-};
-
 //List of configurations
 struct ConfigList
 {    
@@ -60,8 +50,8 @@ enum ConverterStatus
 
 namespace Loader
 {
-    void LoadFileContent(QStringList& result,const QStringList& source);
-    FileErrors checkFilePath(QString&);
+    QStringList LoadFileContent(const QStringList& source);
+    FileErrorType checkFilePath(const QString& file);
 }
 
 class ConverterJSON : public QObject
